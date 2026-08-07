@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+// Carrega a base de conhecimento
 function loadBase() {
     const basePath = path.join(process.cwd(), 'base_conhecimento');
     try {
@@ -11,26 +12,33 @@ function loadBase() {
     }
 }
 
+// ============================================================
+// FUNÇÃO CORRIGIDA – PRIORIZA RESPOSTAS COMPLETAS E PRÁTICAS
+// ============================================================
 function buildPrompt(question) {
     const baseContent = loadBase();
     return `
-Você é um assistente especialista da Central de Perícias (CEPER). Use APENAS as informações da base de conhecimento abaixo para responder à pergunta do usuário.
+Você é um assistente especialista da Central de Perícias (CEPER). Sua função é ajudar servidores com procedimentos do dia a dia.
 
-BASE DE CONHECIMENTO:
+BASE DE CONHECIMENTO (TODAS AS REGRAS E MODELOS DE CERTIDÃO):
 ${baseContent}
 
 PERGUNTA DO USUÁRIO:
 ${question}
 
-REGRAS:
-- Responda de forma clara, objetiva e direta.
-- Se a base não tiver a informação, diga "Não encontrei essa informação na base da CEPER."
-- Quando citar um modelo de certidão, destaque com **negrito**.
-- Cite o item ou a data da regra quando disponível.
-- Mantenha o tom profissional.
+REGRAS OBRIGATÓRIAS PARA SUA RESPOSTA:
+1. Sempre priorize as instruções passo a passo da rotina, como se estivesse orientando um colega que está com o sistema aberto na frente dele.
+2. Se houver um modelo de certidão aplicável (itens 1 a 19), **transcreva o texto completo do modelo**.
+3. Indique claramente o local no sistema (ex: "Acesse Movimentar Processo", "Clique em Perícias", "Vá em Ações", etc.).
+4. Se houver prazos (ex: 5 dias, 15 dias), informe-os explicitamente.
+5. Se houver localizadores (ex: JULIANA, TA PAGAR PERITO, INTIMAR PARTE SEM ADVOGADO), mencione quais usar e como usá-los.
+6. Caso a pergunta não tenha relação com a base, diga "Não encontrei essa informação na base da CEPER."
+7. Responda de forma objetiva, direta, sem enfeites, mas com todos os detalhes práticos.
+8. Se houver mais de um fluxo possível (ex: primeira falta vs. segunda falta), explique ambos.
 `;
 }
 
+// Chamada à API DeepSeek
 async function callDeepSeek(prompt, apiKey) {
     const url = 'https://api.deepseek.com/v1/chat/completions';
     const payload = {
@@ -63,6 +71,7 @@ async function callDeepSeek(prompt, apiKey) {
     return data.choices[0].message.content.trim();
 }
 
+// Handler da Vercel
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Método não permitido. Use POST.' });
