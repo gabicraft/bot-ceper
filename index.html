@@ -2,14 +2,26 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- ============================================
+         IMPEDE O MODO DE LEITURA (todos os navegadores)
+    ============================================ -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- ============================================ -->
     <title>CEPER Bot - Supabase</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         /* ========================================
+           PREVENÇÃO DO MODO DE LEITURA
+        ======================================== */
+        body {
+            -webkit-text-size-adjust: 100%;
+        }
+        /* ========================================
            RESET E VARIÁVEIS
-           ======================================== */
+        ======================================== */
         * {
             margin: 0;
             padding: 0;
@@ -117,77 +129,6 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 40px;
             border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .online-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 2px 10px;
-            border-radius: 40px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-            position: relative;
-        }
-        .online-indicator:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        .online-indicator .online-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-        }
-        .online-indicator .online-count {
-            font-weight: 600;
-            color: var(--text-light);
-        }
-        .online-indicator .online-list-popup {
-            display: none;
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 16px;
-            min-width: 160px;
-            box-shadow: var(--shadow);
-            z-index: 100;
-        }
-        .online-indicator:hover .online-list-popup {
-            display: block;
-        }
-        .online-indicator .online-list-popup ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .online-indicator .online-list-popup li {
-            padding: 4px 0;
-            font-size: 13px;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .online-indicator .online-list-popup li .dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: var(--success);
-            border-radius: 50%;
-        }
-        .online-indicator .online-list-popup .empty-online {
-            color: var(--text-muted);
-            font-size: 13px;
         }
         /* TELA DE LOGIN */
         #telaLogin {
@@ -253,6 +194,50 @@
             color: var(--text-muted);
             font-size: 13px;
             margin-top: 16px;
+        }
+        /* ONLINE NA TELA DE LOGIN */
+        .online-login {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        .online-login h4 {
+            font-size: 14px;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .online-login ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .online-login li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+        .online-login li .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .online-login .empty-online {
+            color: var(--text-muted);
+            font-size: 13px;
         }
         /* TELA DE TROCA DE SENHA */
         #telaTrocaSenha {
@@ -715,12 +700,18 @@
         .chat-msg .texto-msg {
             color: var(--text-light);
         }
+        .chat-msg .privado {
+            color: var(--danger);
+            font-size: 12px;
+            margin-right: 6px;
+        }
         .chat-input-area {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
-        .chat-input-area input {
+        .chat-input-area input[type="text"] {
             flex: 1;
             padding: 10px 14px;
             border-radius: 12px;
@@ -729,6 +720,17 @@
             color: var(--text-light);
             font-size: 14px;
             outline: none;
+            min-width: 150px;
+        }
+        .chat-input-area select {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            min-width: 120px;
         }
         .chat-input-area button {
             background: var(--secondary);
@@ -742,8 +744,7 @@
         .chat-input-area button:hover {
             background: #d4a820;
         }
-        /* ONLINE DENTRO DO CHAT */
-        .online-users-chat {
+        .online-users {
             flex: 1;
             min-width: 160px;
             background: rgba(0, 0, 0, 0.15);
@@ -753,7 +754,7 @@
             max-height: 400px;
             overflow-y: auto;
         }
-        .online-users-chat h4 {
+        .online-users h4 {
             color: var(--secondary);
             font-size: 14px;
             margin-bottom: 8px;
@@ -761,12 +762,12 @@
             align-items: center;
             gap: 6px;
         }
-        .online-users-chat ul {
+        .online-users ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        .online-users-chat li {
+        .online-users li {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -774,7 +775,7 @@
             font-size: 13px;
             color: var(--text-light);
         }
-        .online-users-chat li .dot {
+        .online-users li .online-dot {
             display: inline-block;
             width: 8px;
             height: 8px;
@@ -782,11 +783,11 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .online-users-chat .empty-online {
+        .online-users .empty-online {
             color: var(--text-muted);
             font-size: 13px;
         }
-        /* USUÁRIOS (admin) */
+        /* USUÁRIOS */
         .user-table {
             width: 100%;
             border-collapse: collapse;
@@ -952,8 +953,15 @@
             .chat-interno-wrapper {
                 flex-direction: column;
             }
-            .online-users-chat {
-                max-height: 120px;
+            .online-users {
+                max-height: 150px;
+            }
+            .chat-input-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .chat-input-area select {
+                width: 100%;
             }
         }
         .text-muted {
@@ -988,6 +996,21 @@
                 transform: scale(1);
             }
         }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .chat-header .usuario-logado {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .chat-header .usuario-logado strong {
+            color: var(--secondary);
+        }
     </style>
 </head>
 <body>
@@ -1003,11 +1026,18 @@
             <button onclick="fazerLogin()">Entrar</button>
             <div class="erro" id="erroLogin">Usuário ou senha inválidos.</div>
             <div class="info">Acesso exclusivo para servidores da CEPER.</div>
+            <!-- ONLINE NA TELA DE LOGIN -->
+            <div class="online-login" id="onlineLoginContainer">
+                <h4><i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i> Usuários online agora</h4>
+                <ul id="onlineLoginList">
+                    <li class="empty-online">Carregando...</li>
+                </ul>
+            </div>
         </div>
     </div>
 
     <!-- ============================================
-    TELA DE TROCA DE SENHA (primeiro acesso)
+    TELA DE TROCA DE SENHA
     ============================================ -->
     <div id="telaTrocaSenha">
         <div class="login-box">
@@ -1030,19 +1060,7 @@
                 <h1>CEPER <span>Bot</span></h1>
             </div>
             <div class="header-actions">
-                <span class="usuario-info" id="infoUsuario">
-                    👤 <span id="nomeUsuarioLogado">servidor</span>
-                    <span class="online-indicator" id="onlineIndicator">
-                        <span class="online-dot"></span>
-                        <span class="online-count" id="onlineCount">0</span> online
-                        <span class="online-list-popup" id="onlinePopup">
-                            <span style="font-size:12px;color:var(--secondary);display:block;margin-bottom:4px;">Usuários online</span>
-                            <ul id="onlinePopupList">
-                                <li class="empty-online">Carregando...</li>
-                            </ul>
-                        </span>
-                    </span>
-                </span>
+                <span class="usuario-info" id="infoUsuario">👤 servidor</span>
                 <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </div>
@@ -1051,7 +1069,7 @@
             <button class="active" data-tab="tabChat"><i class="fas fa-comments"></i> Chat IA</button>
             <button data-tab="tabAvisos"><i class="fas fa-bullhorn"></i> Avisos</button>
             <button data-tab="tabBase"><i class="fas fa-database"></i> Base</button>
-            <button data-tab="tabChatInterno" id="tabChatInternoBtn"><i class="fas fa-users"></i> Chat Equipe <span class="badge-msg" id="chatBadge">0</span></button>
+            <button data-tab="tabChatInterno"><i class="fas fa-users"></i> Chat Equipe</button>
             <button data-tab="tabUsuarios" id="tabUsuariosBtn" class="hidden-tab"><i class="fas fa-user-cog"></i> Usuários</button>
         </div>
 
@@ -1117,20 +1135,26 @@
 
         <!-- TAB CHAT INTERNO -->
         <div id="tabChatInterno" class="tab-content">
-            <h3 style="margin-bottom:12px;"><i class="fas fa-users"></i> Chat da Equipe</h3>
+            <div class="chat-header">
+                <h3><i class="fas fa-users"></i> Chat da Equipe</h3>
+                <span class="usuario-logado"><i class="fas fa-user-circle"></i> Logado como: <strong id="chatUsuarioNome">carregando...</strong></span>
+            </div>
             <div class="chat-interno-wrapper">
-                <div>
+                <div style="flex:2; min-width:300px;">
                     <div id="chatInternoArea" class="chat-interno-area">
                         <div class="empty-state">Carregando mensagens...</div>
                     </div>
                     <div class="chat-input-area">
-                        <input id="chatInternoInput" type="text" placeholder="Digite sua mensagem..." />
+                        <select id="chatDestinatario">
+                            <option value="todos">Todos (público)</option>
+                        </select>
+                        <input type="text" id="chatInternoInput" placeholder="Digite sua mensagem..." />
                         <button id="btnEnviarChat"><i class="fas fa-paper-plane"></i> Enviar</button>
                     </div>
                 </div>
-                <div class="online-users-chat" id="onlineUsersChat">
+                <div class="online-users" id="onlineUsersContainer">
                     <h4><i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i> Online agora</h4>
-                    <ul id="onlineUsersChatList">
+                    <ul id="onlineUsersList">
                         <li class="empty-online">Carregando...</li>
                     </ul>
                 </div>
@@ -1218,7 +1242,7 @@
         }
 
         // ============================================
-        // NOTIFICAÇÃO SONORA
+        // NOTIFICAÇÃO SONORA (MAIS ALTA)
         // ============================================
         function playNotificationSound() {
             try {
@@ -1229,86 +1253,91 @@
                 gainNode.connect(audioCtx.destination);
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                // Volume aumentado para 0.6
+                gainNode.gain.setValueAtTime(0.6, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
                 oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.2);
-            } catch (e) {}
+                oscillator.stop(audioCtx.currentTime + 0.25);
+            } catch (e) { /* silencioso */ }
         }
 
         // ============================================
-        // ONLINE USERS (PÚBLICO)
+        // ONLINE USERS (tela de login e chat)
         // ============================================
-        let onlineUsersCache = [];
-        let isOnlinePopupOpen = false;
-
-        async function fetchOnlineUsers() {
+        async function carregarOnlineUsers() {
             try {
-                const users = await apiGet('usuarios', 'ativo=eq.true&order=nome.asc');
-                if (!users) return [];
-                const now = new Date();
-                const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
-                return users.filter(u => {
+                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc');
+                const agora = new Date();
+                const doisMinutos = 2 * 60 * 1000;
+                const online = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
-                    const lastActive = new Date(u.ultima_atividade);
-                    return lastActive > twoMinutesAgo;
+                    const diff = agora - new Date(u.ultima_atividade);
+                    return diff < doisMinutos;
                 });
-            } catch (err) {
-                return [];
-            }
-        }
 
-        async function updateOnlineIndicator() {
-            const onlineUsers = await fetchOnlineUsers();
-            onlineUsersCache = onlineUsers;
-            const count = onlineUsers.length;
-
-            // Atualiza o indicador no cabeçalho
-            document.getElementById('onlineCount').textContent = count;
-
-            // Popup
-            const popupList = document.getElementById('onlinePopupList');
-            if (count === 0) {
-                popupList.innerHTML = '<li class="empty-online">Nenhum usuário online</li>';
-            } else {
-                popupList.innerHTML = onlineUsers.map(u =>
-                    `<li><span class="dot"></span> ${u.nome}</li>`
-                ).join('');
-            }
-
-            // Chat interno
-            const chatList = document.getElementById('onlineUsersChatList');
-            if (chatList) {
-                if (count === 0) {
-                    chatList.innerHTML = '<li class="empty-online">Nenhum usuário online</li>';
-                } else {
-                    chatList.innerHTML = onlineUsers.map(u =>
-                        `<li><span class="dot"></span> ${u.nome}</li>`
-                    ).join('');
+                // Atualiza lista na tela de login
+                const loginList = document.getElementById('onlineLoginList');
+                if (loginList) {
+                    if (online.length === 0) {
+                        loginList.innerHTML = '<li class="empty-online">Ninguém online no momento.</li>';
+                    } else {
+                        loginList.innerHTML = online.map(u => `
+                            <li><span class="dot"></span> ${u.nome}</li>
+                        `).join('');
+                    }
                 }
+
+                // Atualiza lista no chat (se existir)
+                const chatList = document.getElementById('onlineUsersList');
+                if (chatList) {
+                    if (online.length === 0) {
+                        chatList.innerHTML = '<li class="empty-online">Ninguém online no momento.</li>';
+                    } else {
+                        chatList.innerHTML = online.map(u => `
+                            <li><span class="online-dot"></span> ${u.nome}</li>
+                        `).join('');
+                    }
+                    // Atualiza seletor de destinatário (apenas para mensagens privadas)
+                    const selectDest = document.getElementById('chatDestinatario');
+                    if (selectDest) {
+                        const currentVal = selectDest.value;
+                        selectDest.innerHTML = '<option value="todos">Todos (público)</option>';
+                        const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
+                        online.forEach(u => {
+                            if (u.nome !== usuarioLogado.nome) {
+                                const opt = document.createElement('option');
+                                opt.value = u.nome;
+                                opt.textContent = u.nome;
+                                selectDest.appendChild(opt);
+                            }
+                        });
+                        if ([...selectDest.options].some(o => o.value === currentVal)) {
+                            selectDest.value = currentVal;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Erro ao carregar online:', err);
             }
         }
 
         // ============================================
-        // UPDATE ACTIVITY (para manter o usuário online)
+        // ATUALIZAR ATIVIDADE DO USUÁRIO
         // ============================================
-        async function updateActivity() {
+        async function atualizarAtividade() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (!usuario.id) return;
             try {
                 await apiPatch('usuarios', usuario.id, {
                     ultima_atividade: new Date().toISOString()
                 });
-            } catch (e) {}
+            } catch (e) { /* ignorar */ }
         }
 
         // ============================================
         // LOGIN E TROCA DE SENHA
         // ============================================
         let usuarioAtual = null;
-        let activityInterval = null;
-        let onlineInterval = null;
-        let chatPollingInterval = null;
 
         async function fazerLogin() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -1400,11 +1429,12 @@
             document.getElementById('telaLogin').style.display = 'none';
             document.getElementById('telaTrocaSenha').style.display = 'none';
             document.getElementById('conteudoPrincipal').style.display = 'block';
+            document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+            document.getElementById('chatUsuarioNome').textContent = usuario.nome;
 
-            // Atualiza nome do usuário
-            document.getElementById('nomeUsuarioLogado').textContent = usuario.nome;
+            // Atualiza atividade imediatamente
+            atualizarAtividade();
 
-            // Abas
             if (usuario.papel === 'super_admin') {
                 document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
                 carregarUsuarios();
@@ -1412,38 +1442,28 @@
                 document.getElementById('tabUsuariosBtn').classList.add('hidden-tab');
             }
 
-            // Carregar dados
             carregarAvisos();
             carregarProcedimentos();
             carregarChatInterno();
             atualizarBadgeAvisos();
 
-            // Atualizar atividade (a cada 30 segundos)
-            if (activityInterval) clearInterval(activityInterval);
-            activityInterval = setInterval(updateActivity, 30000);
-            updateActivity();
-
-            // Atualizar online (a cada 10 segundos)
-            if (onlineInterval) clearInterval(onlineInterval);
-            onlineInterval = setInterval(updateOnlineIndicator, 10000);
-            updateOnlineIndicator();
-
-            // Iniciar polling do chat
+            // Inicia polling do chat
             startChatPolling();
+            // Inicia atualização de online
+            startOnlinePolling();
+            // Inicia atualização de atividade (a cada 30 segundos)
+            setInterval(atualizarAtividade, 30000);
         }
 
         function logout() {
             localStorage.removeItem('usuario');
             localStorage.removeItem('logado');
-            if (activityInterval) clearInterval(activityInterval);
-            if (onlineInterval) clearInterval(onlineInterval);
-            if (chatPollingInterval) clearInterval(chatPollingInterval);
+            if (window.chatInterval) clearInterval(window.chatInterval);
+            if (window.onlineInterval) clearInterval(window.onlineInterval);
             window.location.reload();
         }
 
-        // ============================================
-        // VERIFICA SESSÃO
-        // ============================================
+        // Verificar sessão
         if (localStorage.getItem('logado') === 'true') {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.id) {
@@ -1453,7 +1473,8 @@
                 } else {
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
-                    document.getElementById('nomeUsuarioLogado').textContent = usuario.nome;
+                    document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+                    document.getElementById('chatUsuarioNome').textContent = usuario.nome;
                     if (usuario.papel === 'super_admin') {
                         document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
                         carregarUsuarios();
@@ -1464,18 +1485,23 @@
                     carregarProcedimentos();
                     carregarChatInterno();
                     atualizarBadgeAvisos();
-                    if (activityInterval) clearInterval(activityInterval);
-                    activityInterval = setInterval(updateActivity, 30000);
-                    updateActivity();
-                    if (onlineInterval) clearInterval(onlineInterval);
-                    onlineInterval = setInterval(updateOnlineIndicator, 10000);
-                    updateOnlineIndicator();
                     startChatPolling();
+                    startOnlinePolling();
+                    setInterval(atualizarAtividade, 30000);
                 }
             } else {
                 localStorage.removeItem('logado');
                 localStorage.removeItem('usuario');
             }
+        }
+
+        // ============================================
+        // ONLINE POLLING (a cada 10 segundos)
+        // ============================================
+        function startOnlinePolling() {
+            if (window.onlineInterval) clearInterval(window.onlineInterval);
+            carregarOnlineUsers();
+            window.onlineInterval = setInterval(carregarOnlineUsers, 10000);
         }
 
         // ============================================
@@ -1618,66 +1644,158 @@
         }
 
         // ============================================
-        // CHAT INTERNO
+        // CHAT INTERNO (com polling, som, badge e privacidade)
         // ============================================
         let lastMessageCount = 0;
+        let chatInterval = null;
+        let ultimaMensagemLida = 0;
 
         async function carregarChatInterno() {
             try {
-                const msgs = await apiGet('mensagens_chat', 'order=data_hora.asc');
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                const nome = usuario.nome || '';
+
+                // Busca mensagens públicas + privadas onde o usuário é remetente ou destinatário
+                const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
+                const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
+
+                // Combina e filtra
+                let todas = [];
+
+                // Públicas
+                if (msgsPublicas) {
+                    todas = todas.concat(msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
+                }
+
+                // Privadas (apenas as que envolvem o usuário)
+                if (msgsPrivadas) {
+                    const privadasFiltradas = msgsPrivadas.filter(m =>
+                        m.remetente === nome || m.destinatario === nome
+                    );
+                    todas = todas.concat(privadasFiltradas.map(m => ({ ...m, tipo: 'privado' })));
+                }
+
+                // Ordena por data
+                todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+
                 const container = document.getElementById('chatInternoArea');
-                if (!msgs || msgs.length === 0) {
+                if (!todas || todas.length === 0) {
                     container.innerHTML = '<div class="empty-state">Nenhuma mensagem ainda. Seja o primeiro a escrever!</div>';
                     lastMessageCount = 0;
                     return;
                 }
-                if (msgs.length > lastMessageCount && lastMessageCount > 0) {
-                    playNotificationSound();
+
+                // Atualiza badge de novas mensagens
+                const totalMsg = todas.length;
+                const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
+                if (badge) {
+                    const novas = todas.filter(m => {
+                        const msgTime = new Date(m.data_hora).getTime();
+                        return msgTime > ultimaMensagemLida;
+                    }).length;
+
+                    if (novas > 0) {
+                        badge.style.display = 'inline-block';
+                        badge.textContent = novas;
+                    } else {
+                        badge.style.display = 'none';
+                    }
                 }
-                lastMessageCount = msgs.length;
 
-                container.innerHTML = msgs.map(m => `
-                    <div class="chat-msg">
-                        <div>
-                            <span class="remetente">${m.remetente}</span>
-                            <span class="texto-msg">${m.mensagem}</span>
+                // Atualiza a última mensagem lida
+                if (todas.length > 0) {
+                    const ultima = todas[todas.length - 1];
+                    ultimaMensagemLida = new Date(ultima.data_hora).getTime();
+                }
+
+                // Renderiza
+                container.innerHTML = todas.map(m => {
+                    const isPrivado = m.tipo === 'privado';
+                    const remetenteDisplay = isPrivado ? `${m.remetente} (privado)` : m.remetente;
+                    const iconePrivado = isPrivado ? '<span class="privado"><i class="fas fa-lock"></i></span>' : '';
+                    return `
+                        <div class="chat-msg">
+                            <div>
+                                ${iconePrivado}
+                                <span class="remetente">${remetenteDisplay}</span>
+                                <span class="texto-msg">${m.mensagem}</span>
+                            </div>
+                            <span class="data-msg">${new Date(m.data_hora).toLocaleString()}</span>
                         </div>
-                        <span class="data-msg">${new Date(m.data_hora).toLocaleString()}</span>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 container.scrollTop = container.scrollHeight;
-
-                // Atualiza badge
-                const badge = document.getElementById('chatBadge');
-                // Apenas contagem simples (pode ser melhorada)
-                badge.style.display = 'none';
-
+                lastMessageCount = todas.length;
             } catch (err) {
                 console.error('Erro ao carregar chat:', err);
             }
         }
 
         function startChatPolling() {
-            if (chatPollingInterval) clearInterval(chatPollingInterval);
+            if (chatInterval) clearInterval(chatInterval);
             // Carrega contagem inicial
             (async () => {
                 try {
-                    const msgs = await apiGet('mensagens_chat', 'order=data_hora.asc');
-                    lastMessageCount = msgs ? msgs.length : 0;
-                } catch (e) {}
+                    await carregarChatInterno();
+                } catch (e) { /* ignore */ }
             })();
 
-            chatPollingInterval = setInterval(async () => {
+            chatInterval = setInterval(async () => {
+                // Sempre busca, independente da aba ativa (para badge e som)
                 try {
-                    const msgs = await apiGet('mensagens_chat', 'order=data_hora.asc');
-                    if (!msgs) return;
-                    if (msgs.length > lastMessageCount && lastMessageCount > 0) {
-                        playNotificationSound();
-                        await carregarChatInterno();
-                    } else {
-                        lastMessageCount = msgs.length;
+                    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                    const nome = usuario.nome || '';
+
+                    // Busca total de mensagens públicas e privadas relevantes
+                    const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
+                    const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
+                    let total = 0;
+                    if (msgsPublicas) total += msgsPublicas.length;
+                    if (msgsPrivadas) {
+                        const filtradas = msgsPrivadas.filter(m =>
+                            m.remetente === nome || m.destinatario === nome
+                        );
+                        total += filtradas.length;
                     }
-                } catch (err) {}
+
+                    // Verifica se há novas mensagens
+                    // Simplificado: compara com lastMessageCount (que é atualizado no carregamento)
+                    // Para garantir, vamos atualizar o badge sempre
+                    const todas = [];
+                    if (msgsPublicas) todas.push(...msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
+                    if (msgsPrivadas) {
+                        const filtradas = msgsPrivadas.filter(m =>
+                            m.remetente === nome || m.destinatario === nome
+                        );
+                        todas.push(...filtradas.map(m => ({ ...m, tipo: 'privado' })));
+                    }
+                    todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+
+                    // Atualiza badge
+                    const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
+                    if (badge) {
+                        const novas = todas.filter(m => {
+                            const msgTime = new Date(m.data_hora).getTime();
+                            return msgTime > ultimaMensagemLida;
+                        }).length;
+                        if (novas > 0) {
+                            badge.style.display = 'inline-block';
+                            badge.textContent = novas;
+                            // Toca som se houver novas mensagens
+                            playNotificationSound();
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    // Se a aba do chat estiver ativa, recarrega as mensagens
+                    const chatTab = document.getElementById('tabChatInterno');
+                    if (chatTab && chatTab.classList.contains('active')) {
+                        await carregarChatInterno();
+                    }
+                } catch (err) {
+                    // silencioso
+                }
             }, 5000);
         }
 
@@ -1688,11 +1806,22 @@
 
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             const remetente = usuario.nome || 'Servidor';
+            const destinatario = document.getElementById('chatDestinatario').value;
 
             try {
-                await apiPost('mensagens_chat', { remetente, mensagem });
+                if (destinatario === 'todos') {
+                    // Mensagem pública
+                    await apiPost('mensagens_chat', { remetente, mensagem });
+                } else {
+                    // Mensagem privada
+                    await apiPost('mensagens_privadas', { remetente, destinatario, mensagem });
+                }
                 input.value = '';
+                // Recarrega o chat imediatamente
                 await carregarChatInterno();
+                // Atualiza badge para zero
+                const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
+                if (badge) badge.style.display = 'none';
             } catch (err) {
                 alert('Erro ao enviar mensagem: ' + err.message);
             }
@@ -1705,7 +1834,7 @@
         });
 
         // ============================================
-        // CHAT IA
+        // CHAT IA (DeepSeek)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1859,7 +1988,7 @@ REGRAS OBRIGATÓRIAS:
         });
 
         // ============================================
-        // USUÁRIOS (admin)
+        // GERENCIAR USUÁRIOS
         // ============================================
         async function carregarUsuarios() {
             try {
@@ -1869,7 +1998,6 @@ REGRAS OBRIGATÓRIAS:
                     container.innerHTML = '<div class="empty-state">Nenhum usuário cadastrado.</div>';
                     return;
                 }
-                const currentUser = JSON.parse(localStorage.getItem('usuario') || '{}');
                 container.innerHTML = `
                     <table class="user-table">
                         <thead>
@@ -1893,7 +2021,7 @@ REGRAS OBRIGATÓRIAS:
                                           '<span class="status-badge inativo">Inativo</span>'}
                                     </td>
                                     <td class="acoes-usuario">
-                                        ${u.id !== currentUser.id ? `
+                                        ${u.id !== JSON.parse(localStorage.getItem('usuario') || '{}').id ? `
                                             <button onclick="resetarSenhaUsuario('${u.id}')"><i class="fas fa-key"></i></button>
                                             <button onclick="toggleUsuario('${u.id}', ${!u.ativo})">
                                                 ${u.ativo ? '<i class="fas fa-user-slash"></i>' : '<i class="fas fa-user-check"></i>'}
@@ -1985,6 +2113,15 @@ REGRAS OBRIGATÓRIAS:
                 }
             });
         });
+
+        // ============================================
+        // INICIALIZAÇÃO ADICIONAL (online na tela de login)
+        // ============================================
+        // Se estiver na tela de login (não logado), carrega online a cada 10s
+        if (!localStorage.getItem('logado')) {
+            carregarOnlineUsers();
+            setInterval(carregarOnlineUsers, 10000);
+        }
     </script>
 </body>
 </html>
