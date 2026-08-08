@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         /* ========================================
-           MESMO CSS ANTERIOR (mantido para não quebrar)
+           RESET E VARIÁVEIS
            ======================================== */
         * {
             margin: 0;
@@ -475,7 +475,7 @@
             cursor: not-allowed;
             transform: none;
         }
-        /* AVISOS */
+        /* AVISOS E PROCEDIMENTOS */
         .aviso-card,
         .proc-item {
             background: rgba(255, 255, 255, 0.03);
@@ -1049,7 +1049,7 @@
         }
 
         // ============================================
-        // LOGIN
+        // LOGIN E TROCA DE SENHA
         // ============================================
         let usuarioAtual = null;
 
@@ -1090,7 +1090,7 @@
                 localStorage.setItem('usuario', JSON.stringify(usuario));
                 localStorage.setItem('logado', 'true');
 
-                // Verificar se é primeiro acesso
+                // Verificar primeiro acesso
                 if (usuario.primeiro_acesso) {
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('telaTrocaSenha').style.display = 'flex';
@@ -1146,7 +1146,6 @@
             document.getElementById('conteudoPrincipal').style.display = 'block';
             document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
 
-            // Mostrar aba Usuários apenas para super_admin
             if (usuario.papel === 'super_admin') {
                 document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
                 carregarUsuarios();
@@ -1170,7 +1169,6 @@
         if (localStorage.getItem('logado') === 'true') {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.id) {
-                // Se for primeiro acesso, redirecionar para troca de senha
                 if (usuario.primeiro_acesso) {
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('telaTrocaSenha').style.display = 'flex';
@@ -1598,7 +1596,6 @@ REGRAS OBRIGATÓRIAS:
                 return;
             }
 
-            // Gerar senha temporária (8 caracteres alfanuméricos)
             const tempSenha = Math.random().toString(36).slice(2, 10);
             const hash = CryptoJS.SHA256(tempSenha).toString();
 
@@ -1613,7 +1610,6 @@ REGRAS OBRIGATÓRIAS:
                 });
                 document.getElementById('userNome').value = '';
                 document.getElementById('userEmail').value = '';
-                // Mostrar senha gerada
                 document.getElementById('senhaTemporariaTexto').textContent = tempSenha;
                 document.getElementById('senhaGerada').style.display = 'block';
                 await carregarUsuarios();
