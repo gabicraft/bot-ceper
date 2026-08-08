@@ -339,7 +339,12 @@
 
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
-            const res = await fetch(url, { headers });
+            const res = await fetch(url, {
+                headers: {
+                    ...headers,
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (!res.ok) throw new Error(await res.text());
             return res.json();
         }
@@ -401,8 +406,11 @@
                     audioCtx = ctx;
                 } catch (e) { return; }
             }
+            // Se o contexto estiver suspenso, tenta retomar.
+            // Se ainda estiver suspenso, não toca.
             if (ctx.state === 'suspended') {
                 ctx.resume().catch(() => {});
+                if (ctx.state === 'suspended') return;
             }
             try {
                 const oscillator = ctx.createOscillator();
@@ -436,9 +444,7 @@
         // ============================================
         async function carregarOnlineUsers() {
             try {
-                // Adiciona cache buster para evitar respostas em cache
-                const cacheBuster = '&_=' + Date.now();
-                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc' + cacheBuster);
+                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc');
                 const agora = new Date();
                 const doisMinutos = 2 * 60 * 1000;
                 const online = usuarios.filter(u => {
@@ -488,6 +494,10 @@
                 }
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
+                const chatList = document.getElementById('onlineUsersList');
+                if (chatList) {
+                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar. Tente recarregar a página.</li>';
+                }
             }
         }
 
@@ -638,7 +648,7 @@
             startOnlinePolling();
 
             if (heartbeatInterval) clearInterval(heartbeatInterval);
-            heartbeatInterval = setInterval(heartbeat, 15000); // a cada 15s
+            heartbeatInterval = setInterval(heartbeat, 15000);
 
             logoutTimer = setInterval(verificarInatividade, 30000);
         }
