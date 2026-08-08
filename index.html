@@ -1,432 +1,982 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bot CEPER - Assistente de Perícias</title>
-    <!-- Font Awesome (ícones) -->
+    <title>CEPER Bot - Sistema Completo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
+        /* ========================================
+           RESET E VARIÁVEIS
+           ======================================== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
-
+        :root {
+            --primary: #1a3a5c;
+            --primary-light: #2a5a8c;
+            --secondary: #e8b931;
+            --bg-dark: #0e1a2b;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-light: #e8edf5;
+            --text-muted: #a0b8d0;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            --radius: 20px;
+            --transition: 0.3s ease;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
         body {
-            background: linear-gradient(145deg, #0b1a33 0%, #1a2f4f 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(26, 58, 92, 0.3) 0%, transparent 60%);
         }
-
         .container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 32px;
-            padding: 32px 28px;
-            max-width: 820px;
+            max-width: 1100px;
             width: 100%;
-            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.3s;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-top: 10px;
         }
-
+        /* ========================================
+           HEADER
+           ======================================== */
         .header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             gap: 14px;
-            margin-bottom: 28px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            padding-bottom: 20px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
         }
-
-        .header-icon {
-            background: #1e88e5;
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            background: var(--primary-light);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
-            color: #fff;
-            box-shadow: 0 8px 20px rgba(30, 136, 229, 0.3);
+            font-size: 22px;
         }
-
-        .header h1 {
-            color: #fff;
+        .logo h1 {
             font-weight: 600;
-            font-size: 24px;
+            font-size: 22px;
             letter-spacing: -0.3px;
         }
-
-        .header h1 span {
-            color: #64b5f6;
+        .logo h1 span {
+            color: var(--secondary);
             font-weight: 300;
         }
-
-        .header .badge {
-            background: rgba(255, 255, 255, 0.08);
-            color: #aac9f0;
-            padding: 4px 14px;
-            border-radius: 40px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-left: auto;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
         }
-
+        .header-actions button {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .header-actions button:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+            transform: scale(1.02);
+        }
+        .header-actions .btn-secondary {
+            background: var(--secondary);
+            color: #1a1a1a;
+            border-color: var(--secondary);
+        }
+        .header-actions .btn-secondary:hover {
+            background: #d4a820;
+            border-color: #d4a820;
+        }
+        .header-actions .btn-danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .header-actions .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+        .header-actions .usuario-info {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+        }
+        /* ========================================
+           TELA DE LOGIN
+           ======================================== */
+        #telaLogin {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+        #telaLogin .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 32px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            width: 100%;
+        }
+        #telaLogin .login-box h2 {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 24px;
+        }
+        #telaLogin .login-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-light);
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+        #telaLogin .login-box input:focus {
+            border-color: var(--primary-light);
+        }
+        #telaLogin .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        #telaLogin .login-box button:hover {
+            background: #d4a820;
+            transform: scale(1.02);
+        }
+        #telaLogin .login-box .erro {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+            font-size: 14px;
+        }
+        #telaLogin .login-box .info {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 16px;
+        }
+        /* ========================================
+           ABAS
+           ======================================== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+        .tabs button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .tabs button.active {
+            background: var(--primary-light);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(42, 90, 140, 0.3);
+        }
+        .tabs button:hover:not(.active) {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tab-content {
+            display: none;
+            animation: fadeUp 0.25s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* ========================================
+           CHAT
+           ======================================== */
         .chat-area {
             background: rgba(0, 0, 0, 0.25);
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 16px 18px;
-            min-height: 200px;
-            max-height: 420px;
+            max-height: 400px;
             overflow-y: auto;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            scroll-behavior: smooth;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
         }
-
         .chat-area::-webkit-scrollbar {
-            width: 4px;
-        }
-        .chat-area::-webkit-scrollbar-track {
-            background: transparent;
+            width: 5px;
         }
         .chat-area::-webkit-scrollbar-thumb {
-            background: #1e88e5;
-            border-radius: 8px;
+            background: var(--primary-light);
+            border-radius: 10px;
         }
-
         .message {
             display: flex;
             gap: 12px;
-            margin-bottom: 16px;
-            animation: fadeIn 0.25s ease;
+            margin-bottom: 14px;
+            animation: fadeUp 0.25s ease;
         }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
         .message.user {
             flex-direction: row-reverse;
         }
-
         .message .avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #b0c4de;
-            font-size: 16px;
             flex-shrink: 0;
+            font-size: 16px;
         }
-
         .message.user .avatar {
-            background: #1e88e5;
-            color: #fff;
+            background: var(--primary-light);
         }
-
         .message .bubble {
             background: rgba(255, 255, 255, 0.06);
-            padding: 12px 18px;
-            border-radius: 18px;
-            color: #e8edf5;
-            font-size: 15px;
+            padding: 10px 16px;
+            border-radius: 16px;
+            max-width: 82%;
             line-height: 1.6;
-            max-width: 85%;
-            word-wrap: break-word;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            border: 1px solid var(--border-color);
         }
-
         .message.user .bubble {
-            background: #1e88e5;
-            color: #fff;
-            border: none;
+            background: var(--primary-light);
+            border-color: var(--primary-light);
         }
-
-        .message .bubble code {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 2px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #b0d4ff;
-        }
-
         .message .bubble strong {
-            color: #ffd966;
+            color: var(--secondary);
         }
-
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 0;
-        }
-        .typing-indicator .dots span {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #90a4ae;
-            border-radius: 50%;
-            margin-right: 4px;
-            animation: pulse 1.2s infinite;
-        }
-        .typing-indicator .dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator .dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes pulse {
-            0%, 60%, 100% { opacity: 0.3; transform: scale(0.85); }
-            30% { opacity: 1; transform: scale(1); }
-        }
-
         .input-area {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             background: rgba(255, 255, 255, 0.04);
-            padding: 6px 6px 6px 18px;
+            padding: 5px 5px 5px 18px;
             border-radius: 60px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: border 0.2s;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
         }
         .input-area:focus-within {
-            border-color: #1e88e5;
-            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.15);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(42, 90, 140, 0.25);
         }
-
         .input-area input {
             flex: 1;
             background: transparent;
             border: none;
-            color: #fff;
-            font-size: 15px;
-            padding: 12px 0;
+            color: var(--text-light);
+            font-size: 14px;
+            padding: 10px 0;
             outline: none;
         }
         .input-area input::placeholder {
-            color: #78909c;
-            font-weight: 300;
+            color: var(--text-muted);
         }
-
         .input-area button {
-            background: #1e88e5;
+            background: var(--secondary);
             border: none;
-            padding: 12px 28px;
+            padding: 10px 24px;
             border-radius: 40px;
-            color: #fff;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
+            color: #1a1a1a;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            white-space: nowrap;
+            transition: var(--transition);
         }
         .input-area button:hover {
-            background: #1565c0;
+            background: #d4a820;
             transform: scale(1.02);
         }
-        .input-area button:active {
-            transform: scale(0.97);
-        }
-        .input-area button i {
-            font-size: 16px;
-        }
-
         .input-area button:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 16px;
-            color: #546e7a;
+        /* ========================================
+           AVISOS
+           ======================================== */
+        .aviso-card {
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 4px solid var(--secondary);
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .aviso-card .chefia {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        .aviso-card .data {
             font-size: 12px;
-            padding: 0 4px;
+            color: var(--text-muted);
+            margin-left: 8px;
         }
-        .footer a {
-            color: #64b5f6;
-            text-decoration: none;
+        .aviso-card .texto {
+            margin-top: 4px;
+            font-size: 14px;
         }
-        .footer a:hover {
-            text-decoration: underline;
+        .aviso-card .acoes {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
         }
-
-        /* Responsivo */
-        @media (max-width: 600px) {
-            .container { padding: 20px 16px; }
-            .header h1 { font-size: 20px; }
-            .input-area { flex-wrap: wrap; padding: 12px; gap: 10px; border-radius: 24px; }
-            .input-area input { width: 100%; padding: 10px 0; }
-            .input-area button { width: 100%; justify-content: center; padding: 14px; }
-            .message .bubble { max-width: 95%; font-size: 14px; }
+        .aviso-card .acoes button {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+        }
+        .aviso-card .acoes button:hover {
+            background: var(--primary-light);
+        }
+        .aviso-card .acoes .btn-del {
+            color: var(--danger);
+        }
+        .aviso-card .acoes .btn-del:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+        .form-aviso {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-aviso input,
+        .form-aviso textarea {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-aviso input:focus,
+        .form-aviso textarea:focus {
+            border-color: var(--primary-light);
+        }
+        .form-aviso textarea {
+            grid-column: span 2;
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-aviso .btn-submit {
+            grid-column: span 2;
+            background: var(--secondary);
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .form-aviso .btn-submit:hover {
+            background: #d4a820;
+        }
+        /* ========================================
+           PROCEDIMENTOS (BASE)
+           ======================================== */
+        .proc-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .proc-item .proc-titulo {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 15px;
+        }
+        .proc-item .proc-conteudo {
+            font-size: 13px;
+            margin-top: 4px;
+            white-space: pre-wrap;
+            color: var(--text-muted);
+        }
+        .proc-item .acoes {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+        .proc-item .acoes button {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+        }
+        .proc-item .acoes button:hover {
+            background: var(--primary-light);
+        }
+        .proc-item .acoes .btn-del {
+            color: var(--danger);
+        }
+        .proc-item .acoes .btn-del:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+        .form-proc {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-proc input,
+        .form-proc textarea,
+        .form-proc select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-proc input:focus,
+        .form-proc textarea:focus,
+        .form-proc select:focus {
+            border-color: var(--primary-light);
+        }
+        .form-proc select option {
+            background: #1a1a2e;
+        }
+        .form-proc textarea {
+            grid-column: span 2;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-proc .btn-submit {
+            grid-column: span 2;
+            background: var(--secondary);
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .form-proc .btn-submit:hover {
+            background: #d4a820;
+        }
+        /* ========================================
+           RESPONSIVO
+           ======================================== */
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .header { flex-direction: column; align-items: stretch; }
+            .header-actions { justify-content: center; }
+            .tabs button { font-size: 12px; padding: 8px 10px; }
+            .form-aviso, .form-proc { grid-template-columns: 1fr; }
+            .form-aviso textarea, .form-aviso .btn-submit,
+            .form-proc textarea, .form-proc .btn-submit { grid-column: span 1; }
+            .input-area { flex-wrap: wrap; padding: 10px; border-radius: 24px; }
+            .input-area input { width: 100%; padding: 8px 0; }
+            .input-area button { width: 100%; justify-content: center; }
+            .message .bubble { max-width: 95%; font-size: 13px; }
+        }
+        .text-muted { color: var(--text-muted); }
+        .mt-12 { margin-top: 12px; }
+        .mb-12 { margin-bottom: 12px; }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 30px 0; font-size: 14px; }
+        .badge { background: rgba(255, 215, 0, 0.15); color: var(--secondary); padding: 2px 12px; border-radius: 40px; font-size: 11px; font-weight: 500; }
+        .hidden { display: none !important; }
+        @keyframes pulse {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(0.85); }
+            30% { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="header">
-        <div class="header-icon"><i class="fas fa-gavel"></i></div>
-        <h1>CEPER <span>Bot</span></h1>
-        <span class="badge"><i class="fas fa-brain" style="margin-right: 4px;"></i> IA</span>
-    </div>
-
-    <!-- Área de mensagens -->
-    <div id="chatArea" class="chat-area">
-        <!-- Mensagem de boas-vindas -->
-        <div class="message assistant">
-            <div class="avatar"><i class="fas fa-robot"></i></div>
-            <div class="bubble">
-                👋 Olá! Sou o assistente da CEPER.<br />
-                Pergunte sobre <strong>procedimentos, certidões, prazos</strong> ou qualquer rotina da Central de Perícias.
-            </div>
-        </div>
-        <!-- Indicador de digitação (escondido) -->
-        <div id="typing" class="typing-indicator">
-            <div class="avatar" style="width:36px;height:36px;border-radius:50%;background:#1e293b;display:flex;align-items:center;justify-content:center;color:#b0c4de;font-size:16px;">
-                <i class="fas fa-robot"></i>
-            </div>
-            <div class="dots">
-                <span></span><span></span><span></span>
-            </div>
+    <!-- TELA DE LOGIN -->
+    <div id="telaLogin">
+        <div class="login-box">
+            <h2><i class="fas fa-lock"></i> Acesso restrito</h2>
+            <input type="text" id="loginUsuario" placeholder="Usuário (ex: servidor1)" />
+            <input type="password" id="loginSenha" placeholder="Senha" />
+            <button onclick="fazerLogin()">Entrar</button>
+            <div class="erro" id="erroLogin">Usuário ou senha inválidos.</div>
+            <div class="info">Use suas credenciais fornecidas pela chefia.</div>
         </div>
     </div>
 
-    <!-- Entrada de texto -->
-    <div class="input-area">
-        <input id="userInput" type="text" placeholder="Digite sua dúvida sobre a CEPER..." />
-        <button id="sendBtn"><i class="fas fa-paper-plane"></i> Enviar</button>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="conteudoPrincipal" class="container" style="display:none;">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-gavel"></i></div>
+                <h1>CEPER <span>Bot</span></h1>
+            </div>
+            <div class="header-actions">
+                <span class="usuario-info" id="infoUsuario">👤 servidor</span>
+                <button onclick="logout()" title="Sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                <button id="btnRecarregarBase" title="Recarregar base do localStorage"><i class="fas fa-sync"></i></button>
+                <button id="btnExportarDados" title="Exportar dados"><i class="fas fa-download"></i></button>
+                <button id="btnImportarDados" title="Importar dados"><i class="fas fa-upload"></i></button>
+                <input type="file" id="fileInput" accept=".json" style="display:none" />
+                <button id="btnResetar" class="btn-danger" title="Resetar tudo"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="active" data-tab="tabChat"><i class="fas fa-comments"></i> Chat</button>
+            <button data-tab="tabAvisos"><i class="fas fa-bullhorn"></i> Avisos</button>
+            <button data-tab="tabBase"><i class="fas fa-database"></i> Base</button>
+        </div>
+
+        <!-- TAB CHAT -->
+        <div id="tabChat" class="tab-content active">
+            <div id="chatArea" class="chat-area">
+                <div class="message assistant">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble">👋 Olá! Sou o assistente da CEPER.<br /> Pergunte sobre <strong>procedimentos, certidões, prazos</strong> ou qualquer rotina.</div>
+                </div>
+                <div id="typing" style="display:none; padding:10px 0;">
+                    <div style="display:flex; gap:8px;">
+                        <span style="width:8px;height:8px;background:#aaa;border-radius:50%;animation:pulse 1.2s infinite;"></span>
+                        <span style="width:8px;height:8px;background:#aaa;border-radius:50%;animation:pulse 1.2s infinite 0.2s;"></span>
+                        <span style="width:8px;height:8px;background:#aaa;border-radius:50%;animation:pulse 1.2s infinite 0.4s;"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <input id="perguntaInput" type="text" placeholder="Digite sua dúvida sobre a CEPER..." />
+                <button id="enviarBtn"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+            <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="btnVerAvisos" class="btn-secondary" style="background:var(--secondary);border:none;padding:8px 18px;border-radius:40px;font-weight:500;cursor:pointer;color:#1a1a1a;">
+                    <i class="fas fa-bullhorn"></i> Últimos avisos
+                </button>
+                <span id="badgeAvisos" class="badge" style="display:none;align-self:center;">0</span>
+            </div>
+            <div id="avisoQuickList" style="margin-top:12px; display:none;">
+                <hr style="border-color:var(--border-color);margin-bottom:12px;" />
+                <div id="avisoQuickContainer"></div>
+            </div>
+        </div>
+
+        <!-- TAB AVISOS -->
+        <div id="tabAvisos" class="tab-content">
+            <h3 style="margin-bottom:12px;"><i class="fas fa-pen"></i> Gerenciar Avisos</h3>
+            <div class="form-aviso">
+                <input type="text" id="avisoChefia" placeholder="Chefia (ex: Luiz, Débora)" />
+                <input type="text" id="avisoData" placeholder="Data (opcional, ex: 08/08/2026)" />
+                <textarea id="avisoMensagem" placeholder="Mensagem do aviso..."></textarea>
+                <button class="btn-submit" id="btnSalvarAviso">Adicionar aviso</button>
+            </div>
+            <div id="listaAvisos"></div>
+        </div>
+
+        <!-- TAB BASE -->
+        <div id="tabBase" class="tab-content">
+            <h3 style="margin-bottom:12px;"><i class="fas fa-book"></i> Editar Base de Conhecimento</h3>
+            <p class="text-muted" style="font-size:13px;margin-bottom:16px;">Edite os procedimentos livremente. As alterações são salvas no seu navegador.</p>
+            <div class="form-proc">
+                <input type="text" id="procTitulo" placeholder="Título (ex: ITEM 1 - Sem especialidade)" />
+                <select id="procCategoria">
+                    <option value="certidão">Certidão</option>
+                    <option value="fluxo">Fluxo</option>
+                    <option value="orientacao">Orientação</option>
+                </select>
+                <textarea id="procConteudo" placeholder="Conteúdo do procedimento..."></textarea>
+                <button class="btn-submit" id="btnSalvarProc">Adicionar procedimento</button>
+            </div>
+            <div id="listaProcedimentos"></div>
+        </div>
+
+        <div style="margin-top:24px; border-top:1px solid var(--border-color); padding-top:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:12px; color:var(--text-muted);">
+            <span><i class="fas fa-database"></i> Dados salvos localmente</span>
+            <span id="statusExportacao">Última exportação: nunca</span>
+        </div>
     </div>
 
-    <div class="footer">
-        <span><i class="fas fa-lock" style="margin-right: 4px;"></i> Chave API segura no backend</span>
-        <span>v1.0 · <i class="fas fa-database"></i> Base CEPER</span>
-    </div>
-</div>
+    <script>
+        // ============================================
+        // USUÁRIOS E SENHAS (HASH)
+        // ============================================
+        const USUARIOS = {
+            'servidor1': CryptoJS.SHA256('sol-e-lua-2026-no-ceu-de-abril').toString(),
+            'servidor2': CryptoJS.SHA256('cafe-quente-3x-com-leite-e-acucar').toString(),
+            'servidor3': CryptoJS.SHA256('aprender-7-dias-por-semana-e-evoluir').toString(),
+            'servidor4': CryptoJS.SHA256('ceper-2026-sistema-seguro-e-confiavel').toString(),
+            'servidor5': CryptoJS.SHA256('agua-mole-pedra-47x-bate-ate-furar').toString()
+        };
 
-<script>
-    (function() {
-        const chatArea = document.getElementById('chatArea');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const typing = document.getElementById('typing');
-        let isProcessing = false;
+        // ============================================
+        // FUNÇÕES DE LOGIN
+        // ============================================
+        function fazerLogin() {
+            const usuario = document.getElementById('loginUsuario').value.trim();
+            const senha = document.getElementById('loginSenha').value;
+            const erro = document.getElementById('erroLogin');
+            if (!usuario || !senha) { erro.textContent = 'Preencha usuário e senha.'; erro.style.display = 'block'; return; }
+            if (!USUARIOS[usuario]) { erro.textContent = 'Usuário inválido.'; erro.style.display = 'block'; return; }
+            const hashDigitado = CryptoJS.SHA256(senha).toString();
+            if (hashDigitado === USUARIOS[usuario]) {
+                localStorage.setItem('usuario', usuario);
+                localStorage.setItem('logado', 'true');
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('conteudoPrincipal').style.display = 'block';
+                document.getElementById('infoUsuario').textContent = '👤 ' + usuario;
+                carregarAvisos();
+                carregarProcedimentos();
+                atualizarBadgeAvisos();
+            } else {
+                erro.textContent = 'Senha incorreta.';
+                erro.style.display = 'block';
+            }
+        }
+        function logout() { localStorage.removeItem('usuario'); localStorage.removeItem('logado'); window.location.reload(); }
 
-        function scrollToBottom() {
-            chatArea.scrollTop = chatArea.scrollHeight;
+        if (localStorage.getItem('logado') === 'true') {
+            const usuario = localStorage.getItem('usuario');
+            if (usuario && USUARIOS[usuario]) {
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('conteudoPrincipal').style.display = 'block';
+                document.getElementById('infoUsuario').textContent = '👤 ' + usuario;
+            } else {
+                localStorage.removeItem('logado');
+                localStorage.removeItem('usuario');
+            }
+        }
+
+        // ============================================
+        // AVISOS
+        // ============================================
+        function getAvisos() { try { return JSON.parse(localStorage.getItem('ceper_avisos') || '[]'); } catch { return []; } }
+        function setAvisos(avisos) { localStorage.setItem('ceper_avisos', JSON.stringify(avisos)); }
+
+        function carregarAvisos() {
+            const avisos = getAvisos();
+            const container = document.getElementById('listaAvisos');
+            if (!avisos.length) { container.innerHTML = '<div class="empty-state">Nenhum aviso cadastrado.</div>'; return; }
+            container.innerHTML = avisos.map((a, i) => `
+                <div class="aviso-card">
+                    <div><span class="chefia">${a.chefia || 'Chefia'}</span> <span class="data">${a.data || new Date(a.criado_em).toLocaleString()}</span></div>
+                    <div class="texto">${a.mensagem}</div>
+                    <div class="acoes"><button onclick="editarAviso(${i})">✏️ Editar</button><button class="btn-del" onclick="removerAviso(${i})">🗑️ Remover</button></div>
+                </div>
+            `).join('');
+            atualizarBadgeAvisos();
+        }
+
+        function atualizarBadgeAvisos() {
+            const avisos = getAvisos();
+            const badge = document.getElementById('badgeAvisos');
+            if (avisos.length > 0) { badge.style.display = 'inline-block'; badge.textContent = avisos.length; } else { badge.style.display = 'none'; }
+        }
+
+        document.getElementById('btnSalvarAviso').addEventListener('click', function() {
+            const chefia = document.getElementById('avisoChefia').value.trim() || 'Chefia';
+            const mensagem = document.getElementById('avisoMensagem').value.trim();
+            const data = document.getElementById('avisoData').value.trim() || new Date().toLocaleString();
+            if (!mensagem) { alert('Digite a mensagem do aviso.'); return; }
+            const avisos = getAvisos();
+            avisos.push({ chefia, mensagem, data, criado_em: new Date().toISOString() });
+            setAvisos(avisos);
+            document.getElementById('avisoChefia').value = '';
+            document.getElementById('avisoMensagem').value = '';
+            document.getElementById('avisoData').value = '';
+            carregarAvisos();
+            alert('Aviso adicionado!');
+        });
+
+        function removerAviso(index) { if (!confirm('Remover este aviso?')) return; const avisos = getAvisos(); avisos.splice(index, 1); setAvisos(avisos); carregarAvisos(); }
+        function editarAviso(index) {
+            const avisos = getAvisos();
+            const a = avisos[index];
+            document.getElementById('avisoChefia').value = a.chefia || '';
+            document.getElementById('avisoMensagem').value = a.mensagem;
+            document.getElementById('avisoData').value = a.data || '';
+            removerAviso(index);
+            alert('Edite o conteúdo e clique em "Adicionar aviso" para salvar a versão editada.');
+        }
+
+        // ============================================
+        // PROCEDIMENTOS
+        // ============================================
+        function getProcedimentos() { try { return JSON.parse(localStorage.getItem('ceper_procedimentos') || '[]'); } catch { return []; } }
+        function setProcedimentos(procs) { localStorage.setItem('ceper_procedimentos', JSON.stringify(procs)); }
+
+        function carregarProcedimentos() {
+            const procs = getProcedimentos();
+            const container = document.getElementById('listaProcedimentos');
+            if (!procs.length) { container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado. Adicione um!</div>'; return; }
+            container.innerHTML = procs.map((p, i) => `
+                <div class="proc-item">
+                    <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
+                    <div class="proc-conteudo">${p.conteudo || ''}</div>
+                    <div class="acoes"><button onclick="editarProcedimento(${i})">✏️ Editar</button><button class="btn-del" onclick="removerProcedimento(${i})">🗑️ Remover</button></div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('btnSalvarProc').addEventListener('click', function() {
+            const titulo = document.getElementById('procTitulo').value.trim();
+            const conteudo = document.getElementById('procConteudo').value.trim();
+            const categoria = document.getElementById('procCategoria').value;
+            if (!titulo || !conteudo) { alert('Preencha título e conteúdo.'); return; }
+            const procs = getProcedimentos();
+            procs.push({ titulo, conteudo, categoria });
+            setProcedimentos(procs);
+            document.getElementById('procTitulo').value = '';
+            document.getElementById('procConteudo').value = '';
+            carregarProcedimentos();
+            alert('Procedimento adicionado!');
+        });
+
+        function removerProcedimento(index) { if (!confirm('Remover este procedimento?')) return; const procs = getProcedimentos(); procs.splice(index, 1); setProcedimentos(procs); carregarProcedimentos(); }
+        function editarProcedimento(index) {
+            const procs = getProcedimentos();
+            const p = procs[index];
+            document.getElementById('procTitulo').value = p.titulo;
+            document.getElementById('procConteudo').value = p.conteudo;
+            document.getElementById('procCategoria').value = p.categoria || 'orientacao';
+            removerProcedimento(index);
+            alert('Edite o conteúdo e clique em "Adicionar procedimento" para salvar a versão editada.');
+        }
+
+        // ============================================
+        // CHAT
+        // ============================================
+        document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
+        document.getElementById('perguntaInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') enviarPergunta(); });
+
+        async function enviarPergunta() {
+            const input = document.getElementById('perguntaInput');
+            const pergunta = input.value.trim();
+            if (!pergunta) return;
+            input.value = '';
+            addMessage('user', pergunta);
+            document.getElementById('typing').style.display = 'flex';
+            document.getElementById('enviarBtn').disabled = true;
+            try {
+                const procs = getProcedimentos();
+                let baseTexto = '';
+                if (procs.length) { baseTexto = procs.map(p => `${p.titulo}\n${p.conteudo}`).join('\n\n'); } else { baseTexto = 'BASE DE CONHECIMENTO VAZIA.'; }
+                const prompt = `Você é um assistente especialista da Central de Perícias (CEPER). Use APENAS as informações da base de conhecimento abaixo para responder à pergunta do usuário.
+
+BASE DE CONHECIMENTO:
+${baseTexto}
+
+PERGUNTA DO USUÁRIO:
+${pergunta}
+
+REGRAS:
+- Responda de forma clara, objetiva e direta.
+- Se a base não tiver a informação, diga "Não encontrei essa informação na base da CEPER."
+- Quando citar um modelo de certidão, destaque com **negrito**.
+- Cite o item ou a data da regra quando disponível.
+- Mantenha o tom profissional.`;
+                const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer sk-79ceb1926bde460e87c47a2d55f867a6' },
+                    body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 2000 })
+                });
+                const data = await response.json();
+                if (data.choices && data.choices.length > 0) { addMessage('assistant', data.choices[0].message.content); } else { addMessage('assistant', '❌ Não foi possível obter uma resposta da IA.'); }
+            } catch (err) { addMessage('assistant', '❌ Erro ao conectar com a IA: ' + err.message); } finally {
+                document.getElementById('typing').style.display = 'none';
+                document.getElementById('enviarBtn').disabled = false;
+                input.focus();
+            }
         }
 
         function addMessage(role, text) {
+            const chat = document.getElementById('chatArea');
             const div = document.createElement('div');
             div.className = `message ${role}`;
-
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
-            avatar.innerHTML = role === 'user'
-                ? '<i class="fas fa-user"></i>'
-                : '<i class="fas fa-robot"></i>';
-
+            avatar.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.innerHTML = text.replace(/\n/g, '<br />');
-
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
             div.appendChild(avatar);
             div.appendChild(bubble);
-            chatArea.appendChild(div);
-            scrollToBottom();
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
         }
 
-        function setTyping(visible) {
-            typing.style.display = visible ? 'flex' : 'none';
-            if (visible) scrollToBottom();
-        }
+        // ============================================
+        // EXPORTAR / IMPORTAR
+        // ============================================
+        document.getElementById('btnExportarDados').addEventListener('click', function() {
+            const dados = { procedimentos: getProcedimentos(), avisos: getAvisos(), versao: '1.0', exportado_em: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `backup_ceper_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            document.getElementById('statusExportacao').textContent = `Última exportação: ${new Date().toLocaleString()}`;
+        });
 
-        async function sendQuestion() {
-            if (isProcessing) return;
-            const question = userInput.value.trim();
-            if (!question) {
-                userInput.focus();
-                return;
-            }
+        document.getElementById('btnImportarDados').addEventListener('click', function() { document.getElementById('fileInput').click(); });
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                try {
+                    const dados = JSON.parse(ev.target.result);
+                    if (!dados.procedimentos || !dados.avisos) { alert('Arquivo inválido.'); return; }
+                    if (confirm('Isso vai substituir TODOS os dados atuais. Deseja continuar?')) {
+                        localStorage.setItem('ceper_procedimentos', JSON.stringify(dados.procedimentos));
+                        localStorage.setItem('ceper_avisos', JSON.stringify(dados.avisos));
+                        carregarAvisos();
+                        carregarProcedimentos();
+                        alert('Dados importados com sucesso!');
+                    }
+                } catch (err) { alert('Erro ao ler o arquivo: ' + err.message); }
+            };
+            reader.readAsText(file);
+            this.value = '';
+        });
 
-            isProcessing = true;
-            sendBtn.disabled = true;
-            userInput.disabled = true;
-
-            addMessage('user', question);
-            userInput.value = '';
-            setTyping(true);
-
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question })
-                });
-
-                setTyping(false);
-
-                if (!response.ok) {
-                    let errorMsg = 'Erro ao processar sua pergunta.';
-                    try {
-                        const errData = await response.json();
-                        if (errData.error) errorMsg = errData.error;
-                    } catch (_) {}
-                    addMessage('assistant', `❌ ${errorMsg}`);
-                    return;
+        // ============================================
+        // RESETAR
+        // ============================================
+        document.getElementById('btnResetar').addEventListener('click', function() {
+            if (confirm('ATENÇÃO: Isso vai apagar TODOS os dados. Tem certeza?')) {
+                if (confirm('Última chance! Continuar?')) {
+                    localStorage.removeItem('ceper_procedimentos');
+                    localStorage.removeItem('ceper_avisos');
+                    location.reload();
                 }
-
-                const data = await response.json();
-
-                if (data.error) {
-                    addMessage('assistant', `⚠️ ${data.error}`);
-                    return;
-                }
-
-                if (data.answer) {
-                    addMessage('assistant', data.answer);
-                } else {
-                    addMessage('assistant', '🤔 Não consegui gerar uma resposta. Tente reformular sua pergunta.');
-                }
-
-            } catch (err) {
-                setTyping(false);
-                addMessage('assistant', `❌ Erro de conexão: ${err.message || 'tente novamente mais tarde.'}`);
-            } finally {
-                isProcessing = false;
-                sendBtn.disabled = false;
-                userInput.disabled = false;
-                userInput.focus();
-            }
-        }
-
-        sendBtn.addEventListener('click', sendQuestion);
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendQuestion();
             }
         });
 
-        userInput.focus();
-    })();
-</script>
+        // ============================================
+        // RECARREGAR BASE
+        // ============================================
+        document.getElementById('btnRecarregarBase').addEventListener('click', function() {
+            carregarProcedimentos();
+            carregarAvisos();
+            alert('Base recarregada!');
+        });
+
+        // ============================================
+        // AVISOS RÁPIDOS
+        // ============================================
+        document.getElementById('btnVerAvisos').addEventListener('click', function() {
+            const container = document.getElementById('avisoQuickList');
+            const lista = document.getElementById('avisoQuickContainer');
+            if (container.style.display === 'block') { container.style.display = 'none'; return; }
+            const avisos = getAvisos();
+            if (!avisos.length) { lista.innerHTML = '<div class="empty-state">Nenhum aviso recente.</div>'; } else {
+                lista.innerHTML = avisos.slice(0, 5).map(a => `
+                    <div class="aviso-card" style="margin-bottom:8px;">
+                        <div><span class="chefia">${a.chefia || 'Chefia'}</span> <span class="data">${a.data || ''}</span></div>
+                        <div class="texto">${a.mensagem}</div>
+                    </div>
+                `).join('');
+            }
+            container.style.display = 'block';
+        });
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        if (localStorage.getItem('logado') === 'true') {
+            carregarAvisos();
+            carregarProcedimentos();
+            atualizarBadgeAvisos();
+        }
+        document.querySelectorAll('.tabs button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
