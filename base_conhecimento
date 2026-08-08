@@ -2,20 +2,20 @@
 BASE DE CONHECIMENTO - CENTRAL DE PERÍCIAS (CEPER)
 ========================================
 
-Última atualização: 07/08/2026
+Última atualização: 08/08/2026
 
 ------------------------------------------------------------
 ÍNDICE
 ------------------------------------------------------------
 
-1. MODELOS DE CERTIDÃO (ITENS 1 A 19)
-2. REGRAS SOBRE LOCALIZADORES
+1. MODELOS DE CERTIDÃO (ITENS 1 A 19 - REVISADO)
+2. REGRAS SOBRE LOCALIZADORES (ATUALIZADO)
 3. GESTÃO DE PERITOS
 4. TRATAMENTO DE PROCESSOS ESPECIAIS
-5. REGRAS DE FALTAS
+5. REGRAS DE FALTAS DO PERICIADO (FLUXO COMPLETO - ATUALIZADO)
 6. FLUXOS OPERACIONAIS NO SISTEMA
 7. MANUAL DE MARCAÇÃO DE PERÍCIAS (E-PROC V.9.17)
-8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES
+8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES (ATUALIZADO)
 
 ------------------------------------------------------------
 1. MODELOS DE CERTIDÃO - PROCEDIMENTOS (ITENS 1 A 19)
@@ -45,8 +45,7 @@ ITEM 7 - Especialidade inexistente (que nunca teremos) em TA ou TAM:
 ITEM 8 - Advogado indica nova especialidade após devolução:
 "Diante da manifestação do evento XXX, na qual a parte autora indica nova especialidade para realização do exame pericial, devolvo os autos ao juízo de origem, para apreciação."
 
-ITEM 9 - Segunda falta à perícia:
-"Certifico e dou fé que a parte autora, pela segunda vez, deixou de comparecer ao exame pericial, razão pela qual devolvo os autos ao juízo de origem."
+ITEM 9 - (REMOVIDO - Conflito resolvido com a nova seção 5)
 
 ITEM 10 - Advogado não quer a realização da perícia:
 "Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
@@ -56,7 +55,7 @@ ITEM 11 - Advogado pede perícia em especialidade diversa da determinada:
 
 ITEM 12 - Pedido de tutela antecipada (sem cancelar a perícia):
 "Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
-OBS: Colocar lembrete vermelho: "ATENÇÃO! A perícia neste processo está marcada para XX/YY, conforme evento XYZ. Se cancelada/desnecessária, favor avisar a CEPER. Se mantida, devolver os autos à CEPER."
+OBS: A perícia deve ser MANTIDA, não cancelada. Colocar lembrete vermelho: "ATENÇÃO! A perícia neste processo está marcada para XX/YY, conforme evento XYZ. Se cancelada/desnecessária, favor avisar a CEPER. Se mantida, devolver os autos à CEPER."
 
 ITEM 13 - Pedido de perícia por videoconferência:
 "Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação. Informo que não dispomos de profissional que possa realizar o exame pericial nas condições pretendidas pela parte autora, bem como que existe perícia marcada nestes autos, conforme evento XXX, a qual eventualmente deverá ser cancelada, a depender da decisão do juízo."
@@ -83,7 +82,7 @@ ITEM 19 - Perícia multidisciplinar:
 "Diante do pedido de perícia multidisciplinar formulado pela parte autora no evento XXX, não havendo procedimento específico para tanto nesta Central de Perícias, devolvo os autos ao juízo de origem, para apreciação."
 
 ------------------------------------------------------------
-2. REGRAS SOBRE LOCALIZADORES (TAGs)
+2. REGRAS SOBRE LOCALIZADORES (TAGs) - ATUALIZADO
 ------------------------------------------------------------
 
 | LOCALIZADOR | QUANDO USAR | QUEM TIRA |
@@ -95,6 +94,7 @@ ITEM 19 - Perícia multidisciplinar:
 | TA PAGAR PERITO | Processos de TA com erro no pagamento. | Olhar semanalmente. |
 | TAM ANALISAR PETIÇÃO | Ao analisar petição, verificar se não há laudo em PDF. | Cuidado ao tirar. |
 | PERÍCIA INDIRETA | Pedidos de perícia indireta. | Equipe. |
+| PRAZO PARTE | Enquanto aguarda justificativa de falta ou entrega de documentos. | Equipe. |
 
 REGRAS IMPORTANTES:
 - Se processo está em HOSPITALAR/DOMICILIAR/INDIRETA/TELEPERÍCIA e chega petição: retirar apenas do localizador de petição, nunca do original (evita que TA marque indevidamente).
@@ -171,22 +171,87 @@ Pedido de "já houve perícia" (texto padrão):
 "Diante do teor da petição do evento X e tendo em vista que já foi realizada perícia médica nestes autos, tive dúvidas em dar cumprimento ao despacho, razão pela qual devolvo os autos ao juízo de origem."
 
 ------------------------------------------------------------
-5. REGRAS DE FALTAS
+5. REGRAS DE FALTAS DO PERICIADO (FLUXO COMPLETO - ATUALIZADO)
 ------------------------------------------------------------
 
-PRIMEIRA FALTA:
-- Aguardar 5 dias pela justificativa.
-- Se apresentar (qualquer motivo): remarcar e intimar.
-- Se não apresentar: certificar e devolver à vara.
+PRIMEIRA FALTA – FLUXO COMPLETO
 
-SEGUNDA FALTA:
-- Independentemente da justificativa, certificar que é a segunda falta e devolver à vara, sem aguardar prazo.
-- Modelo: ITEM 9.
+ATO ORDINATÓRIO
 
-CONFLITO PENDENTE:
-- Regra antiga (22/05): 3 faltas para devolver.
-- Regra nova (item 9): 2 faltas para devolver.
-- AGUARDANDO DECISÃO.
+Tendo em vista a informação de que a parte autora não teria comparecido ao exame pericial, intime-se para apresentar justificativa quanto à ausência no prazo de 5 (cinco) dias. Cumprido, remarque-se o exame, preferencialmente com o mesmo perito. Nada vindo, certifique-se e devolva-se o processo ao juízo de origem.
+
+APÓS O PRAZO – SE A PARTE NÃO SE JUSTIFICAR
+
+Procedimento obrigatório antes de devolver:
+- Encerrar os prazos no sistema (Movimentar Processo → Evento: Encerrar → Juntada de Certidão Encerrar Prazo → marcar o prazo → Movimentar).
+- Cancelar a nomeação do perito.
+- Emitir a certidão de ausência de justificativa.
+- Devolver os autos ao juízo de origem.
+
+>>> MODELO DE CERTIDÃO – AUSÊNCIA DE JUSTIFICATIVA APÓS DILAÇÃO DE PRAZO <<<
+
+CERTIFICO E DOU FÉ que a parte autora deixou de comparecer à perícia designada e, embora lhe tenha sido concedido prazo para apresentar justificativa acerca de sua ausência, permaneceu inerte, razão pela qual devolvo os autos ao juízo de origem.
+
+LOCALIZADOR E PRAZO
+- Localizador: PRAZO PARTE enquanto aguarda a justificativa.
+- Prazo: 5 (cinco) dias para a parte apresentar justificativa.
+
+------------------------------------------------------------
+SEGUNDA FALTA – FLUXO COMPLETO (MESMO TRATAMENTO DA PRIMEIRA)
+
+ATO ORDINATÓRIO
+
+Tendo em vista a informação de que a parte autora não teria comparecido ao exame pericial pela segunda vez, intime-se para apresentar justificativa quanto à ausência no prazo de 5 (cinco) dias. Cumprido, remarque-se o exame, preferencialmente com o mesmo perito. Nada vindo, certifique-se e devolva-se o processo ao juízo de origem.
+
+APÓS O PRAZO – SE A PARTE NÃO SE JUSTIFICAR (SEGUNDA FALTA)
+
+Procedimento obrigatório antes de devolver:
+- Encerrar os prazos no sistema.
+- Cancelar a nomeação do perito.
+- Emitir a certidão de ausência de justificativa (segunda falta).
+- Devolver os autos ao juízo de origem.
+
+>>> MODELO DE CERTIDÃO – AUSÊNCIA DE JUSTIFICATIVA APÓS DILAÇÃO DE PRAZO (SEGUNDA FALTA) <<<
+
+CERTIFICO E DOU FÉ que a parte autora, pela segunda vez, deixou de comparecer à perícia designada e, embora lhe tenha sido concedido prazo para apresentar justificativa acerca de sua ausência, permaneceu inerte, razão pela qual devolvo os autos ao juízo de origem.
+
+LOCALIZADOR E PRAZO
+- Localizador: PRAZO PARTE enquanto aguarda a justificativa.
+- Prazo: 5 (cinco) dias para a parte apresentar justificativa.
+
+------------------------------------------------------------
+TERCEIRA FALTA – FLUXO COMPLETO (DEVOLUÇÃO IMEDIATA)
+
+Quando a parte autora falta pela terceira vez a perícia designada:
+- NÃO se concede novo prazo para justificativa.
+- NÃO se remarca a perícia.
+- DEVE-SE devolver o processo à vara de origem IMEDIATAMENTE.
+
+PROCEDIMENTO OBRIGATÓRIO ANTES DE DEVOLVER
+
+- Encerrar os prazos no sistema.
+- Cancelar a nomeação do perito.
+- Emitir a certidão de terceira falta.
+- Devolver os autos ao juízo de origem.
+
+>>> MODELO DE CERTIDÃO – TERCEIRA FALTA <<<
+
+CERTIFICO E DOU FÉ que a parte autora, pela terceira vez, deixou de comparecer ao exame pericial, razão pela qual devolvo os autos ao juízo de origem.
+
+OBSERVAÇÃO IMPORTANTE
+
+Não há tolerância para nova justificativa ou remarcação após a terceira falta.
+
+------------------------------------------------------------
+RESUMO COMPARATIVO
+
+| Critério | Primeira falta | Segunda falta | Terceira falta |
+| :--- | :--- | :--- | :--- |
+| Prazo para justificar | 5 dias | 5 dias | NÃO HÁ |
+| Justificativa é aceita? | SIM | SIM | NÃO |
+| Remarca perícia? | SIM (se justificar) | SIM (se justificar) | NÃO |
+| Devolve à vara? | SIM (se não justificar) | SIM (se não justificar) | SIM (sempre) |
+| Modelo de certidão | Ausência de justificativa após dilação de prazo | Ausência de justificativa após dilação de prazo (segunda vez) | Terceira falta |
 
 ------------------------------------------------------------
 6. FLUXOS OPERACIONAIS NO SISTEMA
@@ -240,7 +305,7 @@ DESIGNAÇÃO EM BLOCO:
 - Resultado: "Perícia designada com sucesso" para cada processo.
 
 ------------------------------------------------------------
-8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES
+8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES (ATUALIZADO)
 ------------------------------------------------------------
 
 ANTES DE MAIS NADA:
@@ -272,13 +337,12 @@ COMUNICAÇÃO EM HOME OFFICE:
 - Avisar chefia sobre horários alternativos.
 
 ------------------------------------------------------------
-CONFLITOS PENDENTES (AGUARDANDO DECISÃO)
+CONFLITOS PENDENTES
 ------------------------------------------------------------
 
-CONFLITO 1 - FALTAS:
-- Regra antiga (22/05/2026): 3 faltas para devolver.
-- Regra nova (item 9): 2 faltas para devolver.
-- AGUARDANDO DEFINIÇÃO.
+CONFLITO 1 - FALTAS: RESOLVIDO
+- Regra adotada: primeira e segunda faltas com prazo para justificar e remarcação; terceira falta com devolução imediata.
+- Conflito antigo (3 faltas x 2 faltas) foi superado pela nova sistemática.
 
 CONFLITO 2 - PRAZO DE INTIMAÇÃO EM REDISTRIBUIÇÃO DE TA:
 - Regra antiga (30/07/2026): 5 dias.
