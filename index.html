@@ -435,14 +435,12 @@
         let onlineInterval = null;
         let logoutTimer = null;
         let heartbeatInterval = null;
-        // Sem interação do usuário → força logout (10 min)
-        const LOGOUT_TIMEOUT = 10 * 60 * 1000;
-        // Online no servidor = últimos 2 min de heartbeat
-        const ONLINE_WINDOW = 2 * 60 * 1000;
+        const LOGOUT_TIMEOUT = 10 * 60 * 1000; // 10 min sem uso → logout
+        const ONLINE_WINDOW = 2 * 60 * 1000;   // 2 min sem heartbeat → some do online
         let ultimaInteracaoLocal = Date.now();
 
         // ============================================
-        // DATA/HORA — sempre América/São Paulo
+        // DATA/HORA — América/São Paulo
         // ============================================
         function formatarDataSP(valor) {
             if (!valor) return '';
@@ -450,8 +448,8 @@
             if (valor instanceof Date) {
                 d = valor;
             } else {
-                // Strings sem fuso (ex: "2026-08-08 15:30:00") → assume UTC do Supabase
                 const s = String(valor).trim();
+                // Timestamp sem fuso (comum no Supabase) → trata como UTC
                 if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
                     d = new Date(s.replace(' ', 'T') + 'Z');
                 } else {
@@ -461,16 +459,11 @@
             if (isNaN(d.getTime())) return String(valor);
             return d.toLocaleString('pt-BR', {
                 timeZone: 'America/Sao_Paulo',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
                 hour12: false
             });
         }
-
         function agoraSPString() {
             return formatarDataSP(new Date());
         }
@@ -485,31 +478,32 @@
             const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
 
             try {
-                const cacheBuster = '&_=' + Date.now();
-                let usuarios = [];
-                try {
-                    usuarios = await apiGet(
-                        'usuarios',
-                        'select=nome,ultima_atividade,ativo&order=nome.asc' + cacheBuster
-                    );
-                } catch (e1) {
-                    console.warn('Query com ultima_atividade falhou, tentando só nome/ativo:', e1);
-                    usuarios = await apiGet('usuarios', 'select=nome,ativo&order=nome.asc' + cacheBuster);
+                // Mesma query que funciona na API (sem cache-buster que às vezes atrapalha)
+                const usuarios = await apiGet(
+                    'usuarios',
+                    'select=nome,ultima_atividade,ativo&order=nome.asc'
+                );
+
+                if (!Array.isArray(usuarios)) {
+                    throw new Error('Resposta inválida do Supabase (não é lista)');
                 }
 
-                if (!Array.isArray(usuarios)) usuarios = [];
-
-                const agora = new Date();
+                const agora = Date.now();
 
                 const online = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
-                    const diff = agora - new Date(u.ultima_atividade);
+                    // Garante parse como UTC se vier sem Z
+                    let s = String(u.ultima_atividade).trim();
+                    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) s = s.replace(' ', 'T') + 'Z';
+                    const diff = agora - new Date(s).getTime();
                     return diff >= 0 && diff < ONLINE_WINDOW;
                 });
 
                 const recentes = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
-                    const diff = agora - new Date(u.ultima_atividade);
+                    let s = String(u.ultima_atividade).trim();
+                    if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) s = s.replace(' ', 'T') + 'Z';
+                    const diff = agora - new Date(s).getTime();
                     return diff >= ONLINE_WINDOW && diff < LOGOUT_TIMEOUT;
                 });
 
@@ -522,12 +516,8 @@
                         chatList.innerHTML = '<li class="empty-online">Ninguém online no momento.</li>';
                     } else {
                         let html = '';
-                        online.forEach(u => {
-                            html += `<li><span class="online-dot"></span> ${u.nome}</li>`;
-                        });
-                        recentes.forEach(u => {
-                            html += `<li><span class="online-dot busy-dot"></span> ${u.nome} (ausente)</li>`;
-                        });
+                        online.forEach(u => { html += `<li><span class="online-dot"></span> ${u.nome}</li>`; });
+                        recentes.forEach(u => { html += `<li><span class="online-dot busy-dot"></span> ${u.nome} (ausente)</li>`; });
                         chatList.innerHTML = html;
                     }
                 }
@@ -536,7 +526,7 @@
                     const currentVal = selectDest.value;
                     selectDest.innerHTML = '<option value="todos">Todos (público)</option>';
                     const nomesAdicionados = new Set();
-                    const adicionarOpcao = (nome, label) => {
+                    const add = (nome, label) => {
                         if (!nome || nome === usuarioLogado.nome || nomesAdicionados.has(nome)) return;
                         nomesAdicionados.add(nome);
                         const opt = document.createElement('option');
@@ -544,9 +534,9 @@
                         opt.textContent = label || nome;
                         selectDest.appendChild(opt);
                     };
-                    online.forEach(u => adicionarOpcao(u.nome, u.nome + ' (online)'));
-                    recentes.forEach(u => adicionarOpcao(u.nome, u.nome + ' (ausente)'));
-                    ativos.forEach(u => adicionarOpcao(u.nome, u.nome));
+                    online.forEach(u => add(u.nome, u.nome + ' (online)'));
+                    recentes.forEach(u => add(u.nome, u.nome + ' (ausente)'));
+                    ativos.forEach(u => add(u.nome, u.nome));
                     if ([...selectDest.options].some(o => o.value === currentVal)) {
                         selectDest.value = currentVal;
                     }
@@ -554,37 +544,33 @@
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
                 if (chatList) {
-                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar online. Verifique ultima_atividade e permissões no Supabase.</li>';
+                    chatList.innerHTML = '<li class="empty-online">Erro: ' + (err.message || err) + '</li>';
                 }
                 if (onlineNumber) onlineNumber.textContent = '?';
             }
         }
 
         // ============================================
-        // HEARTBEAT (com retry)
+        // HEARTBEAT
         // ============================================
         async function heartbeat() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (!usuario.id) return;
             try {
                 const agoraIso = new Date().toISOString();
-                await apiPatch('usuarios', usuario.id, {
-                    ultima_atividade: agoraIso
-                });
+                await apiPatch('usuarios', usuario.id, { ultima_atividade: agoraIso });
                 usuario.ultima_atividade = agoraIso;
                 localStorage.setItem('usuario', JSON.stringify(usuario));
             } catch (e) {
-                console.warn('Heartbeat falhou, tentando novamente em 5s...');
+                console.warn('Heartbeat falhou, retry em 5s...', e);
                 setTimeout(heartbeat, 5000);
             }
         }
 
         // ============================================
-        // VERIFICAR INATIVIDADE (interação real)
+        // INATIVIDADE (interação real do usuário)
         // ============================================
-        function registrarInteracao() {
-            ultimaInteracaoLocal = Date.now();
-        }
+        function registrarInteracao() { ultimaInteracaoLocal = Date.now(); }
         ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'].forEach(evt => {
             document.addEventListener(evt, registrarInteracao, { passive: true });
         });
@@ -1002,14 +988,13 @@
                     const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
 
-                    // Novas mensagens de OUTRAS pessoas (ignora as que eu enviei)
+                    // Mensagens que chegaram depois da última já contabilizada
                     const novasMsgs = todas.filter(m =>
                         new Date(m.data_hora).getTime() > ultimaMensagemLida &&
                         m.remetente !== nome
                     );
 
                     if (novasMsgs.length > 0 && !abaAtiva) {
-                        // Só alerta quando o usuário NÃO está com a aba de chat aberta.
                         if (badge) {
                             badge.style.display = 'inline-block';
                             badge.textContent = novasMsgs.length;
@@ -1046,7 +1031,6 @@
                     await apiPost('mensagens_privadas', { remetente, destinatario, mensagem });
                 }
                 input.value = '';
-                // Evita som na própria mensagem se o poll correr antes do reload
                 ultimaMensagemLida = Date.now() + 2000;
                 await carregarChatInterno();
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
