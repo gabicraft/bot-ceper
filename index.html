@@ -442,59 +442,97 @@
         // ONLINE USERS
         // ============================================
         async function carregarOnlineUsers() {
+            const chatList = document.getElementById('onlineUsersList');
+            const selectDest = document.getElementById('chatDestinatario');
+            const onlineNumber = document.getElementById('onlineNumber');
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
+
             try {
-                // Adiciona cache buster para evitar respostas em cache
+                // Cache buster para evitar resposta em cache
                 const cacheBuster = '&_=' + Date.now();
-                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc' + cacheBuster);
+                let usuarios = [];
+                try {
+                    usuarios = await apiGet(
+                        'usuarios',
+                        'select=nome,ultima_atividade,ativo&order=nome.asc' + cacheBuster
+                    );
+                } catch (e1) {
+                    // Fallback: se a coluna ultima_atividade não existir ou RLS bloquear
+                    console.warn('Query com ultima_atividade falhou, tentando só nome/ativo:', e1);
+                    usuarios = await apiGet('usuarios', 'select=nome,ativo&order=nome.asc' + cacheBuster);
+                }
+
+                if (!Array.isArray(usuarios)) usuarios = [];
+
                 const agora = new Date();
                 const doisMinutos = 2 * 60 * 1000;
+
+                // Online = atividade nos últimos 2 min
                 const online = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
                     const diff = agora - new Date(u.ultima_atividade);
-                    return diff < doisMinutos;
-                });
-                const busy = usuarios.filter(u => {
-                    if (!u.ultima_atividade) return false;
-                    const diff = agora - new Date(u.ultima_atividade);
-                    return diff >= BUSY_TIMEOUT && diff < LOGOUT_TIMEOUT;
+                    return diff >= 0 && diff < doisMinutos;
                 });
 
-                const onlineNumber = document.getElementById('onlineNumber');
+                // Ocupado / recente = entre 2 min e 30 min (antes havia um buraco de 2–10 min)
+                const recentes = usuarios.filter(u => {
+                    if (!u.ultima_atividade) return false;
+                    const diff = agora - new Date(u.ultima_atividade);
+                    return diff >= doisMinutos && diff < LOGOUT_TIMEOUT;
+                });
+
+                // Ativos no sistema (para o select de mensagem privada)
+                const ativos = usuarios.filter(u => u.ativo !== false);
+
                 if (onlineNumber) {
                     onlineNumber.textContent = online.length;
                 }
 
-                const chatList = document.getElementById('onlineUsersList');
                 if (chatList) {
-                    if (online.length === 0 && busy.length === 0) {
+                    if (online.length === 0 && recentes.length === 0) {
                         chatList.innerHTML = '<li class="empty-online">Ninguém online no momento.</li>';
                     } else {
                         let html = '';
-                        online.forEach(u => { html += `<li><span class="online-dot"></span> ${u.nome}</li>`; });
-                        busy.forEach(u => { html += `<li><span class="online-dot busy-dot"></span> ${u.nome} (ocupado)</li>`; });
+                        online.forEach(u => {
+                            html += `<li><span class="online-dot"></span> ${u.nome}</li>`;
+                        });
+                        recentes.forEach(u => {
+                            html += `<li><span class="online-dot busy-dot"></span> ${u.nome} (ausente)</li>`;
+                        });
                         chatList.innerHTML = html;
                     }
                 }
 
-                const selectDest = document.getElementById('chatDestinatario');
+                // Select de destinatário: online + recentes + demais ativos
+                // (assim dá para mandar mensagem privada mesmo se a pessoa não estiver "verde")
                 if (selectDest) {
                     const currentVal = selectDest.value;
                     selectDest.innerHTML = '<option value="todos">Todos (público)</option>';
-                    const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
-                    online.forEach(u => {
-                        if (u.nome !== usuarioLogado.nome) {
-                            const opt = document.createElement('option');
-                            opt.value = u.nome;
-                            opt.textContent = u.nome;
-                            selectDest.appendChild(opt);
-                        }
-                    });
+
+                    const nomesAdicionados = new Set();
+                    const adicionarOpcao = (nome, label) => {
+                        if (!nome || nome === usuarioLogado.nome || nomesAdicionados.has(nome)) return;
+                        nomesAdicionados.add(nome);
+                        const opt = document.createElement('option');
+                        opt.value = nome;
+                        opt.textContent = label || nome;
+                        selectDest.appendChild(opt);
+                    };
+
+                    online.forEach(u => adicionarOpcao(u.nome, u.nome + ' (online)'));
+                    recentes.forEach(u => adicionarOpcao(u.nome, u.nome + ' (ausente)'));
+                    ativos.forEach(u => adicionarOpcao(u.nome, u.nome));
+
                     if ([...selectDest.options].some(o => o.value === currentVal)) {
                         selectDest.value = currentVal;
                     }
                 }
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
+                if (chatList) {
+                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar online. Verifique a coluna ultima_atividade e as permissões no Supabase.</li>';
+                }
+                if (onlineNumber) onlineNumber.textContent = '?';
             }
         }
 
