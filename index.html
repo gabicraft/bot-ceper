@@ -1004,7 +1004,7 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
 
         // ============================================
-        // FUNÇÕES DE API
+        // FUNÇÕES DE API (CORRIGIDAS)
         // ============================================
         const headers = {
             'Content-Type': 'application/json',
@@ -1019,6 +1019,9 @@
             return res.json();
         }
 
+        // ============================================
+        // API POST CORRIGIDA – TRATA RESPOSTA VAZIA
+        // ============================================
         async function apiPost(table, data) {
             const res = await fetch(SUPABASE_URL + table, {
                 method: 'POST',
@@ -1026,7 +1029,8 @@
                 body: JSON.stringify(data)
             });
             if (!res.ok) throw new Error(await res.text());
-            return res.json();
+            const text = await res.text();
+            return text ? JSON.parse(text) : {};
         }
 
         // ============================================
@@ -1039,7 +1043,6 @@
                 body: JSON.stringify(data)
             });
             if (!res.ok) throw new Error(await res.text());
-            // Verifica se a resposta tem conteúdo antes de parsear
             const text = await res.text();
             return text ? JSON.parse(text) : {};
         }
