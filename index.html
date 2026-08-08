@@ -261,7 +261,7 @@
             background: rgba(0, 0, 0, 0.25);
             border-radius: 16px;
             padding: 16px 18px;
-            max-height: 400px;
+            max-height: 480px;
             overflow-y: auto;
             margin-bottom: 16px;
             border: 1px solid var(--border-color);
@@ -276,42 +276,104 @@
         .message {
             display: flex;
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             animation: fadeUp 0.25s ease;
         }
         .message.user {
             flex-direction: row-reverse;
         }
         .message .avatar {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 16px;
+            font-size: 18px;
         }
         .message.user .avatar {
             background: var(--primary-light);
         }
         .message .bubble {
             background: rgba(255, 255, 255, 0.06);
-            padding: 10px 16px;
+            padding: 14px 20px;
             border-radius: 16px;
             max-width: 82%;
-            line-height: 1.6;
-            font-size: 14px;
+            line-height: 1.8;
+            font-size: 16px;
             border: 1px solid var(--border-color);
+            color: #f0f4fa;
+            word-wrap: break-word;
         }
         .message.user .bubble {
             background: var(--primary-light);
             border-color: var(--primary-light);
         }
-        .message .bubble strong {
+
+        /* Estilos para elementos dentro da bolha */
+        .message .bubble h1 {
+            font-size: 22px;
             color: var(--secondary);
+            margin: 12px 0 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
         }
+        .message .bubble h2 {
+            font-size: 19px;
+            color: #e8d5a3;
+            margin: 10px 0 6px 0;
+        }
+        .message .bubble h3 {
+            font-size: 17px;
+            color: #c9b8a0;
+            margin: 8px 0 4px 0;
+        }
+        .message .bubble strong {
+            color: #ffd966;
+            font-weight: 600;
+        }
+        .message .bubble em {
+            color: #b0d4ff;
+            font-style: italic;
+        }
+        .message .bubble ul {
+            margin: 6px 0 6px 20px;
+            list-style-type: disc;
+            color: #d0d8e0;
+        }
+        .message .bubble li {
+            margin-bottom: 4px;
+        }
+        .message .bubble p {
+            margin-bottom: 8px;
+        }
+        .message .bubble pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+            color: #b0c4de;
+            border-left: 3px solid var(--secondary);
+            margin: 8px 0;
+        }
+        .message .bubble code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #b0d4ff;
+        }
+        .message .bubble blockquote {
+            border-left: 3px solid var(--secondary);
+            padding-left: 14px;
+            margin: 8px 0;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
         .input-area {
             display: flex;
             gap: 10px;
@@ -330,8 +392,8 @@
             background: transparent;
             border: none;
             color: var(--text-light);
-            font-size: 14px;
-            padding: 10px 0;
+            font-size: 15px;
+            padding: 12px 0;
             outline: none;
         }
         .input-area input::placeholder {
@@ -343,7 +405,7 @@
             padding: 10px 24px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 15px;
             color: #1a1a1a;
             cursor: pointer;
             transition: var(--transition);
@@ -357,6 +419,7 @@
             cursor: not-allowed;
             transform: none;
         }
+
         /* ========================================
            AVISOS
            ======================================== */
@@ -406,6 +469,7 @@
             background: var(--danger);
             color: #fff;
         }
+
         .form-aviso {
             background: rgba(255, 255, 255, 0.03);
             padding: 16px;
@@ -450,6 +514,7 @@
         .form-aviso .btn-submit:hover {
             background: #d4a820;
         }
+
         /* ========================================
            PROCEDIMENTOS (BASE)
            ======================================== */
@@ -496,6 +561,7 @@
             background: var(--danger);
             color: #fff;
         }
+
         .form-proc {
             background: rgba(255, 255, 255, 0.03);
             padding: 16px;
@@ -545,6 +611,7 @@
         .form-proc .btn-submit:hover {
             background: #d4a820;
         }
+
         /* ========================================
            RESPONSIVO
            ======================================== */
@@ -559,11 +626,10 @@
             .input-area { flex-wrap: wrap; padding: 10px; border-radius: 24px; }
             .input-area input { width: 100%; padding: 8px 0; }
             .input-area button { width: 100%; justify-content: center; }
-            .message .bubble { max-width: 95%; font-size: 13px; }
+            .message .bubble { max-width: 95%; font-size: 14px; }
         }
+
         .text-muted { color: var(--text-muted); }
-        .mt-12 { margin-top: 12px; }
-        .mb-12 { margin-bottom: 12px; }
         .empty-state { text-align: center; color: var(--text-muted); padding: 30px 0; font-size: 14px; }
         .badge { background: rgba(255, 215, 0, 0.15); color: var(--secondary); padding: 2px 12px; border-radius: 40px; font-size: 11px; font-weight: 500; }
         .hidden { display: none !important; }
@@ -868,16 +934,42 @@ REGRAS:
             }
         }
 
+        // ============================================
+        // RENDERIZADOR DE MARKDOWN + addMessage
+        // ============================================
         function addMessage(role, text) {
             const chat = document.getElementById('chatArea');
             const div = document.createElement('div');
             div.className = `message ${role}`;
+
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
             avatar.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
-            bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+            let html = text
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+                .replace(/```([\s\S]+?)```/g, '<pre><code>$1</code></pre>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            if (!html.startsWith('<')) {
+                html = `<p>${html}</p>`;
+            }
+
+            html = html.replace(/<li>/g, '<ul><li>').replace(/<\/li>/g, '</li></ul>');
+            html = html.replace(/<ul><ul>/g, '<ul>').replace(/<\/ul><\/ul>/g, '</ul>');
+            html = html.replace(/<p><ul>/g, '<ul>').replace(/<\/ul><\/p>/g, '</ul>');
+
+            bubble.innerHTML = html;
             div.appendChild(avatar);
             div.appendChild(bubble);
             chat.appendChild(div);
