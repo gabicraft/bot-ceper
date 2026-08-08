@@ -1029,6 +1029,9 @@
             return res.json();
         }
 
+        // ============================================
+        // API PATCH CORRIGIDA – TRATA RESPOSTA VAZIA
+        // ============================================
         async function apiPatch(table, id, data) {
             const res = await fetch(SUPABASE_URL + table + '?id=eq.' + id, {
                 method: 'PATCH',
@@ -1036,7 +1039,9 @@
                 body: JSON.stringify(data)
             });
             if (!res.ok) throw new Error(await res.text());
-            return res.json();
+            // Verifica se a resposta tem conteúdo antes de parsear
+            const text = await res.text();
+            return text ? JSON.parse(text) : {};
         }
 
         async function apiDelete(table, id) {
