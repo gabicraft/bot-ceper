@@ -203,7 +203,7 @@
             <button class="active" data-tab="tabChat"><i class="fas fa-comments"></i> Chat IA</button>
             <button data-tab="tabAvisos"><i class="fas fa-bullhorn"></i> Avisos</button>
             <button data-tab="tabBase"><i class="fas fa-database"></i> Base</button>
-            <button data-tab="tabChatInterno"><i class="fas fa-users"></i> Chat Equipe</button>
+            <button data-tab="tabChatInterno"><i class="fas fa-users"></i> Chat Equipe<span class="badge-msg"></span></button>
             <button data-tab="tabUsuarios" id="tabUsuariosBtn" class="hidden-tab"><i class="fas fa-user-cog"></i> Usuários</button>
         </div>
 
@@ -339,12 +339,7 @@
 
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
-            const res = await fetch(url, {
-                headers: {
-                    ...headers,
-                    'Cache-Control': 'no-cache'
-                }
-            });
+            const res = await fetch(url, { headers });
             if (!res.ok) throw new Error(await res.text());
             return res.json();
         }
@@ -389,14 +384,21 @@
             if (!audioCtx) {
                 try {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) { /* silencioso */ }
+                } catch (e) { console.warn('Falha ao criar AudioContext:', e); }
             }
             if (audioCtx && audioCtx.state === 'suspended') {
                 audioCtx.resume().catch(() => {});
             }
         }
 
-        document.addEventListener('click', initAudio, { once: true });
+        // Reforça o "desbloqueio" do áudio em QUALQUER interação do usuário
+        // (não apenas um único clique). Isso é necessário porque navegadores
+        // como Safari/iOS podem suspender automaticamente o AudioContext depois
+        // de um tempo, e um AudioContext suspenso não pode ser retomado de
+        // dentro de um setInterval (não conta como "gesto do usuário").
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, initAudio);
+        });
 
         function playNotificationSound() {
             let ctx = audioCtx;
@@ -404,13 +406,10 @@
                 try {
                     ctx = new (window.AudioContext || window.webkitAudioContext)();
                     audioCtx = ctx;
-                } catch (e) { return; }
+                } catch (e) { console.warn('Não foi possível criar o AudioContext para o som:', e); return; }
             }
-            // Se o contexto estiver suspenso, tenta retomar.
-            // Se ainda estiver suspenso, não toca.
             if (ctx.state === 'suspended') {
                 ctx.resume().catch(() => {});
-                if (ctx.state === 'suspended') return;
             }
             try {
                 const oscillator = ctx.createOscillator();
@@ -423,7 +422,7 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
                 oscillator.start(ctx.currentTime);
                 oscillator.stop(ctx.currentTime + 0.25);
-            } catch (e) { /* silencioso */ }
+            } catch (e) { console.warn('Erro ao tocar som de notificação:', e); }
         }
 
         // ============================================
@@ -444,7 +443,9 @@
         // ============================================
         async function carregarOnlineUsers() {
             try {
-                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc');
+                // Adiciona cache buster para evitar respostas em cache
+                const cacheBuster = '&_=' + Date.now();
+                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc' + cacheBuster);
                 const agora = new Date();
                 const doisMinutos = 2 * 60 * 1000;
                 const online = usuarios.filter(u => {
@@ -494,10 +495,6 @@
                 }
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
-                const chatList = document.getElementById('onlineUsersList');
-                if (chatList) {
-                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar. Tente recarregar a página.</li>';
-                }
             }
         }
 
@@ -648,7 +645,7 @@
             startOnlinePolling();
 
             if (heartbeatInterval) clearInterval(heartbeatInterval);
-            heartbeatInterval = setInterval(heartbeat, 15000);
+            heartbeatInterval = setInterval(heartbeat, 15000); // a cada 15s
 
             logoutTimer = setInterval(verificarInatividade, 30000);
         }
@@ -875,24 +872,13 @@
                     return;
                 }
 
-                const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
-                if (badge) {
-                    const novas = todas.filter(m => {
-                        const msgTime = new Date(m.data_hora).getTime();
-                        return msgTime > ultimaMensagemLida;
-                    }).length;
-                    if (novas > 0) {
-                        badge.style.display = 'inline-block';
-                        badge.textContent = novas;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-
                 if (todas.length > 0) {
                     const ultima = todas[todas.length - 1];
                     ultimaMensagemLida = new Date(ultima.data_hora).getTime();
                 }
+
+                const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
+                if (badge) badge.style.display = 'none';
 
                 container.innerHTML = todas.map(m => {
                     const isPrivado = m.tipo === 'privado';
@@ -942,23 +928,27 @@
                     }
                     todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
 
+                    const chatTab = document.getElementById('tabChatInterno');
+                    const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
-                    if (badge) {
-                        const novas = todas.filter(m => {
-                            const msgTime = new Date(m.data_hora).getTime();
-                            return msgTime > ultimaMensagemLida;
-                        }).length;
-                        if (novas > 0) {
+
+                    // Mensagens que chegaram depois da última já contabilizada
+                    const novasMsgs = todas.filter(m => new Date(m.data_hora).getTime() > ultimaMensagemLida);
+
+                    if (novasMsgs.length > 0 && !abaAtiva) {
+                        // Só alerta quando o usuário NÃO está com a aba de chat aberta.
+                        // Avança o marcador imediatamente para não tocar o som de novo
+                        // a cada polling (a cada 5s) para a mesma mensagem.
+                        if (badge) {
                             badge.style.display = 'inline-block';
-                            badge.textContent = novas;
-                            playNotificationSound();
-                        } else {
-                            badge.style.display = 'none';
+                            badge.textContent = novasMsgs.length;
                         }
+                        playNotificationSound();
+                        const maisRecente = novasMsgs[novasMsgs.length - 1];
+                        ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
                     }
 
-                    const chatTab = document.getElementById('tabChatInterno');
-                    if (chatTab && chatTab.classList.contains('active')) {
+                    if (abaAtiva) {
                         await carregarChatInterno();
                     }
                 } catch (err) {
