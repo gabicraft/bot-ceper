@@ -5,182 +5,504 @@ BASE DE CONHECIMENTO - CENTRAL DE PERÍCIAS (CEPER)
 Última atualização: 08/08/2026
 
 ------------------------------------------------------------
-ÍNDICE
+ÍNDICE GERAL
 ------------------------------------------------------------
 
-1. MODELOS DE CERTIDÃO (ITENS 1 A 19 - REVISADO)
-2. REGRAS SOBRE LOCALIZADORES (ATUALIZADO)
+1. MODELOS DE CERTIDÃO E ATOS ORDINATÓRIOS (ITENS 1 A 19)
+2. REGRAS SOBRE LOCALIZADORES (TAGs)
 3. GESTÃO DE PERITOS
 4. TRATAMENTO DE PROCESSOS ESPECIAIS
-5. REGRAS DE FALTAS DO PERICIADO (FLUXO COMPLETO - ATUALIZADO)
+5. REGRAS DE FALTAS DO PERICIADO - FLUXO COMPLETO
 6. FLUXOS OPERACIONAIS NO SISTEMA
 7. MANUAL DE MARCAÇÃO DE PERÍCIAS (E-PROC V.9.17)
-8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES (ATUALIZADO)
+8. ORIENTAÇÕES GERAIS
+9. ANOTAÇÕES ESPARSAS E COMPLEMENTARES
+10. CONFLITOS PENDENTES
 
 ------------------------------------------------------------
-1. MODELOS DE CERTIDÃO - PROCEDIMENTOS (ITENS 1 A 19)
+1. MODELOS DE CERTIDÃO E ATOS ORDINATÓRIOS (ITENS 1 A 19)
 ------------------------------------------------------------
 
-ITEM 1 - Sem indicação de especialidade no despacho:
-"Certifico e dou fé que não localizei no despacho/decisão do evento XXX indicação de especialidade médica para marcação de exame pericial, conforme Art. 3, VI da Portaria SEI Dirfo nº 1, de 1/10/2024, razão pela qual devolvo os autos ao juízo de origem."
+ITEM 1 - SEM INDICAÇÃO DE ESPECIALIDADE NO DESPACHO
 
-ITEM 2 - Processo veio por engano (sem determinação de perícia):
-"Certifico e dou fé que não localizei no despacho/decisão do(s) evento(s) XXX determinação para marcação de exame pericial, razão pela qual devolvo os autos ao juízo de origem."
+Quando não houver indicação da especialidade no despacho, certificar e devolver para a vara.
 
-ITEM 3 - Especialidade única indicada, mas não temos perito:
-"Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ, indicada no despacho/decisão do evento XXX, e, diante da ausência de indicação de especialidade alternativa para realização do exame pericial no referido despacho/decisão, devolvo os autos ao juízo de origem."
+>>> MODELO DE CERTIDÃO <<<
 
-ITEM 4 - Temos perito da especialidade em outra localidade:
-"Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ na subseção judiciária onde reside a parte autora, razão pela qual os autos foram redistribuídos para o local mais próximo onde dispomos de perito na referida especialidade."
+Certifico e dou fé que não localizei no despacho/decisão do evento XXX indicação de especialidade médica para marcação de exame pericial, conforme Art. 3, VI da Portaria SEI Dirfo nº 1, de 1/10/2024, razão pela qual devolvo os autos ao juízo de origem.
 
-ITEM 5 - Reclamação sobre perícia marcada em outra localidade:
-"Diante da manifestação do evento XYZ, informo que não dispomos de perito na especialidade requerida pela parte autora na subseção de ABC, razão pela qual o exame foi marcado na especialidade requerida, mas em outra subseção. Caso a parte autora prefira que o exame seja realizado em outra especialidade, deve se manifestar no prazo de 5 (cinco) dias."
+------------------------------------------------------------
+ITEM 2 - PROCESSO VEIO POR ENGANO (SEM DETERMINAÇÃO DE PERÍCIA)
 
-ITEM 6 - Despacho com especialidade inexistente + alternativa possível (processos manuais):
-"Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ, indicada no despacho/decisão do evento XXX, razão pela qual o exame foi marcado na especialidade ABCD."
+Quando não houver determinação para marcação de perícia (processo veio por engano), certificar e devolver para a vara.
 
-ITEM 7 - Especialidade inexistente (que nunca teremos) em TA ou TAM:
-"Certifico e dou fé que não dispomos de perito na especialidade XYZ, razão pela qual devolvo os autos ao juízo de origem."
+>>> MODELO DE CERTIDÃO <<<
 
-ITEM 8 - Advogado indica nova especialidade após devolução:
-"Diante da manifestação do evento XXX, na qual a parte autora indica nova especialidade para realização do exame pericial, devolvo os autos ao juízo de origem, para apreciação."
+Certifico e dou fé que não localizei no despacho/decisão do(s) evento(s) XXX determinação para marcação de exame pericial, razão pela qual devolvo os autos ao juízo de origem.
 
+------------------------------------------------------------
+ITEM 3 - ESPECIALIDADE ÚNICA INDICADA, MAS NÃO TEMOS PERITO
+
+Quando houver indicação de apenas uma especialidade e não tivermos perito nessa especialidade, certificar e devolver para a vara.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ, indicada no despacho/decisão do evento XXX, e, diante da ausência de indicação de especialidade alternativa para realização do exame pericial no referido despacho/decisão, devolvo os autos ao juízo de origem.
+
+------------------------------------------------------------
+ITEM 4 - TEMOS PERITO DA ESPECIALIDADE EM OUTRA LOCALIDADE
+
+Quando não tivermos perito da especialidade no local onde o processo foi ajuizado, mas tivermos em outra.
+
+REGRA PARA TAM OU MANUAL:
+- Manter na mesma localidade e marcar na agenda compartilhada.
+
+REGRA PARA TA:
+- Certificar e redistribuir para o local onde temos aquela especialidade.
+- Intimar a parte da certidão com prazo de 3 (três) dias.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ na subseção judiciária onde reside a parte autora, razão pela qual os autos foram redistribuídos para o local mais próximo onde dispomos de perito na referida especialidade.
+
+------------------------------------------------------------
+ITEM 5 - RECLAMAÇÃO SOBRE PERÍCIA MARCADA EM OUTRA LOCALIDADE
+
+Quando houver reclamação porque a perícia foi marcada em outra instalação que não aquela onde reside a parte autora.
+
+PROCEDIMENTO:
+- Informar que não dispomos de perito na especialidade requerida pela parte autora na subseção onde reside.
+- Explicar que o exame foi marcado na especialidade requerida, mas em outra subseção.
+- Dar prazo de 5 (cinco) dias para a parte se manifestar se prefere que o exame seja realizado em outra especialidade.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XYZ, informo que não dispomos de perito na especialidade requerida pela parte autora na subseção de ABC, razão pela qual o exame foi marcado na especialidade requerida, mas em outra subseção. Caso a parte autora prefira que o exame seja realizado em outra especialidade, deve se manifestar no prazo de 5 (cinco) dias.
+
+------------------------------------------------------------
+ITEM 6 - DESPACHO COM ESPECIALIDADE INEXISTENTE + ALTERNATIVA POSSÍVEL
+
+Quando no despacho/decisão (processos manuais) vier indicação de especialidade inexistente, mas também for indicada alternativa possível.
+
+PROCEDIMENTO:
+- Certificar.
+- Marcar na especialidade possível.
+- Intimar com prazo de 3 (três) dias.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que não dispomos, no momento, de perito na especialidade XYZ, indicada no despacho/decisão do evento XXX, razão pela qual o exame foi marcado na especialidade ABCD.
+
+------------------------------------------------------------
+ITEM 7 - ESPECIALIDADE INEXISTENTE (QUE NUNCA TEREMOS) EM TA OU TAM
+
+Nos processos de TA ou TAM, quando houver requerimento de marcação de exame em especialidade inexistente (especialidade que não temos nem nunca teremos).
+
+PROCEDIMENTO:
+- Certificar que não dispomos de perito nessa especialidade.
+- Devolver ao juízo de origem.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que não dispomos de perito na especialidade XYZ, razão pela qual devolvo os autos ao juízo de origem.
+
+------------------------------------------------------------
+ITEM 8 - ADVOGADO INDICA NOVA ESPECIALIDADE APÓS DEVOLUÇÃO
+
+Quando, na hipótese anterior, o advogado indicar nova especialidade, diferente daquelas que já constam dos autos.
+
+PROCEDIMENTO:
+- Certificar que a parte indica nova especialidade.
+- Devolver à vara para apreciação (não cabe à CEPER decidir sobre nova especialidade).
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, na qual a parte autora indica nova especialidade para realização do exame pericial, devolvo os autos ao juízo de origem, para apreciação.
+
+------------------------------------------------------------
 ITEM 9 - (REMOVIDO - Conflito resolvido com a nova seção 5)
 
-ITEM 10 - Advogado não quer a realização da perícia:
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
+------------------------------------------------------------
+ITEM 10 - ADVOGADO NÃO QUER A REALIZAÇÃO DA PERÍCIA
 
-ITEM 11 - Advogado pede perícia em especialidade diversa da determinada:
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
+Quando o advogado manifesta que não deseja a realização da perícia.
 
-ITEM 12 - Pedido de tutela antecipada (sem cancelar a perícia):
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
-OBS: A perícia deve ser MANTIDA, não cancelada. Colocar lembrete vermelho: "ATENÇÃO! A perícia neste processo está marcada para XX/YY, conforme evento XYZ. Se cancelada/desnecessária, favor avisar a CEPER. Se mantida, devolver os autos à CEPER."
+PROCEDIMENTO:
+- Certificar a manifestação.
+- Devolver para a vara.
 
-ITEM 13 - Pedido de perícia por videoconferência:
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação. Informo que não dispomos de profissional que possa realizar o exame pericial nas condições pretendidas pela parte autora, bem como que existe perícia marcada nestes autos, conforme evento XXX, a qual eventualmente deverá ser cancelada, a depender da decisão do juízo."
+>>> MODELO DE CERTIDÃO <<<
 
-ITEM 14 - Renúncia de mandato do advogado (cancelar a perícia):
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
-
-ITEM 15 - Substabelecimento:
-Seguir normalmente com o processo. Sem necessidade de certidão.
-
-ITEM 16 - Advogado pede mudança de perito (alegando falta de especialidade):
-"Certifico e dou fé que o(a) perito(a) nomeado(a) nos autos também atua na especialidade de XYZ."
-OBS: Intimar a parte com prazo de 3 dias.
-
-ITEM 17 - Recurso em geral (embargos, agravo, etc.) - sem cancelar a perícia:
-"Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação."
-OBS: Se perícia já ocorreu e falta laudo, falar com coordenação/direção.
-
-ITEM 18 - Documentos escolares solicitados por peritos:
-"Certifico que, considerando a petição do(a) perito(a) do juízo, a parte autora deve ser intimada para fornecer a documentação solicitada no prazo de 15 (quinze) dias."
-OBS: Intimar parte da petição e da certidão (usar "+"). Prazo: 15 dias. Colocar em prazo para parte. Se responder → JULIANA. Se não responder → JULIANA.
-
-ITEM 19 - Perícia multidisciplinar:
-"Diante do pedido de perícia multidisciplinar formulado pela parte autora no evento XXX, não havendo procedimento específico para tanto nesta Central de Perícias, devolvo os autos ao juízo de origem, para apreciação."
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação.
 
 ------------------------------------------------------------
-2. REGRAS SOBRE LOCALIZADORES (TAGs) - ATUALIZADO
+ITEM 11 - ADVOGADO PEDE PERÍCIA EM ESPECIALIDADE DIVERSA DA DETERMINADA
+
+Quando o advogado deseja perícia médica em especialidade diversa da(s) determinada(s) no despacho/decisão.
+
+PROCEDIMENTO:
+- Certificar a manifestação.
+- Devolver para a vara.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação.
+
+------------------------------------------------------------
+ITEM 12 - PEDIDO DE TUTELA ANTECIPADA (SEM CANCELAR A PERÍCIA)
+
+Quando o advogado pede que a tutela antecipada seja apreciada antes da realização da perícia.
+
+PROCEDIMENTO:
+- Informar o número do processo à coordenação ou direção para controle.
+- Certificar e devolver para a vara.
+- NÃO CANCELAR A PERÍCIA.
+- Colocar um LEMBRETE VERMELHO no processo.
+- Alertar a vara que a perícia está mantida. Caso seja cancelada, devem nos avisar para liberarmos o horário.
+- Depois de decidida a questão liminar, se mantida a perícia, devem nos devolver o processo para podermos pagar o perito.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação.
+
+>>> MODELO DE LEMBRETE <<<
+
+ATENÇÃO! A perícia neste processo está marcada para XX/YY, conforme evento XYZ. Se cancelada/desnecessária, favor avisar a CEPER. Se mantida, devolver os autos à CEPER.
+
+------------------------------------------------------------
+ITEM 13 - PEDIDO DE PERÍCIA POR VIDEOCONFERÊNCIA
+
+Quando a parte pedir que a perícia seja realizada por videoconferência.
+
+PROCEDIMENTO:
+a) Verificar com a coordenação se existe a possibilidade de a perícia ser realizada na modalidade domiciliar.
+b) Se não for possível, informar na certidão.
+c) Se já existir perícia marcada, informar na certidão e comunicar o número do processo à coordenação/direção para controle.
+
+OBSERVAÇÃO: Caso tenhamos perito que aceite fazer perícia domiciliar, ANTES DE DEVOLVER O PROCESSO, a direção/coordenação fará contato com a vara e explicará a situação. Conforme seja combinado com a vara, informaremos, ou não, nos autos.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação. Informo que não dispomos de profissional que possa realizar o exame pericial nas condições pretendidas pela parte autora, bem como que existe perícia marcada nestes autos, conforme evento XXX, a qual eventualmente deverá ser cancelada, a depender da decisão do juízo.
+
+------------------------------------------------------------
+ITEM 14 - RENÚNCIA DE MANDATO DO ADVOGADO (CANCELAR A PERÍCIA)
+
+Quando o advogado renuncia ao mandato.
+
+PROCEDIMENTO:
+- CANCELAR A PERÍCIA.
+- Certificar.
+- Devolver à vara.
+
+OBSERVAÇÃO: Dependendo da situação, o eventual novo advogado pode querer alterar a especialidade, apresentar quesitos, etc. Por isso, cancela-se a perícia.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação.
+
+------------------------------------------------------------
+ITEM 15 - SUBSTABELECIMENTO
+
+Quando o advogado juntar substabelecimento.
+
+PROCEDIMENTO:
+- Seguir normalmente com o processo.
+- Sem necessidade de certidão.
+- O próprio advogado pode incluir o substabelecido nos autos, sem nossa intervenção.
+
+------------------------------------------------------------
+ITEM 16 - ADVOGADO PEDE MUDANÇA DE PERITO (ALEGANDO FALTA DE ESPECIALIDADE)
+
+Quando o advogado pede para mudar o perito, por entender que aquele que foi nomeado não é especialista na área.
+
+PROCEDIMENTO:
+- Verificar se o perito nomeado atua naquela especialidade (consultar cadastro).
+- Se for o caso, certificar que o perito atua na especialidade.
+- INTIMAR a parte com prazo de 3 (três) dias.
+- Seguir normalmente com o processo.
+- Caso haja nova manifestação, avisar a coordenação ou a direção.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que o(a) perito(a) nomeado(a) nos autos também atua na especialidade de XYZ.
+
+------------------------------------------------------------
+ITEM 17 - RECURSO EM GERAL (EMBARGOS, AGRAVO, ETC.) - SEM CANCELAR A PERÍCIA
+
+Quando o advogado apresentar embargos de declaração, agravo de instrumento ou outro recurso de qualquer tipo ou nome.
+
+PROCEDIMENTO:
+- Certificar.
+- Devolver ao juízo de origem.
+- NÃO CANCELAR A PERÍCIA.
+
+OBSERVAÇÃO: Caso a perícia já tenha ocorrido e falte apenas a juntada do laudo, falar com a coordenação/direção.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante da manifestação do evento XXX, devolvo os autos ao juízo de origem, para apreciação.
+
+------------------------------------------------------------
+ITEM 18 - DOCUMENTOS ESCOLARES SOLICITADOS POR PERITOS
+
+Quando o perito pede documentos escolares para ajudar na elaboração do laudo.
+
+PROCEDIMENTO:
+- Emitir certidão determinando a intimação da parte para apresentar os documentos.
+- Intimar a parte da petição do perito e da certidão (usar o recurso "+" para juntar ambas).
+- Colocar o processo em prazo para parte.
+- Prazo para entrega: 15 (quinze) dias.
+- Se a parte responder: colocar em JULIANA.
+- Se a parte não responder (decurso de prazo): colocar em JULIANA.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico que, considerando a petição do(a) perito(a) do juízo, a parte autora deve ser intimada para fornecer a documentação solicitada no prazo de 15 (quinze) dias.
+
+------------------------------------------------------------
+ITEM 19 - PERÍCIA MULTIDISCIPLINAR
+
+Quando o advogado pede perícia multidisciplinar.
+
+PROCEDIMENTO:
+- Não marcar a perícia.
+- Devolver o processo ao juízo de origem para que a vara decida como proceder.
+- Usar certidão referenciando o evento em que o advogado fez o pedido.
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante do pedido de perícia multidisciplinar formulado pela parte autora no evento XXX, não havendo procedimento específico para tanto nesta Central de Perícias, devolvo os autos ao juízo de origem, para apreciação.
+
+------------------------------------------------------------
+2. REGRAS SOBRE LOCALIZADORES (TAGs)
 ------------------------------------------------------------
 
-| LOCALIZADOR | QUANDO USAR | QUEM TIRA |
-|-------------|-------------|-----------|
-| DOMICILIAR / HOSPITALAR / INDIRETA / TELEPERÍCIA | Ao receber a solicitação. Não certificar nada ainda. | Permanece até a perícia ser resolvida. |
-| INTIMAR PARTE SEM ADVOGADO | Quando a parte não tem advogado e precisa ser intimada. | A Hazel tira automaticamente. |
+LISTA DE LOCALIZADORES E SUAS FUNÇÕES:
+
+| LOCALIZADOR | QUANDO USAR | QUEM TIRA / OBSERVAÇÕES |
+|-------------|-------------|--------------------------|
+| DOMICILIAR / HOSPITALAR / INDIRETA / TELEPERÍCIA | Ao receber a solicitação. Não certificar nada ainda. | Permanece até a perícia ser resolvida. Não retirar ao analisar petições intercorrentes (retirar apenas do localizador de petição). |
+| INTIMAR PARTE SEM ADVOGADO | Quando a parte não tem advogado e precisa ser intimada. | A Hazel tira automaticamente após certificar. Não retirar manualmente. |
 | LAUDO ATRASADO | Quando o laudo excede o prazo. | Não precisa colocar em outro localizador. |
-| JULIANA | Documentos solicitados por peritos e juntados pela parte. | Equipe. |
-| TA PAGAR PERITO | Processos de TA com erro no pagamento. | Olhar semanalmente. |
-| TAM ANALISAR PETIÇÃO | Ao analisar petição, verificar se não há laudo em PDF. | Cuidado ao tirar. |
-| PERÍCIA INDIRETA | Pedidos de perícia indireta. | Equipe. |
+| JULIANA | Documentos solicitados por peritos e juntados pela parte. | Equipe. Também usado quando parte não responde a prazo (decurso). |
+| TA PAGAR PERITO | Processos de TA com erro no pagamento. | Olhar semanalmente. Processos podem ficar parados apenas neste localizador. |
+| TAM ANALISAR PETIÇÃO | Ao analisar petição, verificar se não há laudo em PDF. | Cuidado ao tirar. Verificar se não há laudo em pdf ou outra informação passada pelo perito. |
+| PERÍCIA INDIRETA | Pedidos de perícia indireta. | Colocar também em JULIANA e fazer um lembrete. |
 | PRAZO PARTE | Enquanto aguarda justificativa de falta ou entrega de documentos. | Equipe. |
+| DECURSO DE PRAZO | Aparece quando o prazo efetivamente termina. | Automático (não precisa colocar manualmente). |
+| AGUARDA LAUDO | Processos com laudo pendente. | Equipe. |
+| TAM ERRO PAGAR PERITO | Para verificação de problemas em nomeações. | Equipe. |
 
-REGRAS IMPORTANTES:
-- Se processo está em HOSPITALAR/DOMICILIAR/INDIRETA/TELEPERÍCIA e chega petição: retirar apenas do localizador de petição, nunca do original (evita que TA marque indevidamente).
-- PEDIDOS DE PERÍCIA INDIRETA: colocar em JULIANA e em PERÍCIA INDIRETA, e fazer um lembrete.
+REGRAS IMPORTANTES SOBRE LOCALIZADORES:
+
+1. Quando chegar petição intercorrente em processos que estão nos localizadores HOSPITALAR, DOMICILIAR, INDIRETA ou TELEPERÍCIA:
+   - NÃO retire o processo desses localizadores.
+   - Retire apenas do localizador de petição.
+   - Isso evita que a Tramitação Ágil marque a perícia automaticamente de forma indevida.
+
+2. PEDIDOS DE PERÍCIA INDIRETA:
+   - Colocar em JULIANA.
+   - Colocar em PERÍCIA INDIRETA.
+   - Fazer um lembrete no processo.
+
+3. INTIMAÇÃO POR WHATSAPP (HAZEL):
+   - A Hazel coloca um lembrete dizendo que a parte foi intimada pelo whatsapp.
+   - NÃO tirar do localizador INTIMAR PARTE SEM ADVOGADO.
+   - Quem deve tirar é a própria Hazel após certificar.
+
+4. LOCALIZADOR AUTOMATIZADO:
+   - Se configurado para a unidade, o processo vai automaticamente para o localizador informado após a designação.
+
+5. DECURSO DE PRAZO:
+   - Aparece quando o prazo efetivamente termina.
+   - Não é necessário colocá-lo manualmente.
 
 ------------------------------------------------------------
 3. GESTÃO DE PERITOS
 ------------------------------------------------------------
 
-- Perito pede majoração em LOAS: Destituir e nomear outro.
-- Perito pede majoração em processo comum: Nomear com valor majorado, fazer AO, Luiz assina após o laudo.
-- Peritos desativados/que não atuam mais:
-  - Francisco Valente: não usar mais.
-  - Rachel Alencar de Castro Araujo Pastor: fora do país.
-  - Daianne Coutinho dos Santos: não nomear em LOAS/BPC.
-  - Thainara Panisset Garcia: não abre mais agenda no Rio (opções: Niterói ou Renata na capital).
-  - Dra. Erika: atende até 12h30.
+MAJORAÇÃO DE HONORÁRIOS:
 
-- Cadastro de perito: Se não estiver disponível, pedir à Rosana/Débora para validar no AJG e e-Proc.
+- Em LOAS/BPC: Se o perito pedir majoração, DESTITUIR e nomear OUTRO perito.
+- Em processo comum: Pode nomear com valor majorado, fazer AO de majoração, e Luiz assina após o laudo ser juntado.
 
-- Cancelamento de nomeação:
-  FLUXO 1 (via AJG): Informações → clicar no número AJG → deletar perito.
-  FLUXO 2 (alternativo, se não aparecer no AJG): Partes e Representantes → Editar → status "Normal" para "Excluído" → Salvar.
+FLUXO PARA MAJORAÇÃO (processo comum):
+1. Nomear o perito com o valor majorado.
+2. Fazer um AO de majoração (modelo salvo) e editar o valor.
+3. Luiz assina após a perícia ser realizada e o laudo juntado.
 
-- Exclusão de partes em geral: Partes e Representantes → Editar → escolher a pessoa → status "Normal" para "Excluído" → Salvar.
+PERITOS DESATIVADOS OU QUE NÃO ATUAM MAIS:
+
+- Francisco Valente: NÃO usar mais.
+- Rachel Alencar de Castro Araujo Pastor: Fora do país. Não atua mais.
+- Daianne Coutinho dos Santos: NÃO nomear em LOAS/BPC.
+- Thainara Panisset Garcia: Não abre mais agenda no Rio. Opções: Niterói ou outra perita (Renata) na capital.
+- Dra. Erika: Atende até 12h30.
+
+CADASTRO DE PERITOS:
+
+- Se o cadastro do perito não estiver disponível no AJG ou e-Proc:
+  - Pedir à Rosana ou Débora para validar.
+- Para validar no AJG: perito deve comparecer com documentos originais.
+- Para validar no e-Proc: equipe da Rosana/Débora faz a validação.
+
+CANCELAMENTO DE NOMEAÇÃO:
+
+FLUXO 1 (via AJG - método padrão):
+1. Acessar "Informações" no processo.
+2. Clicar no número do AJG referente à nomeação.
+3. Deletar/excluir o perito.
+
+FLUXO 2 (alternativo - quando o nome não aparece no AJG):
+1. Acessar "Partes e Representantes".
+2. Clicar em "Editar".
+3. Escolher o perito.
+4. Trocar status de "Normal" para "Excluído".
+5. Salvar.
+
+EXCLUSÃO DE PARTES EM GERAL:
+
+PROCEDIMENTO:
+1. Acessar "Partes e Representantes" (acima do nome da parte).
+2. Clicar em "Editar".
+3. Escolher a pessoa que será excluída.
+4. No campo status, mudar de "Normal" para "Excluído".
+5. Salvar.
+
+PERITO PAGO PELA PARTE:
+
+- Ao nomear um perito que será pago pela parte (não pelo AJG):
+  - Não marcar a opção de pagamento pelo AJG no sistema.
+
+PERITO QUE NÃO É ESPECIALISTA (alegação do advogado):
+
+- Verificar se o perito atua na especialidade.
+- Se sim, emitir certidão e intimar a parte em 3 dias.
+- Se houver nova manifestação, avisar coordenação/direção.
 
 ------------------------------------------------------------
 4. TRATAMENTO DE PROCESSOS ESPECIAIS
 ------------------------------------------------------------
 
 LOAS/BPC:
-- Não tramita na TA (a automatização não atua em LOAS).
-- Se advogado pedir LOAS em processo TA: devolver ao juízo.
-- Certificar: "Certifico e dou fé que a matéria é LOAS/BPC, que não tramita na Tramitação Ágil (TA), razão pela qual devolvo os autos ao juízo de origem."
-- Daianne Coutinho não atende LOAS.
-- Laudo é diferenciado.
 
-Execução Fiscal (isenção de IR):
+- A Tramitação Ágil (TA) NÃO atua em processos de LOAS.
+- Se advogado pedir LOAS em processo TA: trata-se de erro e o processo deve ser devolvido ao juízo.
+- Daianne Coutinho dos Santos NÃO atende LOAS.
+- O laudo pericial para LOAS tem requisitos específicos (é diferenciado).
+- Processo não tramita na TA.
+
+CERTIDÃO PARA LOAS EM TA:
+
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que a matéria é LOAS/BPC, que não tramita na Tramitação Ágil (TA), razão pela qual devolvo os autos ao juízo de origem.
+
+EXECUÇÃO FISCAL (isenção de IR):
+
 - Não precisa colocar resultado da perícia se não for laudo eletrônico.
+- As varas vão examinar os laudos de qualquer forma.
 
-JEF com gratuidade:
-- Se juízo determinar nova perícia, será paga pela Justiça (não pela parte).
+JEF COM GRATUIDADE:
 
-Perícia Hospitalar:
-- Basta colocar no localizador PERICIA HOSPITALAR. Não certificar nada ainda.
-- Se parte tiver alta, avisar para desmarcar.
+- Se o juízo determinar nova perícia, será paga pela Justiça (não pela parte).
+- A primeira instância no JEF é gratuita em virtude da própria lei, e isso inclui as perícias.
 
-Perícia Indireta:
-- Colocar em JULIANA e em PERÍCIA INDIRETA, e fazer um lembrete.
+PERÍCIA HOSPITALAR:
 
-Perícia Multidisciplinar:
+PROCEDIMENTO:
+- Basta colocar o processo no localizador PERICIA HOSPITALAR.
+- NÃO certificar nada ainda.
+- Se a parte tiver alta, avisar para desmarcar a perícia (evita que perito vá ao local à toa).
+
+PERÍCIA INDIRETA:
+
+PROCEDIMENTO:
+- Colocar em JULIANA.
+- Colocar em PERÍCIA INDIRETA.
+- Fazer um lembrete no processo.
+
+PERÍCIA MULTIDISCIPLINAR:
+
+PROCEDIMENTO:
+- Não marcar a perícia.
 - Devolver à vara com certidão referenciando o evento do pedido.
 
 PNEUMO (especialidade rara):
+
+PROCEDIMENTO:
 - Certificar que só temos perito em São Gonçalo.
 - Parte pode optar: ir a SG (por conta própria) ou fazer perícia em especialidade alternativa na própria subseção.
 
-"Neuropsicologia" / "Neuropsiquiatria":
+TEXTO PARA PNEUMO (quando chegar solicitação):
+- Certificar que só temos perito nesta especialidade na subseção de São Gonçalo.
+- A parte autora pode optar entre ir a SG, com despesas por sua própria conta, ou fazer a perícia na subseção onde reside, em especialidade alternativa.
+
+"NEUROPSICOLOGIA" / "NEUROPSIQUIATRIA":
+
+PROCEDIMENTO:
 - Certificar que não há perito.
 - Dar 5 dias para parte escolher entre psiquiatra ou neurologista.
-- Se não responder: marcar com médico do trabalho/clínico.
+- Se não responder: marcar com médico do trabalho ou clínico geral.
 
-Sem despacho para marcar:
-- Não marcar. Precisa de despacho autorizando.
-- Se despacho disser "conforme indicado pela parte", usar especialidade da inicial.
+MODELO DE CERTIDÃO PARA NEUROPSICOLOGIA:
 
-Sem especialidade no despacho:
+>>> MODELO DE CERTIDÃO <<<
+
+Certifico e dou fé que não dispomos de perito na especialidade "neuropsicologia/neuropsiquiatria". A parte autora deve esclarecer se pretende que o exame seja realizado por psiquiatra ou neurologista, ficando desde já ciente de que, na ausência de manifestação, o exame será marcado com médico do trabalho ou clínico geral. Prazo: 5 (cinco) dias.
+
+SEM DESPACHO PARA MARCAR:
+
+- Não marcar perícia sem despacho autorizando.
+- Se o despacho disser "conforme indicado pela parte", usar a especialidade indicada na inicial.
+
+SEM ESPECIALIDADE NO DESPACHO:
+
 - Devolver com certidão do ITEM 1.
 
-Já houve perícia e pagamento:
-- Não é caso de determinação de instância superior. Basta marcar e, na hora de indicar perito, não marcar que será pago pelo AJG.
+JÁ HOUVE PERÍCIA E PAGAMENTO:
 
-Pedido de "já houve perícia" (texto padrão):
-"Diante do teor da petição do evento X e tendo em vista que já foi realizada perícia médica nestes autos, tive dúvidas em dar cumprimento ao despacho, razão pela qual devolvo os autos ao juízo de origem."
+- Se o juízo determinar nova perícia após já ter havido perícia e pagamento:
+  - Não é caso de determinação de instância superior.
+  - Basta marcar e, na hora de indicar o perito, não marcar que será pago pelo AJG.
+
+PEDIDO DE "JÁ HOUVE PERÍCIA" (texto padrão):
+
+>>> MODELO DE CERTIDÃO <<<
+
+Diante do teor da petição do evento X e tendo em vista que já foi realizada perícia médica nestes autos, tive dúvidas em dar cumprimento ao despacho, razão pela qual devolvo os autos ao juízo de origem.
+
+ASSISTENTE SOCIAL:
+
+- A CEPER só começará a fazer perícias sociais a partir de setembro e apenas para algumas varas.
+- Pedidos de assistente social não são de responsabilidade da CEPER.
+- Devem ser devolvidos à vara.
+
+ASSISTENTE TÉCNICO:
+
+- Quando a parte indica assistente técnico: não há procedimento diferente. Seguir normalmente.
 
 ------------------------------------------------------------
-5. REGRAS DE FALTAS DO PERICIADO (FLUXO COMPLETO - ATUALIZADO)
+5. REGRAS DE FALTAS DO PERICIADO - FLUXO COMPLETO
 ------------------------------------------------------------
 
 PRIMEIRA FALTA – FLUXO COMPLETO
+
+PROCEDIMENTO:
+
+Quando o periciado falta pela primeira vez:
+
+1. Expedir ATO ORDINATÓRIO intimando a parte para apresentar justificativa no prazo de 5 (cinco) dias.
+2. Colocar o processo no localizador PRAZO PARTE.
+
+>>> ATO ORDINATÓRIO - PRIMEIRA FALTA <<<
 
 ATO ORDINATÓRIO
 
 Tendo em vista a informação de que a parte autora não teria comparecido ao exame pericial, intime-se para apresentar justificativa quanto à ausência no prazo de 5 (cinco) dias. Cumprido, remarque-se o exame, preferencialmente com o mesmo perito. Nada vindo, certifique-se e devolva-se o processo ao juízo de origem.
 
-APÓS O PRAZO – SE A PARTE NÃO SE JUSTIFICAR
+APÓS O PRAZO - SE A PARTE NÃO SE JUSTIFICAR:
 
 Procedimento obrigatório antes de devolver:
 - Encerrar os prazos no sistema (Movimentar Processo → Evento: Encerrar → Juntada de Certidão Encerrar Prazo → marcar o prazo → Movimentar).
@@ -192,18 +514,30 @@ Procedimento obrigatório antes de devolver:
 
 CERTIFICO E DOU FÉ que a parte autora deixou de comparecer à perícia designada e, embora lhe tenha sido concedido prazo para apresentar justificativa acerca de sua ausência, permaneceu inerte, razão pela qual devolvo os autos ao juízo de origem.
 
-LOCALIZADOR E PRAZO
-- Localizador: PRAZO PARTE enquanto aguarda a justificativa.
-- Prazo: 5 (cinco) dias para a parte apresentar justificativa.
+SE A PARTE APRESENTAR JUSTIFICATIVA:
+
+- Remarcar a perícia (preferencialmente com o mesmo perito).
+- No sistema T.A.: Perícias → Ações → "Juntada de Certidão Perícia Redesignada" → Salvar → Remarcar na tela seguinte.
+- Para processos manuais/TAM: emitir certidão manual de remarcação.
+- Intimar a parte da nova data.
 
 ------------------------------------------------------------
 SEGUNDA FALTA – FLUXO COMPLETO (MESMO TRATAMENTO DA PRIMEIRA)
+
+PROCEDIMENTO:
+
+Quando o periciado falta pela segunda vez, o tratamento é o mesmo da primeira falta:
+
+1. Expedir ATO ORDINATÓRIO (mencionando "pela segunda vez") intimando a parte para apresentar justificativa no prazo de 5 (cinco) dias.
+2. Colocar o processo no localizador PRAZO PARTE.
+
+>>> ATO ORDINATÓRIO - SEGUNDA FALTA <<<
 
 ATO ORDINATÓRIO
 
 Tendo em vista a informação de que a parte autora não teria comparecido ao exame pericial pela segunda vez, intime-se para apresentar justificativa quanto à ausência no prazo de 5 (cinco) dias. Cumprido, remarque-se o exame, preferencialmente com o mesmo perito. Nada vindo, certifique-se e devolva-se o processo ao juízo de origem.
 
-APÓS O PRAZO – SE A PARTE NÃO SE JUSTIFICAR (SEGUNDA FALTA)
+APÓS O PRAZO - SE A PARTE NÃO SE JUSTIFICAR (SEGUNDA FALTA):
 
 Procedimento obrigatório antes de devolver:
 - Encerrar os prazos no sistema.
@@ -215,21 +549,23 @@ Procedimento obrigatório antes de devolver:
 
 CERTIFICO E DOU FÉ que a parte autora, pela segunda vez, deixou de comparecer à perícia designada e, embora lhe tenha sido concedido prazo para apresentar justificativa acerca de sua ausência, permaneceu inerte, razão pela qual devolvo os autos ao juízo de origem.
 
-LOCALIZADOR E PRAZO
-- Localizador: PRAZO PARTE enquanto aguarda a justificativa.
-- Prazo: 5 (cinco) dias para a parte apresentar justificativa.
+SE A PARTE APRESENTAR JUSTIFICATIVA (SEGUNDA FALTA):
+
+- Remarcar a perícia (preferencialmente com o mesmo perito).
+- Mesmo procedimento da primeira falta.
 
 ------------------------------------------------------------
 TERCEIRA FALTA – FLUXO COMPLETO (DEVOLUÇÃO IMEDIATA)
+
+PROCEDIMENTO:
 
 Quando a parte autora falta pela terceira vez a perícia designada:
 - NÃO se concede novo prazo para justificativa.
 - NÃO se remarca a perícia.
 - DEVE-SE devolver o processo à vara de origem IMEDIATAMENTE.
 
-PROCEDIMENTO OBRIGATÓRIO ANTES DE DEVOLVER
-
-- Encerrar os prazos no sistema.
+Procedimento obrigatório antes de devolver:
+- Encerrar os prazos no sistema (Movimentar Processo → Evento: Encerrar → Juntada de Certidão Encerrar Prazo → marcar o prazo → Movimentar).
 - Cancelar a nomeação do perito.
 - Emitir a certidão de terceira falta.
 - Devolver os autos ao juízo de origem.
@@ -238,12 +574,12 @@ PROCEDIMENTO OBRIGATÓRIO ANTES DE DEVOLVER
 
 CERTIFICO E DOU FÉ que a parte autora, pela terceira vez, deixou de comparecer ao exame pericial, razão pela qual devolvo os autos ao juízo de origem.
 
-OBSERVAÇÃO IMPORTANTE
+OBSERVAÇÃO IMPORTANTE:
 
 Não há tolerância para nova justificativa ou remarcação após a terceira falta.
 
 ------------------------------------------------------------
-RESUMO COMPARATIVO
+RESUMO COMPARATIVO - FALTAS
 
 | Critério | Primeira falta | Segunda falta | Terceira falta |
 | :--- | :--- | :--- | :--- |
@@ -251,100 +587,321 @@ RESUMO COMPARATIVO
 | Justificativa é aceita? | SIM | SIM | NÃO |
 | Remarca perícia? | SIM (se justificar) | SIM (se justificar) | NÃO |
 | Devolve à vara? | SIM (se não justificar) | SIM (se não justificar) | SIM (sempre) |
+| Localizador | PRAZO PARTE | PRAZO PARTE | NENHUM |
 | Modelo de certidão | Ausência de justificativa após dilação de prazo | Ausência de justificativa após dilação de prazo (segunda vez) | Terceira falta |
+
+------------------------------------------------------------
+PROCEDIMENTO NO SISTEMA (T.A.) PARA REMARCAÇÃO APÓS JUSTIFICATIVA
+
+Para processos T.A., quando a parte justifica a falta e a perícia precisa ser remarcada:
+
+1. Acessar o processo no e-Proc.
+2. Ir em "Perícias".
+3. Em "Ações", selecionar "Juntada de Certidão Perícia Redesignada".
+4. Salvar.
+5. Na tela seguinte, remarcar a perícia (escolher nova data e perito).
+6. Intimar a parte da nova data.
 
 ------------------------------------------------------------
 6. FLUXOS OPERACIONAIS NO SISTEMA
 ------------------------------------------------------------
 
 MARCAR PERÍCIA (Manual e-Proc):
-1. Acessar processo → "Ações" → "Perícia" → "Nova Perícia".
-2. Preencher: Nome da Parte, Especialização, Localidade.
-   - ATENÇÃO (interior): deixar "Todas as localidades" senão agendas somem.
-3. Escolher data e perito → "Selecionar".
-4. Opcional: anexar Ato Ordinatório (tipo ATOORD).
-5. "Salvar" → evento "Ato ordinatório praticado - perícia designada" é gerado.
-6. Intimação imediata: após salvar, clicar em "Intimar Partes" no topo.
+
+1. Acessar o processo → "Ações" → "Perícia" → "Nova Perícia".
+2. Preencher:
+   - Nome da Parte (quem será periciado).
+   - Especialização do perito.
+   - Localidade onde a perícia será realizada.
+   
+   ATENÇÃO (interior): Se escolher a localidade, as agendas somem. É preciso deixar "Todas as localidades" para que todas as agendas apareçam.
+
+3. Escolher data e perito → clicar em "Selecionar".
+4. Opcional: anexar Ato Ordinatório (modelo atualizado conforme Portaria 13/2026) com orientações à parte autora sobre documentos médicos.
+   - Escolher o arquivo.
+   - Definir o tipo como ATOORD.
+5. Clicar em "Salvar".
+6. Evento gerado: "Ato ordinatório praticado - perícia designada" com o AO anexado.
+7. Os dados da perícia (data, local, perito) aparecem na capa do processo.
+
+INTIMAÇÃO IMEDIATA:
+
+- Após designar a perícia, clicar no botão "Intimar Partes" no topo da tela de resultado da movimentação.
+- Isso expede as intimações eletrônicas às partes (autor, réu, INSS, etc.).
 
 DESIGNAÇÃO EM BLOCO:
-- Funcionalidade disponível para múltiplos processos.
+
+- Funcionalidade disponível para designar perícias em múltiplos processos simultaneamente.
+- O sistema confirma "Perícia designada com sucesso" para cada processo.
 
 REMARCAR PERÍCIA EM T.A. (após justificativa de falta):
-- Perícias → Ações → "Juntada de Certidão Perícia Redesignada" → Salvar → Remarcar na tela seguinte.
+
+1. Perícias → Ações → "Juntada de Certidão Perícia Redesignada".
+2. Salvar.
+3. Remarcar na tela seguinte.
 
 CANCELAR PERÍCIA:
-- IR PARA ITEM 14 (renúncia) ou remoção de nomeação.
+
+- Ver ITEM 14 (renúncia de mandato) ou remoção de nomeação.
 
 ENCERRAR PRAZOS:
-- "Movimentar Processo" → Evento: "Encerrar" → "Juntada de Certidão Encerrar Prazo" → marcar o prazo → "Movimentar".
+
+PROCEDIMENTO:
+1. "Movimentar Processo".
+2. Em "Evento a ser lançado", escolher "Encerrar".
+3. Selecionar "Juntada de Certidão Encerrar Prazo".
+4. Marcar a caixa referente ao prazo que quer encerrar.
+5. Clicar em "Movimentar".
 
 INTIMAÇÃO (HAZEL):
+
 - Não tirar processo do localizador INTIMAR PARTE SEM ADVOGADO.
 - A Hazel tira automaticamente após certificar.
 
 LOCALIZADOR AUTOMATIZADO:
+
 - Se configurado, o processo vai automaticamente para o localizador informado após a designação.
+
+EXCLUIR PARTES DO PROCESSO:
+
+PROCEDIMENTO:
+1. "Partes e Representantes" (acima do nome da parte).
+2. Clicar em "Editar".
+3. Escolher a pessoa.
+4. Mudar status de "Normal" para "Excluído".
+5. Salvar.
+
+CANCELAR NOMEAÇÃO (VIA AJG):
+
+PROCEDIMENTO:
+1. "Informações".
+2. Clicar no número AJG.
+3. Deletar o perito.
+
+CANCELAR NOMEAÇÃO (VIA PARTES - ALTERNATIVO):
+
+PROCEDIMENTO (quando o nome não aparece no AJG):
+1. "Partes e Representantes".
+2. Editar.
+3. Trocar status de "Normal" para "Excluído".
+4. Salvar.
 
 ------------------------------------------------------------
 7. MANUAL DE MARCAÇÃO DE PERÍCIAS (E-PROC V.9.17)
 ------------------------------------------------------------
 
 DESIGNAÇÃO UNITÁRIA:
-1. Capa do processo → "Ações" → "Perícia" → "Nova Perícia".
-2. Selecionar "Nome Parte" (periciado).
-3. Selecionar "Especialização" do perito.
-4. Selecionar "Localidade" (ATENÇÃO: no interior, deixar "Todas as localidades").
-5. Escolher data e perito → clicar em "Selecionar".
-6. Opcional: Anexar Ato Ordinatório com orientações.
-7. Clicar em "Salvar".
-8. Evento gerado: "Ato ordinatório praticado - perícia designada".
-9. Intimar partes: clicar em "Intimar Partes" no topo da tela.
+
+1. Na capa do processo, em "Ações", clicar em "Perícia".
+2. Clicar em "Nova Perícia".
+3. Selecionar "Nome Parte" que será periciada.
+4. Selecionar "Especialização" do perito.
+5. Selecionar "Localidade" onde a perícia será realizada.
+   - ATENÇÃO (interior): se escolher a localidade, as agendas somem. Deixar "Todas as localidades".
+6. Escolher data e perito → clicar em "Selecionar".
+7. Opcional: anexar Ato Ordinatório (tipo ATOORD).
+8. Clicar em "Salvar".
+9. Evento gerado: "Ato ordinatório praticado - perícia designada".
+10. Intimar partes: clicar em "Intimar Partes" no topo da tela de resultado.
+
+ANEXO DO ATO ORDINATÓRIO:
+
+- No campo abaixo da seleção da perícia, pode ser anexado um Ato Ordinatório com orientações à parte autora sobre documentos médicos a serem juntados antes da perícia.
+- O documento será anexado em todos os eventos.
 
 DESIGNAÇÃO EM BLOCO:
+
 - Funcionalidade disponível.
 - Resultado: "Perícia designada com sucesso" para cada processo.
 
+EVENTOS GERADOS:
+
+- Evento 6: "Ato ordinatório praticado - perícia designada" (com dados da perícia: data, local, perito).
+- Evento 7: "Expedida/certificada a intimação eletrônica" (para o INSS, com prazo de 5 dias).
+
+LOCALIZADOR AUTOMATIZADO:
+
+- Se a unidade tiver um localizador padrão configurado (ex: AGUARDA LAUDO), o processo é movido automaticamente para esse localizador após a designação.
+
+INTIMAÇÃO IMEDIATA:
+
+- Após a designação, é possível intimar as partes imediatamente clicando em "Intimar Partes" no topo da tela de resultado.
+
 ------------------------------------------------------------
-8. ORIENTAÇÕES GERAIS E CONFLITOS PENDENTES (ATUALIZADO)
+8. ORIENTAÇÕES GERAIS
 ------------------------------------------------------------
 
 ANTES DE MAIS NADA:
+
 - Verificar se o processo está tramitando na CEPER.
-- Se não, encaminhar a solicitação/reclamação para o juízo responsável.
+- Do contrário, encaminhar a solicitação ou reclamação para o juízo responsável.
+
+VERIFICAR TABELA DE ESPECIALIDADES/LOCALIDADES:
+
+- Sempre verificar na tabela de especialidades/localidades se temos, ou não, peritos de determinada especialidade na subseção em questão.
 
 GEOGRAFIA DAS SUBSECÇÕES:
+
 - Rio de Janeiro → Duque de Caxias → São João de Meriti → Nova Iguaçu.
 - Itaboraí e São Gonçalo têm suas próprias CEPERs.
 - Magé pertence à CEPER-MA.
 - Niterói tem sua própria unidade (NI).
 
-VERIFICAR TABELA:
-- Sempre verificar na tabela de especialidades/localidades se temos perito na subseção em questão.
-
 FOLHA DE PONTO:
+
 - Todo mês, até o último dia útil.
+- Quem estiver saindo de férias já pode deixar sua folha pronta.
 
 PORTARIA 13/2026:
+
 - Revogou a Portaria 1/2024.
-- Todos devem atualizar modelos de minutas (AOs).
+- Todos devem atualizar seus modelos de minutas (AOs).
 
 REUNIÕES:
+
 - Participação obrigatória.
 - Avisos são fixados no grupo.
 
 COMUNICAÇÃO EM HOME OFFICE:
+
 - Ficar atento ao WhatsApp.
-- Avisar chefia sobre horários alternativos.
+- Responder as mensagens assim que possível.
+- Se tiver compromisso e precisar trabalhar em horário alternativo, ou fazer um intervalo durante o expediente, avisar com antecedência.
+
+DIAS PRESENCIAIS:
+
+- Todos devem informar os dias em que trabalham presencialmente.
+
+EXPEDIENTE REMOTO:
+
+- Em caso de greve de rodoviários ou problemas gerais, a presidência pode decretar expediente remoto.
+- As perícias na VZ e nas subseções são mantidas.
+
+ATUALIZAÇÃO DO AO DE DESIGNAÇÃO:
+
+- Recentemente, foi atualizado o texto do AO de designação de perícia para incluir que a entrada de acompanhantes na sala de perícias fica a critério do perito.
 
 ------------------------------------------------------------
-CONFLITOS PENDENTES
+9. ANOTAÇÕES ESPARSAS E COMPLEMENTARES
+------------------------------------------------------------
+
+PERÍCIA INDIRETA:
+
+- Anotação: "Quando se tratar de pedido de perícia indireta, põe no localizador JULIANA e no localizador PERÍCIA INDIRETA, faz um lembrete também."
+
+DOCUMENTOS ESCOLARES:
+
+- Quando o perito pede documentos escolares para ajudar na elaboração do laudo, emitir certidão.
+- Modelo: "Certifico que, considerando a petição do(a) perito(a) do juízo, a parte autora deve ser intimada para fornecer a documentação solicitada no prazo de 15 (quinze) dias."
+- Intimar a parte da petição do perito e da certidão (usar "+").
+- Prazo: 15 dias.
+- Colocar em prazo para parte.
+- Se responder: JULIANA.
+- Se não responder: JULIANA.
+
+TUTELA ANTECIPADA:
+
+- Quando advogado pede tutela antecipada antes da perícia:
+  - Informar número do processo à coordenação/direção para controle.
+  - Certificar e devolver para a vara.
+  - NÃO CANCELAR A PERÍCIA.
+  - Colocar lembrete vermelho: "ATENÇÃO! A perícia neste processo está marcada para XX/YY, conforme evento XYZ. Se cancelada/desnecessária, favor avisar a CEPER. Se mantida, devolver os autos à CEPER."
+
+PERÍCIA POR VIDEOCONFERÊNCIA:
+
+- Verificar com coordenação se é possível perícia domiciliar.
+- Se não, informar na certidão.
+- Se já houver perícia marcada, informar e comunicar à coordenação.
+- Se tiver perito para domiciliar, coordenação contata a vara antes de devolver.
+
+ADVOGADO RENUNCIA AO MANDATO:
+
+- Cancelar a perícia.
+- Certificar e devolver à vara.
+- Novo advogado pode querer alterar especialidade, apresentar quesitos, etc.
+
+ADVOGADO PEDE MUDANÇA DE PERITO:
+
+- Verificar se perito atua na especialidade.
+- Se sim, certificar e intimar em 3 dias.
+- Se houver nova manifestação, avisar coordenação/direção.
+
+RECURSO EM GERAL:
+
+- Devolver para vara sem cancelar perícia.
+- Se perícia já ocorreu e falta laudo, falar com coordenação/direção.
+
+SUBSTABELECIMENTO:
+
+- Seguir normalmente.
+- Sem certidão.
+
+ADVOGADO NÃO QUER PERÍCIA:
+
+- Devolver à vara.
+
+ADVOGADO PEDE ESPECIALIDADE DIVERSA:
+
+- Devolver à vara.
+
+PERÍCIA MULTIDISCIPLINAR:
+
+- Devolver à vara com certidão referenciando evento.
+
+PERÍCIA SOCIAL:
+
+- A CEPER atua apenas em perícias médicas.
+- Pedidos de assistente social: certificar e devolver.
+
+LOAS EM PROCESSO TA:
+
+- A TA não atua em LOAS.
+- Se advogado pedir LOAS em TA, devolver ao juízo.
+
+SEM INDICAÇÃO DE ESPECIALIDADE NO DESPACHO:
+
+- Certificar e devolver com modelo do ITEM 1.
+
+SEM DETERMINAÇÃO PARA MARCAR PERÍCIA:
+
+- Certificar e devolver com modelo do ITEM 2.
+
+NÃO TEMOS PERITO NA ESPECIALIDADE:
+
+- Certificar e devolver com modelo do ITEM 3.
+
+TEMOS PERITO EM OUTRA LOCALIDADE:
+
+- Se TA: redistribuir e intimar em 3 dias.
+- Se TAM/manual: manter e usar agenda compartilhada.
+
+RECLAMAÇÃO POR LOCALIDADE:
+
+- Informar e dar 5 dias para manifestação.
+
+ESPECIALIDADE INEXISTENTE + ALTERNATIVA:
+
+- Marcar alternativa e intimar em 3 dias.
+
+ESPECIALIDADE QUE NUNCA TEREMOS:
+
+- Devolver ao juízo.
+
+ADVOGADO INDICA NOVA ESPECIALIDADE:
+
+- Devolver para apreciação da vara.
+
+------------------------------------------------------------
+10. CONFLITOS PENDENTES
 ------------------------------------------------------------
 
 CONFLITO 1 - FALTAS: RESOLVIDO
+
 - Regra adotada: primeira e segunda faltas com prazo para justificar e remarcação; terceira falta com devolução imediata.
 - Conflito antigo (3 faltas x 2 faltas) foi superado pela nova sistemática.
 
 CONFLITO 2 - PRAZO DE INTIMAÇÃO EM REDISTRIBUIÇÃO DE TA:
+
 - Regra antiga (30/07/2026): 5 dias.
 - Regra nova (item 4): 3 dias.
 - AGUARDANDO DEFINIÇÃO.
