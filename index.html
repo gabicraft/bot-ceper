@@ -183,6 +183,36 @@
             transition: 0.2s;
         }
         .perfil-btn:hover .perfil-hint { opacity: 1; }
+        .avatar-img { cursor: zoom-in; transition: transform 0.15s ease; }
+        .avatar-img:hover { transform: scale(1.08); }
+        #avatarLightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.88);
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            cursor: zoom-out;
+        }
+        #avatarLightbox.open { display: flex; }
+        #avatarLightbox img {
+            max-width: min(92vw, 520px);
+            max-height: 85vh;
+            border-radius: 16px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.55);
+            object-fit: contain;
+            background: #111;
+        }
+        #avatarLightbox .lb-hint {
+            position: absolute;
+            bottom: 28px;
+            left: 0; right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.55);
+            font-size: 13px;
+        }
         .chat-msg {
             display: flex;
             justify-content: space-between;
@@ -209,6 +239,12 @@
     </style>
 </head>
 <body>
+
+    <!-- Lightbox para ampliar avatar -->
+    <div id="avatarLightbox" onclick="fecharAvatarLightbox()">
+        <img id="avatarLightboxImg" src="" alt="Foto ampliada" />
+        <div class="lb-hint">Clique em qualquer lugar para fechar</div>
+    </div>
 
     <!-- ============================================
     TELA DE LOGIN (sem a lista de online)
@@ -248,10 +284,10 @@
                 <h1>CEPER <span>Bot</span></h1>
             </div>
             <div class="header-actions">
-                <span class="usuario-info perfil-btn" id="infoUsuario" title="Clique para alterar a foto de perfil" onclick="document.getElementById('inputAvatar').click()">
+                <span class="usuario-info perfil-btn" id="infoUsuario" title="Clique na foto para ampliar · clique no nome para alterar">
                     <span id="infoUsuarioAvatar"></span>
-                    <span id="infoUsuarioNome">servidor</span>
-                    <span class="perfil-hint">foto</span>
+                    <span id="infoUsuarioNome" style="cursor:pointer" onclick="document.getElementById('inputAvatar').click()">servidor</span>
+                    <span class="perfil-hint" style="cursor:pointer" onclick="document.getElementById('inputAvatar').click()">alterar</span>
                 </span>
                 <input type="file" id="inputAvatar" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" />
                 <span id="onlineCount" class="usuario-info" style="cursor:default;">
@@ -433,6 +469,30 @@
             }
             return '<span class="avatar-fallback" style="width:' + s + 'px;height:' + s + 'px;font-size:' + Math.round(s * 0.4) + 'px;">' + inicial + '</span>';
         }
+
+        function abrirAvatarLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('avatarLightbox');
+            const img = document.getElementById('avatarLightboxImg');
+            if (!box || !img) return;
+            img.src = src;
+            box.classList.add('open');
+        }
+        function fecharAvatarLightbox() {
+            const box = document.getElementById('avatarLightbox');
+            if (box) box.classList.remove('open');
+        }
+        document.addEventListener('click', function(e) {
+            const img = e.target.closest && e.target.closest('img.avatar-img');
+            if (img && img.src) {
+                e.preventDefault();
+                e.stopPropagation();
+                abrirAvatarLightbox(img.src);
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') fecharAvatarLightbox();
+        });
 
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
