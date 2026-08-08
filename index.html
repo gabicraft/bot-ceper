@@ -435,8 +435,45 @@
         let onlineInterval = null;
         let logoutTimer = null;
         let heartbeatInterval = null;
-        const LOGOUT_TIMEOUT = 30 * 60 * 1000;
-        const BUSY_TIMEOUT = 10 * 60 * 1000;
+        // Sem interação do usuário → força logout (10 min)
+        const LOGOUT_TIMEOUT = 10 * 60 * 1000;
+        // Online no servidor = últimos 2 min de heartbeat
+        const ONLINE_WINDOW = 2 * 60 * 1000;
+        let ultimaInteracaoLocal = Date.now();
+
+        // ============================================
+        // DATA/HORA — sempre América/São Paulo
+        // ============================================
+        function formatarDataSP(valor) {
+            if (!valor) return '';
+            let d;
+            if (valor instanceof Date) {
+                d = valor;
+            } else {
+                // Strings sem fuso (ex: "2026-08-08 15:30:00") → assume UTC do Supabase
+                const s = String(valor).trim();
+                if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+                    d = new Date(s.replace(' ', 'T') + 'Z');
+                } else {
+                    d = new Date(s);
+                }
+            }
+            if (isNaN(d.getTime())) return String(valor);
+            return d.toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+        }
+
+        function agoraSPString() {
+            return formatarDataSP(new Date());
+        }
 
         // ============================================
         // ONLINE USERS
@@ -448,7 +485,6 @@
             const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
 
             try {
-                // Cache buster para evitar resposta em cache
                 const cacheBuster = '&_=' + Date.now();
                 let usuarios = [];
                 try {
@@ -457,7 +493,6 @@
                         'select=nome,ultima_atividade,ativo&order=nome.asc' + cacheBuster
                     );
                 } catch (e1) {
-                    // Fallback: se a coluna ultima_atividade não existir ou RLS bloquear
                     console.warn('Query com ultima_atividade falhou, tentando só nome/ativo:', e1);
                     usuarios = await apiGet('usuarios', 'select=nome,ativo&order=nome.asc' + cacheBuster);
                 }
@@ -465,28 +500,22 @@
                 if (!Array.isArray(usuarios)) usuarios = [];
 
                 const agora = new Date();
-                const doisMinutos = 2 * 60 * 1000;
 
-                // Online = atividade nos últimos 2 min
                 const online = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
                     const diff = agora - new Date(u.ultima_atividade);
-                    return diff >= 0 && diff < doisMinutos;
+                    return diff >= 0 && diff < ONLINE_WINDOW;
                 });
 
-                // Ocupado / recente = entre 2 min e 30 min (antes havia um buraco de 2–10 min)
                 const recentes = usuarios.filter(u => {
                     if (!u.ultima_atividade) return false;
                     const diff = agora - new Date(u.ultima_atividade);
-                    return diff >= doisMinutos && diff < LOGOUT_TIMEOUT;
+                    return diff >= ONLINE_WINDOW && diff < LOGOUT_TIMEOUT;
                 });
 
-                // Ativos no sistema (para o select de mensagem privada)
                 const ativos = usuarios.filter(u => u.ativo !== false);
 
-                if (onlineNumber) {
-                    onlineNumber.textContent = online.length;
-                }
+                if (onlineNumber) onlineNumber.textContent = online.length;
 
                 if (chatList) {
                     if (online.length === 0 && recentes.length === 0) {
@@ -503,12 +532,9 @@
                     }
                 }
 
-                // Select de destinatário: online + recentes + demais ativos
-                // (assim dá para mandar mensagem privada mesmo se a pessoa não estiver "verde")
                 if (selectDest) {
                     const currentVal = selectDest.value;
                     selectDest.innerHTML = '<option value="todos">Todos (público)</option>';
-
                     const nomesAdicionados = new Set();
                     const adicionarOpcao = (nome, label) => {
                         if (!nome || nome === usuarioLogado.nome || nomesAdicionados.has(nome)) return;
@@ -518,11 +544,9 @@
                         opt.textContent = label || nome;
                         selectDest.appendChild(opt);
                     };
-
                     online.forEach(u => adicionarOpcao(u.nome, u.nome + ' (online)'));
                     recentes.forEach(u => adicionarOpcao(u.nome, u.nome + ' (ausente)'));
                     ativos.forEach(u => adicionarOpcao(u.nome, u.nome));
-
                     if ([...selectDest.options].some(o => o.value === currentVal)) {
                         selectDest.value = currentVal;
                     }
@@ -530,7 +554,7 @@
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
                 if (chatList) {
-                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar online. Verifique a coluna ultima_atividade e as permissões no Supabase.</li>';
+                    chatList.innerHTML = '<li class="empty-online">Erro ao carregar online. Verifique ultima_atividade e permissões no Supabase.</li>';
                 }
                 if (onlineNumber) onlineNumber.textContent = '?';
             }
@@ -543,9 +567,12 @@
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (!usuario.id) return;
             try {
+                const agoraIso = new Date().toISOString();
                 await apiPatch('usuarios', usuario.id, {
-                    ultima_atividade: new Date().toISOString()
+                    ultima_atividade: agoraIso
                 });
+                usuario.ultima_atividade = agoraIso;
+                localStorage.setItem('usuario', JSON.stringify(usuario));
             } catch (e) {
                 console.warn('Heartbeat falhou, tentando novamente em 5s...');
                 setTimeout(heartbeat, 5000);
@@ -553,16 +580,21 @@
         }
 
         // ============================================
-        // VERIFICAR INATIVIDADE
+        // VERIFICAR INATIVIDADE (interação real)
         // ============================================
+        function registrarInteracao() {
+            ultimaInteracaoLocal = Date.now();
+        }
+        ['click', 'touchstart', 'keydown', 'mousemove', 'scroll'].forEach(evt => {
+            document.addEventListener(evt, registrarInteracao, { passive: true });
+        });
+
         function verificarInatividade() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-            if (!usuario.id || !usuario.ultima_atividade) return;
-            const agora = new Date();
-            const diff = agora - new Date(usuario.ultima_atividade);
-            if (diff > LOGOUT_TIMEOUT) {
+            if (!usuario.id) return;
+            if (Date.now() - ultimaInteracaoLocal > LOGOUT_TIMEOUT) {
                 logout();
-                alert('Sessão expirada por inatividade. Faça login novamente.');
+                alert('Sessão expirada por inatividade (10 min sem uso). Faça login novamente.');
             }
         }
 
@@ -758,7 +790,7 @@
                     <div class="aviso-card">
                         <div>
                             <span class="chefia">${a.chefia || 'Chefia'}</span>
-                            <span class="data">${a.data || new Date(a.criado_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</span>
+                            <span class="data">${a.data || formatarDataSP(a.criado_em)}</span>
                         </div>
                         <div class="texto">${a.mensagem}</div>
                         ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerAviso('${a.id}')">🗑️ Remover</button></div>` : ''}
@@ -790,7 +822,7 @@
             }
             const chefia = document.getElementById('avisoChefia').value.trim() || 'Chefia';
             const mensagem = document.getElementById('avisoMensagem').value.trim();
-            const data = document.getElementById('avisoData').value.trim() || new Date().toLocaleString();
+            const data = document.getElementById('avisoData').value.trim() || agoraSPString();
 
             if (!mensagem) {
                 alert('Digite a mensagem do aviso.');
@@ -922,7 +954,7 @@
                     const isPrivado = m.tipo === 'privado';
                     const remetenteDisplay = isPrivado ? `${m.remetente} (privado)` : m.remetente;
                     const iconePrivado = isPrivado ? '<span class="privado"><i class="fas fa-lock"></i></span>' : '';
-                    const dataFormatada = new Date(m.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                    const dataFormatada = formatarDataSP(m.data_hora);
                     return `
                         <div class="chat-msg">
                             <div>
@@ -970,20 +1002,23 @@
                     const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
 
-                    // Mensagens que chegaram depois da última já contabilizada
-                    const novasMsgs = todas.filter(m => new Date(m.data_hora).getTime() > ultimaMensagemLida);
+                    // Novas mensagens de OUTRAS pessoas (ignora as que eu enviei)
+                    const novasMsgs = todas.filter(m =>
+                        new Date(m.data_hora).getTime() > ultimaMensagemLida &&
+                        m.remetente !== nome
+                    );
 
                     if (novasMsgs.length > 0 && !abaAtiva) {
                         // Só alerta quando o usuário NÃO está com a aba de chat aberta.
-                        // Avança o marcador imediatamente para não tocar o som de novo
-                        // a cada polling (a cada 5s) para a mesma mensagem.
                         if (badge) {
                             badge.style.display = 'inline-block';
                             badge.textContent = novasMsgs.length;
                         }
                         playNotificationSound();
-                        const maisRecente = novasMsgs[novasMsgs.length - 1];
-                        ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
+                        if (todas.length > 0) {
+                            const maisRecente = todas[todas.length - 1];
+                            ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
+                        }
                     }
 
                     if (abaAtiva) {
@@ -1011,6 +1046,8 @@
                     await apiPost('mensagens_privadas', { remetente, destinatario, mensagem });
                 }
                 input.value = '';
+                // Evita som na própria mensagem se o poll correr antes do reload
+                ultimaMensagemLida = Date.now() + 2000;
                 await carregarChatInterno();
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                 if (badge) badge.style.display = 'none';
@@ -1168,7 +1205,7 @@ REGRAS OBRIGATÓRIAS:
                 } else {
                     lista.innerHTML = avisos.slice(0, 5).map(a => `
                         <div class="aviso-card" style="margin-bottom:8px;">
-                            <div><span class="chefia">${a.chefia || 'Chefia'}</span> <span class="data">${a.data || new Date(a.criado_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</span></div>
+                            <div><span class="chefia">${a.chefia || 'Chefia'}</span> <span class="data">${a.data || formatarDataSP(a.criado_em)}</span></div>
                             <div class="texto">${a.mensagem}</div>
                         </div>
                     `).join('');
