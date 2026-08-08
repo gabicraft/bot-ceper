@@ -656,9 +656,6 @@
             outline: none;
             min-width: 150px;
         }
-        /* ========================================
-           SELETOR DE DESTINATÁRIO – VISÍVEL
-        ======================================== */
         .chat-input-area select {
             padding: 10px 14px;
             border-radius: 12px;
@@ -1107,6 +1104,9 @@
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 } catch (e) { /* silencioso */ }
             }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
         function playNotificationSound() {
@@ -1268,6 +1268,21 @@
         }
 
         // ============================================
+        // BEFOREUNLOAD – MARCAR USUÁRIO COMO OFFLINE
+        // ============================================
+        function setupBeforeUnload() {
+            window.addEventListener('beforeunload', function() {
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                if (usuario.id) {
+                    const dataAntiga = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+                    navigator.sendBeacon(SUPABASE_URL + 'usuarios?id=eq.' + usuario.id, JSON.stringify({
+                        ultima_atividade: dataAntiga
+                    }));
+                }
+            });
+        }
+
+        // ============================================
         // LOGIN E TROCA DE SENHA
         // ============================================
         async function fazerLogin() {
@@ -1366,7 +1381,10 @@
             document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
             document.getElementById('chatUsuarioNome').textContent = usuario.nome;
 
+            // Atualiza atividade imediatamente
             atualizarAtividade();
+            // Carrega online imediatamente
+            carregarOnlineUsers();
 
             if (usuario.papel === 'super_admin') {
                 document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
@@ -1385,6 +1403,7 @@
             setInterval(atualizarAtividade, 30000);
             logoutTimer = setInterval(verificarInatividade, 30000);
             setupInteractionListeners();
+            setupBeforeUnload();
         }
 
         function logout() {
@@ -1423,6 +1442,7 @@
                     setInterval(atualizarAtividade, 30000);
                     logoutTimer = setInterval(verificarInatividade, 30000);
                     setupInteractionListeners();
+                    setupBeforeUnload();
                     initAudio();
                 }
             } else {
@@ -1684,6 +1704,7 @@
                         if (novas > 0) {
                             badge.style.display = 'inline-block';
                             badge.textContent = novas;
+                            // Toca o som ao detectar novas mensagens
                             playNotificationSound();
                         } else {
                             badge.style.display = 'none';
