@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
+        /* ========================================
+           RESET E VARIÁVEIS
+           ======================================== */
         * {
             margin: 0;
             padding: 0;
@@ -50,6 +53,7 @@
             box-shadow: var(--shadow);
             margin-top: 10px;
         }
+        /* HEADER */
         .header {
             display: flex;
             justify-content: space-between;
@@ -114,6 +118,7 @@
             border-radius: 40px;
             border: 1px solid var(--border-color);
         }
+        /* TELA DE LOGIN */
         #telaLogin {
             display: flex;
             flex-direction: column;
@@ -178,6 +183,72 @@
             font-size: 13px;
             margin-top: 16px;
         }
+        /* TELA DE TROCA DE SENHA */
+        #telaTrocaSenha {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+        #telaTrocaSenha .login-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 32px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            width: 100%;
+        }
+        #telaTrocaSenha .login-box h2 {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+        #telaTrocaSenha .login-box p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #telaTrocaSenha .login-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-light);
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+        #telaTrocaSenha .login-box input:focus {
+            border-color: var(--primary-light);
+        }
+        #telaTrocaSenha .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        #telaTrocaSenha .login-box button:hover {
+            background: #d4a820;
+            transform: scale(1.02);
+        }
+        #telaTrocaSenha .login-box .erro {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+            font-size: 14px;
+        }
+        /* ABAS */
         .tabs {
             display: flex;
             gap: 4px;
@@ -186,6 +257,7 @@
             padding: 4px;
             margin-bottom: 24px;
             border: 1px solid var(--border-color);
+            flex-wrap: wrap;
         }
         .tabs button {
             flex: 1;
@@ -208,6 +280,9 @@
             color: #fff;
             background: rgba(255, 255, 255, 0.05);
         }
+        .tabs button.hidden-tab {
+            display: none;
+        }
         .tab-content {
             display: none;
             animation: fadeUp 0.25s ease;
@@ -225,6 +300,7 @@
                 transform: translateY(0);
             }
         }
+        /* CHAT IA */
         .chat-area {
             background: rgba(0, 0, 0, 0.25);
             border-radius: 16px;
@@ -399,6 +475,7 @@
             cursor: not-allowed;
             transform: none;
         }
+        /* AVISOS E PROCEDIMENTOS */
         .aviso-card,
         .proc-item {
             background: rgba(255, 255, 255, 0.03);
@@ -509,6 +586,7 @@
         .form-proc .btn-submit:hover {
             background: #d4a820;
         }
+        /* CHAT INTERNO */
         .chat-interno-area {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 16px;
@@ -569,6 +647,113 @@
         .chat-input-area button:hover {
             background: #d4a820;
         }
+        /* USUÁRIOS (admin) */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .user-table th {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        .user-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-light);
+        }
+        .user-table .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .user-table .status-badge.ativo {
+            background: rgba(46, 204, 113, 0.2);
+            color: var(--success);
+        }
+        .user-table .status-badge.inativo {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+        .user-table .status-badge.primeiro {
+            background: rgba(232, 185, 49, 0.2);
+            color: var(--secondary);
+        }
+        .user-table .acoes-usuario button {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+            margin-right: 4px;
+        }
+        .user-table .acoes-usuario button:hover {
+            background: var(--primary-light);
+        }
+        .user-table .acoes-usuario .btn-danger {
+            color: var(--danger);
+        }
+        .user-table .acoes-usuario .btn-danger:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+        .form-usuario {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-usuario input,
+        .form-usuario select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-usuario input:focus,
+        .form-usuario select:focus {
+            border-color: var(--primary-light);
+        }
+        .form-usuario .btn-submit {
+            grid-column: span 2;
+            background: var(--secondary);
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .form-usuario .btn-submit:hover {
+            background: #d4a820;
+        }
+        .senha-temporaria {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 6px;
+            font-family: monospace;
+            color: var(--secondary);
+            font-size: 14px;
+            display: inline-block;
+        }
         @media (max-width: 640px) {
             .container {
                 padding: 16px;
@@ -585,13 +770,15 @@
                 padding: 8px 10px;
             }
             .form-aviso,
-            .form-proc {
+            .form-proc,
+            .form-usuario {
                 grid-template-columns: 1fr;
             }
             .form-aviso textarea,
             .form-aviso .btn-submit,
             .form-proc textarea,
-            .form-proc .btn-submit {
+            .form-proc .btn-submit,
+            .form-usuario .btn-submit {
                 grid-column: span 1;
             }
             .input-area {
@@ -610,6 +797,18 @@
             .message .bubble {
                 max-width: 95%;
                 font-size: 14px;
+            }
+            .user-table {
+                font-size: 12px;
+            }
+            .user-table th,
+            .user-table td {
+                padding: 6px 4px;
+            }
+            .user-table .acoes-usuario button {
+                font-size: 10px;
+                padding: 2px 8px;
+                margin-right: 2px;
             }
         }
         .text-muted {
@@ -663,6 +862,20 @@
     </div>
 
     <!-- ============================================
+    TELA DE TROCA DE SENHA (primeiro acesso)
+    ============================================ -->
+    <div id="telaTrocaSenha">
+        <div class="login-box">
+            <h2><i class="fas fa-key"></i> Trocar senha</h2>
+            <p>Esta é a sua primeira vez. Defina uma nova senha para continuar.</p>
+            <input type="password" id="novaSenha" placeholder="Nova senha (mínimo 6 caracteres)" />
+            <input type="password" id="confirmarSenha" placeholder="Confirmar nova senha" />
+            <button onclick="trocarSenhaPrimeiroAcesso()">Salvar nova senha</button>
+            <div class="erro" id="erroTrocaSenha">As senhas não coincidem ou são muito curtas.</div>
+        </div>
+    </div>
+
+    <!-- ============================================
     CONTEÚDO PRINCIPAL
     ============================================ -->
     <div id="conteudoPrincipal" class="container" style="display:none;">
@@ -677,11 +890,12 @@
             </div>
         </div>
 
-        <div class="tabs">
+        <div class="tabs" id="tabsContainer">
             <button class="active" data-tab="tabChat"><i class="fas fa-comments"></i> Chat IA</button>
             <button data-tab="tabAvisos"><i class="fas fa-bullhorn"></i> Avisos</button>
             <button data-tab="tabBase"><i class="fas fa-database"></i> Base</button>
             <button data-tab="tabChatInterno"><i class="fas fa-users"></i> Chat Equipe</button>
+            <button data-tab="tabUsuarios" id="tabUsuariosBtn" class="hidden-tab"><i class="fas fa-user-cog"></i> Usuários</button>
         </div>
 
         <!-- TAB CHAT IA -->
@@ -718,7 +932,7 @@
         <!-- TAB AVISOS -->
         <div id="tabAvisos" class="tab-content">
             <h3 style="margin-bottom:12px;"><i class="fas fa-pen"></i> Gerenciar Avisos</h3>
-            <div class="form-aviso">
+            <div class="form-aviso" id="formAviso">
                 <input type="text" id="avisoChefia" placeholder="Chefia (ex: Luiz, Débora)" />
                 <input type="text" id="avisoData" placeholder="Data (opcional)" />
                 <textarea id="avisoMensagem" placeholder="Mensagem do aviso..."></textarea>
@@ -731,7 +945,7 @@
         <div id="tabBase" class="tab-content">
             <h3 style="margin-bottom:12px;"><i class="fas fa-book"></i> Editar Base de Conhecimento</h3>
             <p class="text-muted" style="font-size:13px;margin-bottom:16px;">Os procedimentos são salvos no banco e compartilhados com toda a equipe.</p>
-            <div class="form-proc">
+            <div class="form-proc" id="formProc">
                 <input type="text" id="procTitulo" placeholder="Título (ex: ITEM 1 - Sem especialidade)" />
                 <select id="procCategoria">
                     <option value="certidão">Certidão</option>
@@ -754,6 +968,26 @@
                 <input id="chatInternoInput" type="text" placeholder="Digite sua mensagem..." />
                 <button id="btnEnviarChat"><i class="fas fa-paper-plane"></i> Enviar</button>
             </div>
+        </div>
+
+        <!-- TAB USUÁRIOS (apenas super_admin) -->
+        <div id="tabUsuarios" class="tab-content">
+            <h3 style="margin-bottom:12px;"><i class="fas fa-user-cog"></i> Gerenciar Usuários</h3>
+            <div class="form-usuario" id="formUsuario">
+                <input type="text" id="userNome" placeholder="Nome completo" />
+                <input type="email" id="userEmail" placeholder="E-mail" />
+                <select id="userPapel">
+                    <option value="servidor">Servidor</option>
+                    <option value="super_admin">Super Admin</option>
+                </select>
+                <button class="btn-submit" id="btnCriarUsuario">Criar usuário (senha temporária)</button>
+            </div>
+            <div id="senhaGerada" style="display:none; background:rgba(255,255,255,0.05); border-radius:10px; padding:12px; margin-bottom:16px; border-left:4px solid var(--secondary);">
+                <strong style="color:var(--secondary);">Senha temporária gerada:</strong>
+                <span id="senhaTemporariaTexto" style="font-family:monospace; font-size:16px; color:#fff; display:block; margin-top:4px;"></span>
+                <span style="font-size:13px; color:var(--text-muted);">Copie esta senha e envie ao usuário. Ele será forçado a trocar no primeiro login.</span>
+            </div>
+            <div id="listaUsuarios"></div>
         </div>
 
         <div style="margin-top:24px; border-top:1px solid var(--border-color); padding-top:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:12px; color:var(--text-muted);">
@@ -795,6 +1029,16 @@
             return res.json();
         }
 
+        async function apiPatch(table, id, data) {
+            const res = await fetch(SUPABASE_URL + table + '?id=eq.' + id, {
+                method: 'PATCH',
+                headers: headers,
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
         async function apiDelete(table, id) {
             const res = await fetch(SUPABASE_URL + table + '?id=eq.' + id, {
                 method: 'DELETE',
@@ -805,8 +1049,10 @@
         }
 
         // ============================================
-        // LOGIN
+        // LOGIN E TROCA DE SENHA
         // ============================================
+        let usuarioAtual = null;
+
         async function fazerLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const senha = document.getElementById('loginSenha').value;
@@ -840,21 +1086,77 @@
                     return;
                 }
 
+                usuarioAtual = usuario;
                 localStorage.setItem('usuario', JSON.stringify(usuario));
                 localStorage.setItem('logado', 'true');
-                document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block';
-                document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
 
-                await carregarAvisos();
-                await carregarProcedimentos();
-                await carregarChatInterno();
-                atualizarBadgeAvisos();
+                // Verificar primeiro acesso
+                if (usuario.primeiro_acesso) {
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('telaTrocaSenha').style.display = 'flex';
+                    return;
+                }
+
+                entrarSistema(usuario);
 
             } catch (err) {
                 erro.textContent = 'Erro de conexão: ' + err.message;
                 erro.style.display = 'block';
             }
+        }
+
+        async function trocarSenhaPrimeiroAcesso() {
+            const nova = document.getElementById('novaSenha').value;
+            const confirmar = document.getElementById('confirmarSenha').value;
+            const erro = document.getElementById('erroTrocaSenha');
+
+            if (nova.length < 6) {
+                erro.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                erro.style.display = 'block';
+                return;
+            }
+            if (nova !== confirmar) {
+                erro.textContent = 'As senhas não coincidem.';
+                erro.style.display = 'block';
+                return;
+            }
+
+            const hash = CryptoJS.SHA256(nova).toString();
+            const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+            try {
+                await apiPatch('usuarios', usuario.id, {
+                    senha_hash: hash,
+                    primeiro_acesso: false
+                });
+                usuario.senha_hash = hash;
+                usuario.primeiro_acesso = false;
+                localStorage.setItem('usuario', JSON.stringify(usuario));
+                document.getElementById('telaTrocaSenha').style.display = 'none';
+                entrarSistema(usuario);
+            } catch (err) {
+                erro.textContent = 'Erro ao trocar senha: ' + err.message;
+                erro.style.display = 'block';
+            }
+        }
+
+        function entrarSistema(usuario) {
+            document.getElementById('telaLogin').style.display = 'none';
+            document.getElementById('telaTrocaSenha').style.display = 'none';
+            document.getElementById('conteudoPrincipal').style.display = 'block';
+            document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+
+            if (usuario.papel === 'super_admin') {
+                document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
+                carregarUsuarios();
+            } else {
+                document.getElementById('tabUsuariosBtn').classList.add('hidden-tab');
+            }
+
+            carregarAvisos();
+            carregarProcedimentos();
+            carregarChatInterno();
+            atualizarBadgeAvisos();
         }
 
         function logout() {
@@ -863,16 +1165,28 @@
             window.location.reload();
         }
 
+        // Verificar sessão
         if (localStorage.getItem('logado') === 'true') {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.id) {
-                document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block';
-                document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
-                carregarAvisos();
-                carregarProcedimentos();
-                carregarChatInterno();
-                atualizarBadgeAvisos();
+                if (usuario.primeiro_acesso) {
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('telaTrocaSenha').style.display = 'flex';
+                } else {
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('conteudoPrincipal').style.display = 'block';
+                    document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+                    if (usuario.papel === 'super_admin') {
+                        document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
+                        carregarUsuarios();
+                    } else {
+                        document.getElementById('tabUsuariosBtn').classList.add('hidden-tab');
+                    }
+                    carregarAvisos();
+                    carregarProcedimentos();
+                    carregarChatInterno();
+                    atualizarBadgeAvisos();
+                }
             } else {
                 localStorage.removeItem('logado');
                 localStorage.removeItem('usuario');
@@ -890,6 +1204,8 @@
                     container.innerHTML = '<div class="empty-state">Nenhum aviso cadastrado.</div>';
                     return;
                 }
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                const isAdmin = usuario.papel === 'super_admin';
                 container.innerHTML = avisos.map((a, i) => `
                     <div class="aviso-card">
                         <div>
@@ -897,9 +1213,7 @@
                             <span class="data">${a.data || new Date(a.criado_em).toLocaleString()}</span>
                         </div>
                         <div class="texto">${a.mensagem}</div>
-                        <div class="acoes">
-                            <button class="btn-del" onclick="removerAviso('${a.id}')">🗑️ Remover</button>
-                        </div>
+                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerAviso('${a.id}')">🗑️ Remover</button></div>` : ''}
                     </div>
                 `).join('');
                 atualizarBadgeAvisos();
@@ -909,7 +1223,6 @@
         }
 
         function atualizarBadgeAvisos() {
-            // Pega a contagem de avisos do banco (será atualizado após carregar)
             const container = document.getElementById('listaAvisos');
             const items = container.querySelectorAll('.aviso-card');
             const badge = document.getElementById('badgeAvisos');
@@ -922,6 +1235,11 @@
         }
 
         document.getElementById('btnSalvarAviso').addEventListener('click', async function() {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (usuario.papel !== 'super_admin') {
+                alert('Apenas Super Admin pode publicar avisos.');
+                return;
+            }
             const chefia = document.getElementById('avisoChefia').value.trim() || 'Chefia';
             const mensagem = document.getElementById('avisoMensagem').value.trim();
             const data = document.getElementById('avisoData').value.trim() || new Date().toLocaleString();
@@ -964,13 +1282,13 @@
                     container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado.</div>';
                     return;
                 }
+                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+                const isAdmin = usuario.papel === 'super_admin';
                 container.innerHTML = procs.map((p, i) => `
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
-                        <div class="acoes">
-                            <button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button>
-                        </div>
+                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button></div>` : ''}
                     </div>
                 `).join('');
             } catch (err) {
@@ -979,6 +1297,11 @@
         }
 
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (usuario.papel !== 'super_admin') {
+                alert('Apenas Super Admin pode adicionar procedimentos.');
+                return;
+            }
             const titulo = document.getElementById('procTitulo').value.trim();
             const conteudo = document.getElementById('procConteudo').value.trim();
             const categoria = document.getElementById('procCategoria').value;
@@ -989,7 +1312,7 @@
             }
 
             try {
-                await apiPost('procedimentos', { titulo, conteudo, categoria });
+                await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
                 document.getElementById('procTitulo').value = '';
                 document.getElementById('procConteudo').value = '';
                 await carregarProcedimentos();
@@ -1059,7 +1382,7 @@
         });
 
         // ============================================
-        // CHAT IA (com DeepSeek)
+        // CHAT IA (DeepSeek)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1185,7 +1508,7 @@ REGRAS OBRIGATÓRIAS:
         }
 
         // ============================================
-        // AVISOS RÁPIDOS (na aba Chat)
+        // AVISOS RÁPIDOS
         // ============================================
         document.getElementById('btnVerAvisos').addEventListener('click', async function() {
             const container = document.getElementById('avisoQuickList');
@@ -1211,6 +1534,118 @@ REGRAS OBRIGATÓRIAS:
                 alert('Erro ao carregar avisos: ' + err.message);
             }
         });
+
+        // ============================================
+        // GERENCIAR USUÁRIOS (apenas super_admin)
+        // ============================================
+        async function carregarUsuarios() {
+            try {
+                const usuarios = await apiGet('usuarios', 'order=nome.asc');
+                const container = document.getElementById('listaUsuarios');
+                if (!usuarios || usuarios.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Nenhum usuário cadastrado.</div>';
+                    return;
+                }
+                container.innerHTML = `
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Papel</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${usuarios.map(u => `
+                                <tr>
+                                    <td>${u.nome}</td>
+                                    <td>${u.email}</td>
+                                    <td>${u.papel}</td>
+                                    <td>
+                                        ${u.primeiro_acesso ? '<span class="status-badge primeiro">Primeiro acesso</span>' :
+                                          u.ativo ? '<span class="status-badge ativo">Ativo</span>' :
+                                          '<span class="status-badge inativo">Inativo</span>'}
+                                    </td>
+                                    <td class="acoes-usuario">
+                                        ${u.id !== JSON.parse(localStorage.getItem('usuario') || '{}').id ? `
+                                            <button onclick="resetarSenhaUsuario('${u.id}')"><i class="fas fa-key"></i></button>
+                                            <button onclick="toggleUsuario('${u.id}', ${!u.ativo})">
+                                                ${u.ativo ? '<i class="fas fa-user-slash"></i>' : '<i class="fas fa-user-check"></i>'}
+                                            </button>
+                                        ` : '<span style="color:var(--text-muted);font-size:12px;">(você)</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                console.error('Erro ao carregar usuários:', err);
+            }
+        }
+
+        document.getElementById('btnCriarUsuario').addEventListener('click', async function() {
+            const nome = document.getElementById('userNome').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const papel = document.getElementById('userPapel').value;
+
+            if (!nome || !email) {
+                alert('Preencha nome e e-mail.');
+                return;
+            }
+
+            const tempSenha = Math.random().toString(36).slice(2, 10);
+            const hash = CryptoJS.SHA256(tempSenha).toString();
+
+            try {
+                await apiPost('usuarios', {
+                    nome: nome,
+                    email: email,
+                    senha_hash: hash,
+                    papel: papel,
+                    ativo: true,
+                    primeiro_acesso: true
+                });
+                document.getElementById('userNome').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('senhaTemporariaTexto').textContent = tempSenha;
+                document.getElementById('senhaGerada').style.display = 'block';
+                await carregarUsuarios();
+                alert('Usuário criado com sucesso! A senha temporária foi exibida acima.');
+            } catch (err) {
+                alert('Erro ao criar usuário: ' + err.message);
+            }
+        });
+
+        async function resetarSenhaUsuario(id) {
+            if (!confirm('Resetar senha deste usuário? Uma nova senha temporária será gerada.')) return;
+            const tempSenha = Math.random().toString(36).slice(2, 10);
+            const hash = CryptoJS.SHA256(tempSenha).toString();
+
+            try {
+                await apiPatch('usuarios', id, {
+                    senha_hash: hash,
+                    primeiro_acesso: true
+                });
+                alert(`Nova senha temporária: ${tempSenha}\nEnvie esta senha para o usuário. Ele será forçado a trocar no primeiro login.`);
+                await carregarUsuarios();
+            } catch (err) {
+                alert('Erro ao resetar senha: ' + err.message);
+            }
+        }
+
+        async function toggleUsuario(id, ativar) {
+            const acao = ativar ? 'ativar' : 'desativar';
+            if (!confirm(`Deseja ${acao} este usuário?`)) return;
+            try {
+                await apiPatch('usuarios', id, { ativo: ativar });
+                await carregarUsuarios();
+            } catch (err) {
+                alert('Erro ao alterar status: ' + err.message);
+            }
+        }
 
         // ============================================
         // NAVEGAÇÃO POR ABAS
