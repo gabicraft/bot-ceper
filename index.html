@@ -376,7 +376,7 @@
         }
 
         // ============================================
-        // SOM (com AudioContext, sem base64)
+        // SOM (com AudioContext robusto)
         // ============================================
         let audioCtx = null;
 
@@ -387,33 +387,34 @@
                 } catch (e) { /* silencioso */ }
             }
             if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
+                audioCtx.resume().catch(() => {});
             }
         }
 
-        // Cria o AudioContext no primeiro clique
         document.addEventListener('click', initAudio, { once: true });
 
         function playNotificationSound() {
-            if (!audioCtx) {
+            let ctx = audioCtx;
+            if (!ctx) {
                 try {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    audioCtx = ctx;
                 } catch (e) { return; }
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
             }
             try {
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
                 oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
+                gainNode.connect(ctx.destination);
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.6, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + 0.25);
+                gainNode.gain.setValueAtTime(0.6, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                oscillator.start(ctx.currentTime);
+                oscillator.stop(ctx.currentTime + 0.25);
             } catch (e) { /* silencioso */ }
         }
 
@@ -435,7 +436,9 @@
         // ============================================
         async function carregarOnlineUsers() {
             try {
-                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc');
+                // Adiciona cache buster para evitar respostas em cache
+                const cacheBuster = '&_=' + Date.now();
+                const usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade&order=ultima_atividade.desc' + cacheBuster);
                 const agora = new Date();
                 const doisMinutos = 2 * 60 * 1000;
                 const online = usuarios.filter(u => {
@@ -489,7 +492,7 @@
         }
 
         // ============================================
-        // HEARTBEAT
+        // HEARTBEAT (com retry)
         // ============================================
         async function heartbeat() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -498,7 +501,10 @@
                 await apiPatch('usuarios', usuario.id, {
                     ultima_atividade: new Date().toISOString()
                 });
-            } catch (e) { /* ignorar */ }
+            } catch (e) {
+                console.warn('Heartbeat falhou, tentando novamente em 5s...');
+                setTimeout(heartbeat, 5000);
+            }
         }
 
         // ============================================
@@ -632,7 +638,7 @@
             startOnlinePolling();
 
             if (heartbeatInterval) clearInterval(heartbeatInterval);
-            heartbeatInterval = setInterval(heartbeat, 30000);
+            heartbeatInterval = setInterval(heartbeat, 15000); // a cada 15s
 
             logoutTimer = setInterval(verificarInatividade, 30000);
         }
@@ -671,7 +677,7 @@
                     atualizarBadgeAvisos();
                     startChatPolling();
                     startOnlinePolling();
-                    heartbeatInterval = setInterval(heartbeat, 30000);
+                    heartbeatInterval = setInterval(heartbeat, 15000);
                     logoutTimer = setInterval(verificarInatividade, 30000);
                     initAudio();
                 }
