@@ -908,14 +908,11 @@
         }
 
         // ============================================
-        // CHAT
+        // CHAT – VERSÃO FINAL COM IA CRIATIVA E FREIOS
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') enviarPergunta(); });
 
-        // ============================================
-        // PROMPT ATUALIZADO – IA CRIATIVA COM FREIOS
-        // ============================================
         async function enviarPergunta() {
             const input = document.getElementById('perguntaInput');
             const pergunta = input.value.trim();
@@ -935,24 +932,38 @@
 
                 const prompt = `Você é um assistente especialista da Central de Perícias (CEPER).
 
-BASE DE CONHECIMENTO OFICIAL (prioridade absoluta):
+BASE DE CONHECIMENTO OFICIAL DA CEPER:
 ${baseTexto}
 
 PERGUNTA DO USUÁRIO:
 ${pergunta}
 
-REGRAS DE CONDUTA:
-1. PRIORIDADE ABSOLUTA: Use a base de conhecimento sempre que a informação estiver disponível.
-2. Se a base NÃO tiver a informação específica, você pode usar seu conhecimento geral (jurídico, processual, de perícias) para:
-   - Combinar elementos de modelos existentes na base.
-   - Criar uma sugestão de certidão ou procedimento.
-   - Propor uma redação alternativa para a situação.
-3. OBRIGATORIAMENTE, quando usar conhecimento geral (não presente na base), inicie sua resposta com:
-   ⚠️ Esta informação não está na base da CEPER. Com base no meu conhecimento geral, sugiro:
+REGRAS OBRIGATÓRIAS:
+
+1. IDENTIFIQUE O TIPO DE PERGUNTA:
+   - Se a pergunta for sobre PROCEDIMENTOS, CERTIDÕES, PRAZOS, LOCALIZADORES ou qualquer rotina da CEPER → você DEVE usar a base de conhecimento como fonte primária.
+   - Se a pergunta for sobre HISTÓRIA, GEOGRAFIA, CULTURA, ATUALIDADES ou qualquer assunto GERAL → você pode usar seu conhecimento geral livremente, sem aviso.
+
+2. QUANDO A PERGUNTA FOR SOBRE A CEPER:
+   a. Se a informação estiver na base → responda usando a base.
+   b. Se a informação NÃO estiver na base → você pode usar seu conhecimento geral para:
+      - Combinar elementos de modelos existentes.
+      - Criar uma sugestão de certidão ou procedimento.
+      - Propor uma redação alternativa.
+      Neste caso, OBRIGATORIAMENTE, inicie a resposta com: ⚠️ Esta informação não está na base da CEPER. Com base no meu conhecimento geral, sugiro:
+
+3. QUANDO A PERGUNTA FOR SOBRE ASSUNTOS GERAIS:
+   - Responda diretamente com seu conhecimento geral.
+   - NÃO precisa avisar que não está na base (pois é óbvio).
+
 4. NUNCA invente dados concretos (números de processos, prazos específicos que não estejam na base) – apenas estruturas e redações.
+
 5. Mantenha o tom profissional, prático e objetivo.
+
 6. Sempre que for transcrever um modelo de certidão (da base ou criado), coloque-o entre [CERTIDAO] e [/CERTIDAO].
+
 7. Para destacar algo como urgente ou importante, use #texto# (ex: #prazo final#) – isso fará o texto ficar vermelho.
+
 8. Cite o item ou a data da regra quando disponível na base.`;
 
                 const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
