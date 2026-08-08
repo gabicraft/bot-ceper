@@ -148,6 +148,64 @@
         .chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
         .chat-header .usuario-logado { font-size: 13px; color: var(--text-muted); }
         .chat-header .usuario-logado strong { color: var(--secondary); }
+
+        /* Avatares */
+        .avatar-img, .avatar-fallback {
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+        .avatar-fallback {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: #fff;
+            font-weight: 600;
+        }
+        .perfil-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 12px 4px 4px !important;
+            transition: 0.2s ease;
+        }
+        .perfil-btn:hover {
+            border-color: rgba(59, 130, 246, 0.45) !important;
+            background: rgba(59, 130, 246, 0.1) !important;
+        }
+        .perfil-btn .perfil-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .perfil-btn:hover .perfil-hint { opacity: 1; }
+        .chat-msg {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .chat-msg .msg-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+        .chat-msg .msg-body { min-width: 0; }
+        .online-users li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .online-users li .online-dot,
+        .online-users li .busy-dot {
+            margin-left: auto;
+        }
     </style>
 </head>
 <body>
@@ -190,7 +248,12 @@
                 <h1>CEPER <span>Bot</span></h1>
             </div>
             <div class="header-actions">
-                <span class="usuario-info" id="infoUsuario">👤 servidor</span>
+                <span class="usuario-info perfil-btn" id="infoUsuario" title="Clique para alterar a foto de perfil" onclick="document.getElementById('inputAvatar').click()">
+                    <span id="infoUsuarioAvatar"></span>
+                    <span id="infoUsuarioNome">servidor</span>
+                    <span class="perfil-hint">foto</span>
+                </span>
+                <input type="file" id="inputAvatar" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" />
                 <span id="onlineCount" class="usuario-info" style="cursor:default;">
                     <span class="dot"></span>
                     <span id="onlineNumber">0</span> online
@@ -326,7 +389,12 @@
         // SUPABASE CONFIG
         // ============================================
         const SUPABASE_URL = 'https://jxcioqwwxsnyhmkigvbj.supabase.co/rest/v1/';
+        const SUPABASE_STORAGE_URL = 'https://jxcioqwwxsnyhmkigvbj.supabase.co/storage/v1';
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
+        const AVATAR_BUCKET = 'avatars';
+
+        // mapa nome → avatar_url (para o chat)
+        let avatarMap = {};
 
         // ============================================
         // FUNÇÕES DE API
@@ -336,6 +404,35 @@
             'apikey': SUPABASE_ANON_KEY,
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
         };
+
+        async function uploadToStorage(bucket, path, file) {
+            const res = await fetch(SUPABASE_STORAGE_URL + '/object/' + bucket + '/' + path, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                    'Content-Type': file.type || 'application/octet-stream',
+                    'x-upsert': 'true'
+                },
+                body: file
+            });
+            if (!res.ok) {
+                const t = await res.text();
+                throw new Error(t || ('Upload falhou: HTTP ' + res.status));
+            }
+            return SUPABASE_STORAGE_URL + '/object/public/' + bucket + '/' + path;
+        }
+
+        function avatarHtml(url, nome, size) {
+            const s = size || 28;
+            const inicial = (nome || '?').trim().charAt(0).toUpperCase();
+            if (url) {
+                return '<img class="avatar-img" src="' + url + '" alt="' + (nome || '') +
+                    '" style="width:' + s + 'px;height:' + s + 'px;" onerror="this.style.display=\'none\';this.nextElementSibling&&(this.nextElementSibling.style.display=\'flex\')" />' +
+                    '<span class="avatar-fallback" style="display:none;width:' + s + 'px;height:' + s + 'px;font-size:' + Math.round(s * 0.4) + 'px;">' + inicial + '</span>';
+            }
+            return '<span class="avatar-fallback" style="width:' + s + 'px;height:' + s + 'px;font-size:' + Math.round(s * 0.4) + 'px;">' + inicial + '</span>';
+        }
 
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
@@ -439,12 +536,11 @@
         const BUSY_TIMEOUT = 10 * 60 * 1000;
 
         // ============================================
-        // ONLINE USERS
+        // ONLINE USERS + AVATARES
         // ============================================
         function parseAtividade(valor) {
             if (!valor) return null;
             let s = String(valor).trim();
-            // Supabase devolve sem Z → interpreta como UTC
             if (/^\d{4}-\d{2}-\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
                 s = s.replace(' ', 'T') + 'Z';
             }
@@ -459,20 +555,24 @@
             const usuarioLogado = JSON.parse(localStorage.getItem('usuario') || '{}');
 
             try {
-                // Query simples (a mesma que responde 200 no Supabase)
-                const usuarios = await apiGet(
-                    'usuarios',
-                    'select=nome,ultima_atividade,ativo&order=nome.asc'
-                );
-
-                if (!Array.isArray(usuarios)) {
-                    throw new Error('Resposta inválida do servidor');
+                let usuarios = [];
+                try {
+                    usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade,ativo,avatar_url&order=nome.asc');
+                } catch (e1) {
+                    // Coluna avatar_url ainda não existe
+                    usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade,ativo&order=nome.asc');
                 }
+                if (!Array.isArray(usuarios)) throw new Error('Resposta inválida');
+
+                // Atualiza mapa de avatares para o chat
+                avatarMap = {};
+                usuarios.forEach(u => {
+                    if (u.nome) avatarMap[u.nome] = u.avatar_url || '';
+                });
 
                 const agora = Date.now();
-                const janelaOnline = 3 * 60 * 1000;  // 3 min
-                const janelaRecente = 15 * 60 * 1000; // 15 min
-
+                const janelaOnline = 3 * 60 * 1000;
+                const janelaRecente = 15 * 60 * 1000;
                 const online = [];
                 const recentes = [];
                 const ativos = [];
@@ -483,7 +583,6 @@
                     const t = parseAtividade(u.ultima_atividade);
                     if (t == null) return;
                     const diff = agora - t;
-                    // aceita até 30s no futuro (relógio desalinhado)
                     if (diff >= -30000 && diff < janelaOnline) online.push(u);
                     else if (diff >= janelaOnline && diff < janelaRecente) recentes.push(u);
                 });
@@ -496,10 +595,12 @@
                     } else {
                         let html = '';
                         online.forEach(u => {
-                            html += '<li><span class="online-dot"></span> ' + u.nome + '</li>';
+                            html += '<li>' + avatarHtml(u.avatar_url, u.nome, 26) +
+                                '<span>' + u.nome + '</span><span class="online-dot"></span></li>';
                         });
                         recentes.forEach(u => {
-                            html += '<li><span class="online-dot busy-dot"></span> ' + u.nome + ' (ausente)</li>';
+                            html += '<li>' + avatarHtml(u.avatar_url, u.nome, 26) +
+                                '<span>' + u.nome + ' (ausente)</span><span class="online-dot busy-dot"></span></li>';
                         });
                         chatList.innerHTML = html;
                     }
@@ -526,7 +627,6 @@
                 }
             } catch (err) {
                 console.error('Erro ao carregar online:', err);
-                // Nunca deixar "Carregando..." para sempre
                 if (chatList) {
                     chatList.innerHTML = '<li class="empty-online">Falha ao carregar: ' +
                         (err && err.message ? err.message : String(err)) + '</li>';
@@ -534,6 +634,63 @@
                 if (onlineNumber) onlineNumber.textContent = '?';
             }
         }
+
+        // ============================================
+        // FOTO DE PERFIL
+        // ============================================
+        function atualizarHeaderPerfil(usuario) {
+            const nomeEl = document.getElementById('infoUsuarioNome');
+            const avEl = document.getElementById('infoUsuarioAvatar');
+            if (nomeEl) nomeEl.textContent = usuario.nome || 'servidor';
+            if (avEl) avEl.innerHTML = avatarHtml(usuario.avatar_url, usuario.nome, 28);
+        }
+
+        async function enviarAvatar(file) {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (!usuario.id) {
+                alert('Faça login novamente.');
+                return;
+            }
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Selecione uma imagem (JPG, PNG, WEBP ou GIF).');
+                return;
+            }
+            if (file.size > 3 * 1024 * 1024) {
+                alert('Imagem muito grande. Máximo 3 MB.');
+                return;
+            }
+
+            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+            const path = usuario.id + '/avatar.' + ext;
+
+            try {
+                const url = await uploadToStorage(AVATAR_BUCKET, path, file);
+                // cache-bust na URL
+                const urlFinal = url + '?t=' + Date.now();
+                await apiPatch('usuarios', usuario.id, { avatar_url: urlFinal });
+                usuario.avatar_url = urlFinal;
+                localStorage.setItem('usuario', JSON.stringify(usuario));
+                atualizarHeaderPerfil(usuario);
+                avatarMap[usuario.nome] = urlFinal;
+                carregarOnlineUsers();
+                alert('Foto de perfil atualizada!');
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao enviar foto. Verifique se o bucket "avatars" existe e está público.\n\n' + (err.message || err));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('inputAvatar');
+            if (input) {
+                input.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        enviarAvatar(this.files[0]);
+                        this.value = '';
+                    }
+                });
+            }
+        });
 
         // ============================================
         // HEARTBEAT (com retry)
@@ -660,7 +817,7 @@
             document.getElementById('telaLogin').style.display = 'none';
             document.getElementById('telaTrocaSenha').style.display = 'none';
             document.getElementById('conteudoPrincipal').style.display = 'block';
-            document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+            atualizarHeaderPerfil(usuario);
             document.getElementById('chatUsuarioNome').textContent = usuario.nome;
 
             heartbeat();
@@ -707,7 +864,7 @@
                 } else {
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'block';
-                    document.getElementById('infoUsuario').textContent = '👤 ' + usuario.nome;
+                    atualizarHeaderPerfil(usuario);
                     document.getElementById('chatUsuarioNome').textContent = usuario.nome;
                     if (usuario.papel === 'super_admin') {
                         document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
@@ -887,6 +1044,19 @@
                 const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
                 const nome = usuario.nome || '';
 
+                // Garante avatares carregados para mostrar ao lado dos nomes
+                if (Object.keys(avatarMap).length === 0) {
+                    try {
+                        let us;
+                        try {
+                            us = await apiGet('usuarios', 'select=nome,avatar_url');
+                        } catch (_) {
+                            us = await apiGet('usuarios', 'select=nome');
+                        }
+                        (us || []).forEach(u => { if (u.nome) avatarMap[u.nome] = u.avatar_url || ''; });
+                    } catch (_) { /* ignore */ }
+                }
+
                 const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
                 const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
 
@@ -922,12 +1092,16 @@
                     const remetenteDisplay = isPrivado ? `${m.remetente} (privado)` : m.remetente;
                     const iconePrivado = isPrivado ? '<span class="privado"><i class="fas fa-lock"></i></span>' : '';
                     const dataFormatada = new Date(m.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                    const avUrl = avatarMap[m.remetente] || '';
                     return `
                         <div class="chat-msg">
-                            <div>
-                                ${iconePrivado}
-                                <span class="remetente">${remetenteDisplay}</span>
-                                <span class="texto-msg">${m.mensagem}</span>
+                            <div class="msg-left">
+                                ${avatarHtml(avUrl, m.remetente, 30)}
+                                <div class="msg-body">
+                                    ${iconePrivado}
+                                    <span class="remetente">${remetenteDisplay}</span>
+                                    <span class="texto-msg">${m.mensagem}</span>
+                                </div>
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
                         </div>
