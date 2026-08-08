@@ -51,7 +51,6 @@
             box-shadow: var(--shadow);
             margin-top: 10px;
         }
-        /* HEADER */
         .header {
             display: flex;
             justify-content: space-between;
@@ -115,6 +114,27 @@
             background: rgba(255,255,255,0.05);
             border-radius: 40px;
             border: 1px solid var(--border-color);
+        }
+        /* ========================================
+           CONTADOR DE ONLINE NO CABEÇALHO
+        ======================================== */
+        .online-count {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 40px;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .online-count .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
         }
         /* TELA DE LOGIN */
         #telaLogin {
@@ -181,7 +201,6 @@
             font-size: 13px;
             margin-top: 16px;
         }
-        /* ONLINE NA TELA DE LOGIN */
         .online-login {
             margin-top: 24px;
             padding-top: 16px;
@@ -228,7 +247,6 @@
             color: var(--text-muted);
             font-size: 13px;
         }
-        /* TELA DE TROCA DE SENHA */
         #telaTrocaSenha {
             display: none;
             flex-direction: column;
@@ -293,7 +311,6 @@
             display: none;
             font-size: 14px;
         }
-        /* ABAS */
         .tabs {
             display: flex;
             gap: 4px;
@@ -353,7 +370,6 @@
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* CHAT IA */
         .chat-area {
             background: rgba(0,0,0,0.25);
             border-radius: 16px;
@@ -502,7 +518,6 @@
             cursor: not-allowed;
             transform: none;
         }
-        /* AVISOS E PROCEDIMENTOS */
         .aviso-card, .proc-item {
             background: rgba(255,255,255,0.03);
             border-radius: 12px;
@@ -595,7 +610,6 @@
         .form-aviso .btn-submit:hover, .form-proc .btn-submit:hover {
             background: #d4a820;
         }
-        /* CHAT INTERNO */
         .chat-interno-wrapper {
             display: flex;
             gap: 20px;
@@ -642,15 +656,26 @@
             outline: none;
             min-width: 150px;
         }
+        /* ========================================
+           SELETOR DE DESTINATÁRIO – VISÍVEL
+        ======================================== */
         .chat-input-area select {
             padding: 10px 14px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            background: rgba(255,255,255,0.04);
-            color: var(--text-light);
+            background: #1e2a3a;
+            color: #e8edf5;
             font-size: 14px;
             outline: none;
             min-width: 120px;
+            cursor: pointer;
+        }
+        .chat-input-area select option {
+            background: #1e2a3a;
+            color: #e8edf5;
+        }
+        .chat-input-area select option:hover {
+            background: var(--primary-light);
         }
         .chat-input-area button {
             background: var(--secondary);
@@ -708,7 +733,6 @@
             color: var(--text-muted);
             font-size: 13px;
         }
-        /* USUÁRIOS */
         .user-table {
             width: 100%;
             border-collapse: collapse;
@@ -854,7 +878,6 @@
             <button onclick="fazerLogin()">Entrar</button>
             <div class="erro" id="erroLogin">Usuário ou senha inválidos.</div>
             <div class="info">Acesso exclusivo para servidores da CEPER.</div>
-            <!-- ONLINE NA TELA DE LOGIN -->
             <div class="online-login" id="onlineLoginContainer">
                 <h4><i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i> Usuários online agora</h4>
                 <ul id="onlineLoginList">
@@ -889,6 +912,10 @@
             </div>
             <div class="header-actions">
                 <span class="usuario-info" id="infoUsuario">👤 servidor</span>
+                <span id="onlineCount" class="usuario-info" style="cursor:default;">
+                    <span class="dot"></span>
+                    <span id="onlineNumber">0</span> online
+                </span>
                 <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </div>
@@ -1070,7 +1097,7 @@
         }
 
         // ============================================
-        // ÁUDIO (criado no primeiro clique)
+        // ÁUDIO (criado no login e retomado se suspenso)
         // ============================================
         let audioCtx = null;
 
@@ -1083,7 +1110,14 @@
         }
 
         function playNotificationSound() {
-            if (!audioCtx) return;
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) { return; }
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
             try {
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
@@ -1098,8 +1132,6 @@
             } catch (e) { /* silencioso */ }
         }
 
-        document.addEventListener('click', initAudio, { once: true });
-
         // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
@@ -1113,7 +1145,7 @@
         const BUSY_TIMEOUT = 10 * 60 * 1000;   // 10 minutos
 
         // ============================================
-        // ONLINE USERS (com status busy)
+        // ONLINE USERS
         // ============================================
         async function carregarOnlineUsers() {
             try {
@@ -1130,6 +1162,12 @@
                     const diff = agora - new Date(u.ultima_atividade);
                     return diff >= BUSY_TIMEOUT && diff < LOGOUT_TIMEOUT;
                 });
+
+                // Contador no cabeçalho
+                const onlineNumber = document.getElementById('onlineNumber');
+                if (onlineNumber) {
+                    onlineNumber.textContent = online.length;
+                }
 
                 // Lista na tela de login
                 const loginList = document.getElementById('onlineLoginList');
@@ -1189,7 +1227,7 @@
         }
 
         // ============================================
-        // ATUALIZAR ATIVIDADE DO USUÁRIO
+        // ATUALIZAR ATIVIDADE
         // ============================================
         async function atualizarAtividade() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -1202,7 +1240,7 @@
         }
 
         // ============================================
-        // VERIFICAR INATIVIDADE E LOGOUT AUTOMÁTICO
+        // VERIFICAR INATIVIDADE E LOGOUT
         // ============================================
         function verificarInatividade() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -1216,7 +1254,7 @@
         }
 
         // ============================================
-        // EVENTOS DE INTERAÇÃO (atualizam atividade)
+        // EVENTOS DE INTERAÇÃO
         // ============================================
         function setupInteractionListeners() {
             const events = ['click', 'mousemove', 'keydown', 'scroll', 'touchstart'];
@@ -1268,6 +1306,9 @@
                 usuarioAtual = usuario;
                 localStorage.setItem('usuario', JSON.stringify(usuario));
                 localStorage.setItem('logado', 'true');
+
+                // Inicializa áudio
+                initAudio();
 
                 if (usuario.primeiro_acesso) {
                     document.getElementById('telaLogin').style.display = 'none';
@@ -1382,6 +1423,7 @@
                     setInterval(atualizarAtividade, 30000);
                     logoutTimer = setInterval(verificarInatividade, 30000);
                     setupInteractionListeners();
+                    initAudio();
                 }
             } else {
                 localStorage.removeItem('logado');
