@@ -423,21 +423,31 @@
         #btnVoltarGeral:hover {
             background: var(--primary-light) !important;
         }
-        /* Modal Base de Conhecimento */
+        /* Modal Base de Conhecimento (fora do .container) */
         .modal-proc-overlay {
-            position: fixed; inset: 0; z-index: 10050;
-            background: rgba(0,0,0,0.72);
-            display: flex; align-items: center; justify-content: center;
+            position: fixed !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 99999 !important;
+            background: rgba(0,0,0,0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
             padding: 16px;
         }
+        .modal-proc-overlay.open {
+            display: flex !important;
+        }
         .modal-proc-box {
-            background: #152233;
-            border: 1px solid var(--border-color);
+            background: #1a2a3d;
+            border: 1px solid rgba(255,255,255,0.18);
             border-radius: 16px;
             width: min(920px, 100%);
             max-height: 92vh;
-            display: flex; flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            min-height: 420px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.65);
+            color: #e8eef5;
         }
         .modal-proc-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -618,49 +628,6 @@
                 </button>
             </div>
             <div id="listaProcedimentos"></div>
-        </div>
-
-        <!-- Modal edição Base de Conhecimento -->
-        <div id="modalProc" class="modal-proc-overlay" style="display:none;" onclick="if(event.target===this)fecharModalProc()">
-            <div class="modal-proc-box" onclick="event.stopPropagation()">
-                <div class="modal-proc-header">
-                    <h3 id="modalProcTitulo">Novo item da base</h3>
-                    <button type="button" class="modal-proc-close" onclick="fecharModalProc()" title="Fechar">✕</button>
-                </div>
-                <div class="modal-proc-body">
-                    <input type="hidden" id="procEditId" value="" />
-                    <label class="modal-label">Título</label>
-                    <input type="text" id="procTitulo" class="modal-input" placeholder="Ex: Cancelar nomeação – rotina no eproc/AJG" />
-                    <label class="modal-label">Categoria</label>
-                    <select id="procCategoria" class="modal-input">
-                        <option value="rotina">Rotina (passo a passo)</option>
-                        <option value="cenario">Cenário / variável</option>
-                        <option value="fluxo">Fluxo completo</option>
-                        <option value="certidao">Certidão / modelo</option>
-                        <option value="localizador">Localizador</option>
-                        <option value="equipe">Equipe / cultura</option>
-                        <option value="sistema">Sistema (e-Proc / AJG)</option>
-                        <option value="orientacao">Orientação geral</option>
-                    </select>
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
-                        <label class="modal-label" style="margin:0;">Conteúdo</label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
-                            <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
-                                <i class="fas fa-image"></i> Inserir imagem
-                                <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
-                            </label>
-                        </div>
-                    </div>
-                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
-                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
-                    <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
-                </div>
-                <div class="modal-proc-footer">
-                    <button type="button" id="btnCancelarProc" class="modal-btn-sec" onclick="fecharModalProc()">Cancelar</button>
-                    <button type="button" id="btnSalvarProc" class="modal-btn-primary">Salvar</button>
-                </div>
-            </div>
         </div>
 
         <!-- TAB CHAT INTERNO -->
@@ -1529,12 +1496,16 @@ VER TAMBÉM:
                 return;
             }
             if (novo) limparFormProc();
-            document.getElementById('modalProc').style.display = 'flex';
+            const modal = document.getElementById('modalProc');
+            modal.classList.add('open');
+            modal.style.display = 'flex';
             setTimeout(() => document.getElementById('procTitulo').focus(), 50);
         }
 
         function fecharModalProc() {
-            document.getElementById('modalProc').style.display = 'none';
+            const modal = document.getElementById('modalProc');
+            modal.classList.remove('open');
+            modal.style.display = 'none';
             limparFormProc();
         }
 
@@ -1552,7 +1523,9 @@ VER TAMBÉM:
             document.getElementById('btnSalvarProc').textContent = 'Salvar alterações';
             document.getElementById('procUploadStatus').textContent = '';
             atualizarPreviewImagensProc();
-            document.getElementById('modalProc').style.display = 'flex';
+            const modal = document.getElementById('modalProc');
+            modal.classList.add('open');
+            modal.style.display = 'flex';
         }
 
         function inserirNoCursor(textarea, texto) {
@@ -1702,7 +1675,9 @@ VER TAMBÉM:
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const modal = document.getElementById('modalProc');
-                if (modal && modal.style.display === 'flex') fecharModalProc();
+                if (modal && (modal.classList.contains('open') || modal.style.display === 'flex')) {
+                    fecharModalProc();
+                }
             }
         });
 
@@ -2649,5 +2624,50 @@ REGRAS:
             });
         });
     </script>
+
+        <!-- Modal edição Base de Conhecimento -->
+        <div id="modalProc" class="modal-proc-overlay" style="display:none;" onclick="if(event.target===this)fecharModalProc()">
+            <div class="modal-proc-box" onclick="event.stopPropagation()">
+                <div class="modal-proc-header">
+                    <h3 id="modalProcTitulo">Novo item da base</h3>
+                    <button type="button" class="modal-proc-close" onclick="fecharModalProc()" title="Fechar">✕</button>
+                </div>
+                <div class="modal-proc-body">
+                    <input type="hidden" id="procEditId" value="" />
+                    <label class="modal-label">Título</label>
+                    <input type="text" id="procTitulo" class="modal-input" placeholder="Ex: Cancelar nomeação – rotina no eproc/AJG" />
+                    <label class="modal-label">Categoria</label>
+                    <select id="procCategoria" class="modal-input">
+                        <option value="rotina">Rotina (passo a passo)</option>
+                        <option value="cenario">Cenário / variável</option>
+                        <option value="fluxo">Fluxo completo</option>
+                        <option value="certidao">Certidão / modelo</option>
+                        <option value="localizador">Localizador</option>
+                        <option value="equipe">Equipe / cultura</option>
+                        <option value="sistema">Sistema (e-Proc / AJG)</option>
+                        <option value="orientacao">Orientação geral</option>
+                    </select>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                        <label class="modal-label" style="margin:0;">Conteúdo</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
+                            <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
+                                <i class="fas fa-image"></i> Inserir imagem
+                                <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
+                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
+                    <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="modal-proc-footer">
+                    <button type="button" id="btnCancelarProc" class="modal-btn-sec" onclick="fecharModalProc()">Cancelar</button>
+                    <button type="button" id="btnSalvarProc" class="modal-btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+
 </body>
 </html>
