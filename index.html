@@ -540,16 +540,33 @@
         <!-- TAB BASE -->
         <div id="tabBase" class="tab-content">
             <h3 style="margin-bottom:12px;"><i class="fas fa-book"></i> Editar Base de Conhecimento</h3>
-            <p class="text-muted" style="font-size:13px;margin-bottom:16px;">Os procedimentos são salvos no banco e compartilhados com toda a equipe.</p>
+            <p class="text-muted" style="font-size:13px;margin-bottom:16px;">
+                Cadastre <strong>fatias</strong> por tópico: uma rotina objetiva, e cenários/exceções em itens separados.
+                Use títulos claros (ex.: <em>Cancelar nomeação – rotina no eproc/AJG</em>).
+            </p>
             <div class="form-proc" id="formProc">
                 <input type="hidden" id="procEditId" value="" />
-                <input type="text" id="procTitulo" placeholder="Título (ex: ITEM 1 - Sem especialidade)" />
+                <input type="text" id="procTitulo" placeholder="Título (ex: Cancelar nomeação – rotina no eproc/AJG)" />
                 <select id="procCategoria">
-                    <option value="certidão">Certidão</option>
-                    <option value="fluxo">Fluxo</option>
-                    <option value="orientacao">Orientação</option>
+                    <option value="rotina">Rotina (passo a passo)</option>
+                    <option value="cenario">Cenário / variável</option>
+                    <option value="fluxo">Fluxo completo</option>
+                    <option value="certidao">Certidão / modelo</option>
+                    <option value="localizador">Localizador</option>
+                    <option value="equipe">Equipe / cultura</option>
+                    <option value="sistema">Sistema (e-Proc / AJG)</option>
+                    <option value="orientacao">Orientação geral</option>
                 </select>
-                <textarea id="procConteudo" placeholder="Conteúdo do procedimento..."></textarea>
+                <textarea id="procConteudo" placeholder="Modelo sugerido:
+
+TÓPICO: Nome do assunto
+TIPO: rotina | cenário | modelo
+
+(texto objetivo)
+
+VER TAMBÉM:
+- Título de item relacionado
+- Outro item relacionado"></textarea>
                 <div style="grid-column: span 2; display:flex; gap:10px; flex-wrap:wrap;">
                     <button class="btn-submit" id="btnSalvarProc" style="flex:1; grid-column:auto;">Adicionar procedimento</button>
                     <button type="button" id="btnCancelarProc" style="display:none; flex:0 0 auto; background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-light); padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;">Cancelar edição</button>
@@ -1401,7 +1418,7 @@
             document.getElementById('procEditId').value = '';
             document.getElementById('procTitulo').value = '';
             document.getElementById('procConteudo').value = '';
-            document.getElementById('procCategoria').value = 'certidão';
+            document.getElementById('procCategoria').value = 'rotina';
             document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
             const btnCancel = document.getElementById('btnCancelarProc');
             if (btnCancel) btnCancel.style.display = 'none';
@@ -1416,7 +1433,7 @@
             document.getElementById('procEditId').value = p.id;
             document.getElementById('procTitulo').value = p.titulo || '';
             document.getElementById('procConteudo').value = p.conteudo || '';
-            document.getElementById('procCategoria').value = p.categoria || 'certidão';
+            document.getElementById('procCategoria').value = p.categoria || 'rotina';
             document.getElementById('btnSalvarProc').textContent = 'Salvar alterações';
             const btnCancel = document.getElementById('btnCancelarProc');
             if (btnCancel) btnCancel.style.display = 'inline-block';
