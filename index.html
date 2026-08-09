@@ -695,6 +695,50 @@
         </div>
     </div>
 
+<!-- Modal edição Base de Conhecimento -->
+        <div id="modalProc" class="modal-proc-overlay" style="display:none;" onclick="if(event.target===this)fecharModalProc()">
+            <div class="modal-proc-box" onclick="event.stopPropagation()">
+                <div class="modal-proc-header">
+                    <h3 id="modalProcTitulo">Novo item da base</h3>
+                    <button type="button" class="modal-proc-close" onclick="fecharModalProc()" title="Fechar">✕</button>
+                </div>
+                <div class="modal-proc-body">
+                    <input type="hidden" id="procEditId" value="" />
+                    <label class="modal-label">Título</label>
+                    <input type="text" id="procTitulo" class="modal-input" placeholder="Ex: Cancelar nomeação – rotina no eproc/AJG" />
+                    <label class="modal-label">Categoria</label>
+                    <select id="procCategoria" class="modal-input">
+                        <option value="rotina">Rotina (passo a passo)</option>
+                        <option value="cenario">Cenário / variável</option>
+                        <option value="fluxo">Fluxo completo</option>
+                        <option value="certidao">Certidão / modelo</option>
+                        <option value="localizador">Localizador</option>
+                        <option value="equipe">Equipe / cultura</option>
+                        <option value="sistema">Sistema (e-Proc / AJG)</option>
+                        <option value="orientacao">Orientação geral</option>
+                    </select>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                        <label class="modal-label" style="margin:0;">Conteúdo</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
+                            <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
+                                <i class="fas fa-image"></i> Inserir imagem
+                                <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
+                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
+                    <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="modal-proc-footer">
+                    <button type="button" id="btnCancelarProc" class="modal-btn-sec" onclick="fecharModalProc()">Cancelar</button>
+                    <button type="button" id="btnSalvarProc" class="modal-btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+
     <script>
         // ============================================
         // SUPABASE CONFIG
@@ -1586,17 +1630,20 @@ VER TAMBÉM:
             }
         }
 
-        document.getElementById('btnNovoProc').addEventListener('click', function() {
+        const _btnNovo = document.getElementById('btnNovoProc');
+        if (_btnNovo) _btnNovo.addEventListener('click', function() {
             abrirModalProc(true);
         });
 
-        document.getElementById('btnInserirModeloProc').addEventListener('click', function() {
+        const _btnMod = document.getElementById('btnInserirModeloProc');
+        if (_btnMod) _btnMod.addEventListener('click', function() {
             const ta = document.getElementById('procConteudo');
             if (!ta.value.trim()) ta.value = MODELO_TEXTO_PROC;
             else inserirNoCursor(ta, '\n' + MODELO_TEXTO_PROC);
         });
 
-        document.getElementById('procImagemInput').addEventListener('change', async function(e) {
+        const _procImgInput = document.getElementById('procImagemInput');
+        if (_procImgInput) _procImgInput.addEventListener('change', async function(e) {
             const file = e.target.files && e.target.files[0];
             e.target.value = '';
             if (!file) return;
@@ -1626,9 +1673,11 @@ VER TAMBÉM:
             }
         });
 
-        document.getElementById('procConteudo').addEventListener('input', atualizarPreviewImagensProc);
+        const _procCont = document.getElementById('procConteudo');
+        if (_procCont) _procCont.addEventListener('input', atualizarPreviewImagensProc);
 
-        document.getElementById('btnSalvarProc').addEventListener('click', async function() {
+        const _btnSalvarProc = document.getElementById('btnSalvarProc');
+        if (_btnSalvarProc) _btnSalvarProc.addEventListener('click', async function() {
             if (!isGestor()) {
                 alert('Apenas Admin ou Super Admin podem gerenciar procedimentos.');
                 return;
@@ -2624,50 +2673,6 @@ REGRAS:
             });
         });
     </script>
-
-        <!-- Modal edição Base de Conhecimento -->
-        <div id="modalProc" class="modal-proc-overlay" style="display:none;" onclick="if(event.target===this)fecharModalProc()">
-            <div class="modal-proc-box" onclick="event.stopPropagation()">
-                <div class="modal-proc-header">
-                    <h3 id="modalProcTitulo">Novo item da base</h3>
-                    <button type="button" class="modal-proc-close" onclick="fecharModalProc()" title="Fechar">✕</button>
-                </div>
-                <div class="modal-proc-body">
-                    <input type="hidden" id="procEditId" value="" />
-                    <label class="modal-label">Título</label>
-                    <input type="text" id="procTitulo" class="modal-input" placeholder="Ex: Cancelar nomeação – rotina no eproc/AJG" />
-                    <label class="modal-label">Categoria</label>
-                    <select id="procCategoria" class="modal-input">
-                        <option value="rotina">Rotina (passo a passo)</option>
-                        <option value="cenario">Cenário / variável</option>
-                        <option value="fluxo">Fluxo completo</option>
-                        <option value="certidao">Certidão / modelo</option>
-                        <option value="localizador">Localizador</option>
-                        <option value="equipe">Equipe / cultura</option>
-                        <option value="sistema">Sistema (e-Proc / AJG)</option>
-                        <option value="orientacao">Orientação geral</option>
-                    </select>
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
-                        <label class="modal-label" style="margin:0;">Conteúdo</label>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
-                            <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
-                                <i class="fas fa-image"></i> Inserir imagem
-                                <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
-                            </label>
-                        </div>
-                    </div>
-                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
-                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
-                    <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
-                </div>
-                <div class="modal-proc-footer">
-                    <button type="button" id="btnCancelarProc" class="modal-btn-sec" onclick="fecharModalProc()">Cancelar</button>
-                    <button type="button" id="btnSalvarProc" class="modal-btn-primary">Salvar</button>
-                </div>
-            </div>
-        </div>
-
 
 </body>
 </html>
