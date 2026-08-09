@@ -247,7 +247,7 @@
     </div>
 
     <!-- ============================================
-    TELA DE LOGIN (sem a lista de online)
+    TELA DE LOGIN
     ============================================ -->
     <div id="telaLogin">
         <div class="login-box">
@@ -429,7 +429,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
         const AVATAR_BUCKET = 'avatars';
 
-        // mapa nome → avatar_url (para o chat)
         let avatarMap = {};
 
         // ============================================
@@ -533,7 +532,7 @@
         }
 
         // ============================================
-        // SOM (com AudioContext robusto)
+        // SOM DE NOTIFICAÇÃO (versão melhorada)
         // ============================================
         let audioCtx = null;
 
@@ -553,28 +552,32 @@
         });
 
         function playNotificationSound() {
-            let ctx = audioCtx;
-            if (!ctx) {
-                try {
-                    ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    audioCtx = ctx;
-                } catch (e) { console.warn('Não foi possível criar o AudioContext para o som:', e); return; }
-            }
-            if (ctx.state === 'suspended') {
-                ctx.resume().catch(() => {});
-            }
             try {
-                const oscillator = ctx.createOscillator();
-                const gainNode = ctx.createGain();
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
                 oscillator.connect(gainNode);
-                gainNode.connect(ctx.destination);
+                gainNode.connect(audioCtx.destination);
+
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
-                gainNode.gain.setValueAtTime(0.6, ctx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-                oscillator.start(ctx.currentTime);
-                oscillator.stop(ctx.currentTime + 0.25);
-            } catch (e) { console.warn('Erro ao tocar som de notificação:', e); }
+
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {
+                console.warn('Erro ao tocar som:', e);
+            }
         }
 
         // ============================================
@@ -588,7 +591,6 @@
         let logoutTimer = null;
         let heartbeatInterval = null;
         const LOGOUT_TIMEOUT = 30 * 60 * 1000;
-        const BUSY_TIMEOUT = 10 * 60 * 1000;
 
         // ============================================
         // ONLINE USERS + AVATARES
@@ -745,7 +747,7 @@
         });
 
         // ============================================
-        // HEARTBEAT (com retry)
+        // HEARTBEAT
         // ============================================
         async function heartbeat() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -962,7 +964,7 @@
                 }
                 const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
                 const isAdmin = usuario.papel === 'super_admin';
-                container.innerHTML = avisos.map((a, i) => `
+                container.innerHTML = avisos.map((a) => `
                     <div class="aviso-card">
                         <div>
                             <span class="chefia">${a.chefia || 'Chefia'}</span>
@@ -1040,7 +1042,7 @@
                 }
                 const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
                 const isAdmin = usuario.papel === 'super_admin';
-                container.innerHTML = procs.map((p, i) => `
+                container.innerHTML = procs.map((p) => `
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
@@ -1165,13 +1167,11 @@
             }
         }
 
+        // ===== POLLING MELHORADO (som + badge) =====
         function startChatPolling() {
             if (chatInterval) clearInterval(chatInterval);
-            (async () => {
-                try {
-                    await carregarChatInterno();
-                } catch (e) { /* ignore */ }
-            })();
+
+            carregarChatInterno();
 
             chatInterval = setInterval(async () => {
                 try {
@@ -1180,6 +1180,7 @@
 
                     const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
                     const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
+
                     let todas = [];
                     if (msgsPublicas) todas.push(...msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
                     if (msgsPrivadas) {
@@ -1188,20 +1189,27 @@
                         );
                         todas.push(...filtradas.map(m => ({ ...m, tipo: 'privado' })));
                     }
+
                     todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
 
                     const chatTab = document.getElementById('tabChatInterno');
                     const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
 
-                    const novasMsgs = todas.filter(m => new Date(m.data_hora).getTime() > ultimaMensagemLida);
+                    const novasMsgs = todas.filter(m => {
+                        const t = new Date(m.data_hora).getTime();
+                        return t > ultimaMensagemLida;
+                    });
 
-                    if (novasMsgs.length > 0 && !abaAtiva) {
-                        if (badge) {
-                            badge.style.display = 'inline-block';
-                            badge.textContent = novasMsgs.length;
+                    if (novasMsgs.length > 0) {
+                        if (!abaAtiva) {
+                            if (badge) {
+                                badge.style.display = 'inline-block';
+                                badge.textContent = novasMsgs.length;
+                            }
+                            playNotificationSound();
                         }
-                        playNotificationSound();
+
                         const maisRecente = novasMsgs[novasMsgs.length - 1];
                         ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
                     }
@@ -1209,10 +1217,11 @@
                     if (abaAtiva) {
                         await carregarChatInterno();
                     }
+
                 } catch (err) {
-                    // silencioso
+                    console.warn('Erro no polling do chat:', err);
                 }
-            }, 5000);
+            }, 4000);
         }
 
         document.getElementById('btnEnviarChat').addEventListener('click', async function() {
@@ -1246,7 +1255,7 @@
         });
 
         // ============================================
-        // CHAT IA (agora usando Edge Function segura)
+        // CHAT IA (Edge Function segura)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1302,7 +1311,6 @@ REGRAS OBRIGATÓRIAS:
 
 8. Cite o item ou a data da regra quando disponível na base.`;
 
-                // ===== AQUI ESTÁ A MUDANÇA IMPORTANTE =====
                 const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
                     method: 'POST',
                     headers: {
@@ -1510,7 +1518,7 @@ REGRAS OBRIGATÓRIAS:
         }
 
         // ============================================
-        // NAVEGAÇÃO POR ABAS
+        // NAVEGAÇÃO POR ABAS (com limpeza do badge)
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.tabs button').forEach(btn => {
@@ -1518,11 +1526,16 @@ REGRAS OBRIGATÓRIAS:
                     document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                    
                     const target = document.getElementById(this.dataset.tab);
                     if (target) {
                         target.classList.add('active');
                     }
+
+                    // Quando clicar no Chat da Equipe → limpa o badge e atualiza
                     if (this.dataset.tab === 'tabChatInterno') {
+                        const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
+                        if (badge) badge.style.display = 'none';
                         carregarChatInterno();
                     }
                 });
