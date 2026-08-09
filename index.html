@@ -1275,13 +1275,9 @@
         // ============================================
         // PROCEDIMENTOS
         // ============================================
-        let procedimentosCache = [];
-        let editingProcId = null;
-
         async function carregarProcedimentos() {
             try {
                 const procs = await apiGet('procedimentos', 'order=criado_em.asc');
-                procedimentosCache = procs || [];
                 const container = document.getElementById('listaProcedimentos');
                 if (!procs || procs.length === 0) {
                     container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado.</div>';
@@ -1293,10 +1289,7 @@
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
-                        ${isAdmin ? `<div class="acoes">
-                            <button class="btn-edit" onclick="editarProcedimento('${p.id}')">✏️ Editar</button>
-                            <button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button>
-                        </div>` : ''}
+                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button></div>` : ''}
                     </div>
                 `).join('');
             } catch (err) {
@@ -1304,48 +1297,10 @@
             }
         }
 
-        function editarProcedimento(id) {
-            const proc = procedimentosCache.find(p => String(p.id) === String(id));
-            if (!proc) {
-                alert('Procedimento não encontrado. Tente recarregar a página.');
-                return;
-            }
-            editingProcId = proc.id;
-            document.getElementById('procTitulo').value = proc.titulo || '';
-            document.getElementById('procCategoria').value = proc.categoria || 'certidão';
-            document.getElementById('procConteudo').value = proc.conteudo || '';
-
-            const btn = document.getElementById('btnSalvarProc');
-            btn.textContent = 'Salvar alterações';
-
-            let btnCancelar = document.getElementById('btnCancelarEdicaoProc');
-            if (!btnCancelar) {
-                btnCancelar = document.createElement('button');
-                btnCancelar.id = 'btnCancelarEdicaoProc';
-                btnCancelar.type = 'button';
-                btnCancelar.textContent = 'Cancelar edição';
-                btnCancelar.style.cssText = 'grid-column: span 2; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-light); padding: 10px; border-radius: 10px; cursor: pointer;';
-                btnCancelar.onclick = cancelarEdicaoProc;
-                btn.insertAdjacentElement('afterend', btnCancelar);
-            }
-
-            document.getElementById('formProc').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function cancelarEdicaoProc() {
-            editingProcId = null;
-            document.getElementById('procTitulo').value = '';
-            document.getElementById('procConteudo').value = '';
-            document.getElementById('procCategoria').value = 'certidão';
-            document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
-            const btnCancelar = document.getElementById('btnCancelarEdicaoProc');
-            if (btnCancelar) btnCancelar.remove();
-        }
-
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.papel !== 'super_admin') {
-                alert('Apenas Super Admin pode adicionar ou editar procedimentos.');
+                alert('Apenas Super Admin pode adicionar procedimentos.');
                 return;
             }
             const titulo = document.getElementById('procTitulo').value.trim();
@@ -1358,20 +1313,13 @@
             }
 
             try {
-                if (editingProcId) {
-                    await apiPatch('procedimentos', editingProcId, { titulo, conteudo, categoria });
-                    cancelarEdicaoProc();
-                    await carregarProcedimentos();
-                    alert('Procedimento atualizado!');
-                } else {
-                    await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
-                    document.getElementById('procTitulo').value = '';
-                    document.getElementById('procConteudo').value = '';
-                    await carregarProcedimentos();
-                    alert('Procedimento adicionado!');
-                }
+                await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
+                document.getElementById('procTitulo').value = '';
+                document.getElementById('procConteudo').value = '';
+                await carregarProcedimentos();
+                alert('Procedimento adicionado!');
             } catch (err) {
-                alert('Erro ao salvar procedimento: ' + err.message);
+                alert('Erro ao adicionar procedimento: ' + err.message);
             }
         });
 
@@ -1379,9 +1327,6 @@
             if (!confirm('Remover este procedimento?')) return;
             try {
                 await apiDelete('procedimentos', id);
-                if (editingProcId && String(editingProcId) === String(id)) {
-                    cancelarEdicaoProc();
-                }
                 await carregarProcedimentos();
             } catch (err) {
                 alert('Erro ao remover procedimento: ' + err.message);
@@ -1784,7 +1729,7 @@
         });
 
         // ============================================
-        // CHAT IA (Edge Function com limite de tokens)
+        // CHAT IA (Edge Function segura)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1840,11 +1785,6 @@ REGRAS OBRIGATÓRIAS:
 
 8. Cite o item ou a data da regra quando disponível na base.`;
 
-                // ============================================
-                // CHAMADA PARA A EDGE FUNCTION (COM LIMITE DE TOKENS)
-                // ============================================
-                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-
                 const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
                     method: 'POST',
                     headers: {
@@ -1852,36 +1792,14 @@ REGRAS OBRIGATÓRIAS:
                         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
                         'apikey': SUPABASE_ANON_KEY
                     },
-                    body: JSON.stringify({
-                        prompt: prompt,
-                        usuario_email: usuario.email
-                    })
+                    body: JSON.stringify({ prompt: prompt })
                 });
-
-                // Verifica se o limite foi atingido (status 429)
-                if (response.status === 429) {
-                    const erro = await response.json();
-                    addMessage('assistant', '⚠️ ' + (erro.error || 'Limite de tokens excedido. Tente amanhã.'));
-                    document.getElementById('typing').style.display = 'none';
-                    document.getElementById('enviarBtn').disabled = false;
-                    return;
-                }
-
-                if (!response.ok) {
-                    const erro = await response.json();
-                    throw new Error(erro.error || 'Erro na comunicação com a IA.');
-                }
 
                 const data = await response.json();
                 if (data.choices && data.choices.length > 0) {
-                    let mensagem = data.choices[0].message.content;
-                    // Mostra quantos tokens restam (opcional)
-                    if (data.tokens_restantes !== undefined) {
-                        mensagem += `\n\n📊 Tokens restantes hoje: ${data.tokens_restantes}`;
-                    }
-                    addMessage('assistant', mensagem);
+                    addMessage('assistant', data.choices[0].message.content);
                 } else if (data.error) {
-                    addMessage('assistant', '❌ Erro: ' + data.error);
+                    addMessage('assistant', '❌ Erro: ' + (data.error.message || data.error));
                 } else {
                     addMessage('assistant', '❌ Não foi possível obter uma resposta da IA.');
                 }
