@@ -512,6 +512,7 @@
                 <input id="perguntaInput" type="text" placeholder="Digite sua dúvida sobre a CEPER..." />
                 <button id="enviarBtn"><i class="fas fa-paper-plane"></i> Enviar</button>
             </div>
+            <div id="indicadorCota" style="margin-top:8px; font-size:12px; color:var(--text-muted);"></div>
             <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
                 <button id="btnVerAvisos" style="background:var(--secondary);border:none;padding:8px 18px;border-radius:40px;font-weight:500;cursor:pointer;color:#1a1a1a;">
                     <i class="fas fa-bullhorn"></i> Últimos avisos
@@ -841,6 +842,93 @@
             return p === 'super_admin' || p === 'admin';
         }
 
+        // Cota diária de tokens da IA (null = ilimitado)
+        const COTAS_TOKENS_DIA = {
+            super_admin: null,
+            admin: 100000,
+            servidor: 30000
+        };
+
+        function diaHojeSP() {
+            return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+        }
+
+        function cotaDoPapel(papel) {
+            const p = (papel || 'servidor').toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(COTAS_TOKENS_DIA, p)) return COTAS_TOKENS_DIA[p];
+            return COTAS_TOKENS_DIA.servidor;
+        }
+
+        function formatarTokens(n) {
+            const x = Number(n) || 0;
+            return x.toLocaleString('pt-BR');
+        }
+
+        async function obterUsoHoje(usuarioId) {
+            if (!usuarioId) return null;
+            const dia = diaHojeSP();
+            try {
+                const rows = await apiGet(
+                    'uso_tokens_diario',
+                    'select=*&usuario_id=eq.' + usuarioId + '&dia=eq.' + dia
+                );
+                return (rows && rows[0]) ? rows[0] : null;
+            } catch (err) {
+                console.warn('Uso tokens:', err);
+                return null;
+            }
+        }
+
+        async function registrarUsoTokens(usuarioId, usage) {
+            if (!usuarioId || !usage) return;
+            const promptTok = Number(usage.prompt_tokens) || 0;
+            const compTok = Number(usage.completion_tokens) || 0;
+            const totalTok = Number(usage.total_tokens) || (promptTok + compTok);
+            if (totalTok <= 0) return;
+
+            const dia = diaHojeSP();
+            try {
+                const atual = await obterUsoHoje(usuarioId);
+                if (atual && atual.id) {
+                    await apiPatch('uso_tokens_diario', atual.id, {
+                        tokens_prompt: (Number(atual.tokens_prompt) || 0) + promptTok,
+                        tokens_completion: (Number(atual.tokens_completion) || 0) + compTok,
+                        tokens_total: (Number(atual.tokens_total) || 0) + totalTok,
+                        qtd_perguntas: (Number(atual.qtd_perguntas) || 0) + 1
+                    });
+                } else {
+                    await apiPost('uso_tokens_diario', {
+                        usuario_id: usuarioId,
+                        dia: dia,
+                        tokens_prompt: promptTok,
+                        tokens_completion: compTok,
+                        tokens_total: totalTok,
+                        qtd_perguntas: 1
+                    });
+                }
+            } catch (err) {
+                console.warn('Falha ao registrar uso de tokens:', err);
+            }
+        }
+
+        async function verificarCotaAntesDePerguntar(usuario) {
+            const cota = cotaDoPapel(usuario.papel);
+            if (cota == null) return { ok: true, usado: 0, cota: null };
+
+            const uso = await obterUsoHoje(usuario.id);
+            const usado = uso ? (Number(uso.tokens_total) || 0) : 0;
+            if (usado >= cota) {
+                return {
+                    ok: false,
+                    usado,
+                    cota,
+                    msg: 'Você atingiu a cota diária de ' + formatarTokens(cota) +
+                        ' tokens (' + formatarTokens(usado) + ' usados hoje). Tente novamente amanhã ou fale com um administrador.'
+                };
+            }
+            return { ok: true, usado, cota };
+        }
+
         // Conversas estilo WhatsApp
         let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
         let unreadPrivados = {};  // { "Nome": quantidade }
@@ -1148,6 +1236,7 @@
             carregarProcedimentos();
             carregarChatInterno();
             atualizarBadgeAvisos();
+            atualizarIndicadorCota();
 
             startChatPolling();
             startOnlinePolling();
@@ -1190,6 +1279,7 @@
                     carregarProcedimentos();
                     carregarChatInterno();
                     atualizarBadgeAvisos();
+                    atualizarIndicadorCota();
                     startChatPolling();
                     startOnlinePolling();
                     heartbeatInterval = setInterval(heartbeat, 15000);
@@ -1801,6 +1891,24 @@
             const input = document.getElementById('perguntaInput');
             const pergunta = input.value.trim();
             if (!pergunta) return;
+
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (!usuario.id) {
+                alert('Faça login novamente.');
+                return;
+            }
+
+            // Verifica cota diária antes de chamar a IA
+            try {
+                const check = await verificarCotaAntesDePerguntar(usuario);
+                if (!check.ok) {
+                    addMessage('assistant', '⛔ ' + check.msg);
+                    return;
+                }
+            } catch (e) {
+                console.warn('Não foi possível verificar cota:', e);
+            }
+
             input.value = '';
             addMessage('user', pergunta);
             document.getElementById('typing').style.display = 'flex';
@@ -1857,8 +1965,18 @@ REGRAS OBRIGATÓRIAS:
                 });
 
                 const data = await response.json();
-                if (data.choices && data.choices.length > 0) {
+                if (!response.ok) {
+                    const msg = (data && (data.error?.message || data.error || data.message))
+                        ? (data.error?.message || data.error || data.message)
+                        : JSON.stringify(data);
+                    addMessage('assistant', '❌ Erro na IA (' + response.status + '): ' + msg);
+                } else if (data.choices && data.choices.length > 0) {
                     addMessage('assistant', data.choices[0].message.content);
+                    // Registra consumo de tokens
+                    if (data.usage) {
+                        await registrarUsoTokens(usuario.id, data.usage);
+                        atualizarIndicadorCota();
+                    }
                 } else if (data.error) {
                     addMessage('assistant', '❌ Erro: ' + (data.error.message || data.error));
                 } else {
@@ -1870,6 +1988,31 @@ REGRAS OBRIGATÓRIAS:
                 document.getElementById('typing').style.display = 'none';
                 document.getElementById('enviarBtn').disabled = false;
                 input.focus();
+            }
+        }
+
+        async function atualizarIndicadorCota() {
+            const el = document.getElementById('indicadorCota');
+            if (!el) return;
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (!usuario.id) {
+                el.textContent = '';
+                return;
+            }
+            const cota = cotaDoPapel(usuario.papel);
+            try {
+                const uso = await obterUsoHoje(usuario.id);
+                const usado = uso ? (Number(uso.tokens_total) || 0) : 0;
+                if (cota == null) {
+                    el.textContent = 'Tokens hoje: ' + formatarTokens(usado) + ' · sem limite';
+                    el.style.color = 'var(--text-muted)';
+                } else {
+                    const pct = Math.min(100, Math.round((usado / cota) * 100));
+                    el.textContent = 'Tokens hoje: ' + formatarTokens(usado) + ' / ' + formatarTokens(cota) + ' (' + pct + '%)';
+                    el.style.color = pct >= 90 ? 'var(--danger)' : (pct >= 70 ? 'var(--secondary)' : 'var(--text-muted)');
+                }
+            } catch (_) {
+                el.textContent = '';
             }
         }
 
@@ -1951,23 +2094,52 @@ REGRAS OBRIGATÓRIAS:
                     container.innerHTML = '<div class="empty-state">Nenhum usuário cadastrado.</div>';
                     return;
                 }
+
+                const dia = diaHojeSP();
+                let usos = [];
+                try {
+                    usos = await apiGet('uso_tokens_diario', 'select=*&dia=eq.' + dia);
+                } catch (_) { usos = []; }
+                const usoMap = {};
+                (usos || []).forEach(r => { if (r.usuario_id) usoMap[r.usuario_id] = r; });
+
                 container.innerHTML = `
+                    <div style="margin-bottom:14px; padding:12px 14px; background:rgba(255,255,255,0.04); border-radius:12px; border:1px solid var(--border-color); font-size:13px; color:var(--text-muted);">
+                        <strong style="color:var(--secondary);">Cotas de tokens (IA) — hoje (${dia})</strong><br/>
+                        Super Admin: sem limite · Admin: 100.000 · Servidor: 30.000
+                    </div>
                     <table class="user-table">
                         <thead>
                             <tr>
                                 <th>Nome</th>
                                 <th>E-mail</th>
                                 <th>Papel</th>
+                                <th>Tokens hoje</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${usuarios.map(u => `
+                            ${usuarios.map(u => {
+                                const cota = cotaDoPapel(u.papel);
+                                const uso = usoMap[u.id];
+                                const usado = uso ? (Number(uso.tokens_total) || 0) : 0;
+                                const perguntas = uso ? (Number(uso.qtd_perguntas) || 0) : 0;
+                                let tokensCell;
+                                if (cota == null) {
+                                    tokensCell = formatarTokens(usado) + ' <span style="color:var(--text-muted);font-size:11px;">/ ∞</span>';
+                                } else {
+                                    const pct = Math.min(100, Math.round((usado / cota) * 100));
+                                    const cor = pct >= 90 ? 'var(--danger)' : (pct >= 70 ? 'var(--secondary)' : 'var(--success)');
+                                    tokensCell = '<span style="color:' + cor + '">' + formatarTokens(usado) + ' / ' + formatarTokens(cota) + '</span>' +
+                                        ' <span style="color:var(--text-muted);font-size:11px;">(' + pct + '% · ' + perguntas + ' perg.)</span>';
+                                }
+                                return `
                                 <tr>
                                     <td>${u.nome}</td>
                                     <td>${u.email}</td>
                                     <td>${u.papel}</td>
+                                    <td>${tokensCell}</td>
                                     <td>
                                         ${u.primeiro_acesso ? '<span class="status-badge primeiro">Primeiro acesso</span>' :
                                           u.ativo ? '<span class="status-badge ativo">Ativo</span>' :
@@ -1981,8 +2153,8 @@ REGRAS OBRIGATÓRIAS:
                                             </button>
                                         ` : '<span style="color:var(--text-muted);font-size:12px;">(você)</span>'}
                                     </td>
-                                </tr>
-                            `).join('')}
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
