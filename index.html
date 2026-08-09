@@ -541,6 +541,7 @@
             <h3 style="margin-bottom:12px;"><i class="fas fa-book"></i> Editar Base de Conhecimento</h3>
             <p class="text-muted" style="font-size:13px;margin-bottom:16px;">Os procedimentos são salvos no banco e compartilhados com toda a equipe.</p>
             <div class="form-proc" id="formProc">
+                <input type="hidden" id="procEditId" value="" />
                 <input type="text" id="procTitulo" placeholder="Título (ex: ITEM 1 - Sem especialidade)" />
                 <select id="procCategoria">
                     <option value="certidão">Certidão</option>
@@ -548,7 +549,10 @@
                     <option value="orientacao">Orientação</option>
                 </select>
                 <textarea id="procConteudo" placeholder="Conteúdo do procedimento..."></textarea>
-                <button class="btn-submit" id="btnSalvarProc">Adicionar procedimento</button>
+                <div style="grid-column: span 2; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-submit" id="btnSalvarProc" style="flex:1; grid-column:auto;">Adicionar procedimento</button>
+                    <button type="button" id="btnCancelarProc" style="display:none; flex:0 0 auto; background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-light); padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;">Cancelar edição</button>
+                </div>
             </div>
             <div id="listaProcedimentos"></div>
         </div>
@@ -599,6 +603,7 @@
                 <input type="email" id="userEmail" placeholder="E-mail" />
                 <select id="userPapel">
                     <option value="servidor">Servidor</option>
+                    <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
                 </select>
                 <button class="btn-submit" id="btnCriarUsuario">Criar usuário (senha temporária)</button>
@@ -823,6 +828,18 @@
         let logoutTimer = null;
         let heartbeatInterval = null;
         const LOGOUT_TIMEOUT = 30 * 60 * 1000;
+
+        // Papéis: super_admin = tudo | admin = base + avisos | servidor = uso normal
+        function papelUsuario() {
+            try {
+                return (JSON.parse(localStorage.getItem('usuario') || '{}').papel || '').toLowerCase();
+            } catch (_) { return ''; }
+        }
+        function isSuperAdmin() { return papelUsuario() === 'super_admin'; }
+        function isGestor() {
+            const p = papelUsuario();
+            return p === 'super_admin' || p === 'admin';
+        }
 
         // Conversas estilo WhatsApp
         let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
@@ -1120,7 +1137,7 @@
             heartbeat();
             carregarOnlineUsers();
 
-            if (usuario.papel === 'super_admin') {
+            if (isSuperAdmin()) {
                 document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
                 carregarUsuarios();
             } else {
@@ -1163,7 +1180,7 @@
                     document.getElementById('conteudoPrincipal').style.display = 'block';
                     atualizarHeaderPerfil(usuario);
                     document.getElementById('chatUsuarioNome').textContent = usuario.nome;
-                    if (usuario.papel === 'super_admin') {
+                    if (isSuperAdmin()) {
                         document.getElementById('tabUsuariosBtn').classList.remove('hidden-tab');
                         carregarUsuarios();
                     } else {
@@ -1205,8 +1222,7 @@
                     container.innerHTML = '<div class="empty-state">Nenhum aviso cadastrado.</div>';
                     return;
                 }
-                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-                const isAdmin = usuario.papel === 'super_admin';
+                const isAdmin = isGestor();
                 container.innerHTML = avisos.map((a) => `
                     <div class="aviso-card">
                         <div>
@@ -1236,9 +1252,8 @@
         }
 
         document.getElementById('btnSalvarAviso').addEventListener('click', async function() {
-            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-            if (usuario.papel !== 'super_admin') {
-                alert('Apenas Super Admin pode publicar avisos.');
+            if (!isGestor()) {
+                alert('Apenas Admin ou Super Admin podem publicar avisos.');
                 return;
             }
             const chefia = document.getElementById('avisoChefia').value.trim() || 'Chefia';
@@ -1273,23 +1288,57 @@
         }
 
         // ============================================
-        // PROCEDIMENTOS
+        // PROCEDIMENTOS (adicionar / editar / remover)
         // ============================================
+        let procsCache = {};
+
+        function limparFormProc() {
+            document.getElementById('procEditId').value = '';
+            document.getElementById('procTitulo').value = '';
+            document.getElementById('procConteudo').value = '';
+            document.getElementById('procCategoria').value = 'certidão';
+            document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
+            const btnCancel = document.getElementById('btnCancelarProc');
+            if (btnCancel) btnCancel.style.display = 'none';
+        }
+
+        function editarProcedimento(id) {
+            const p = procsCache[id];
+            if (!p) {
+                alert('Procedimento não encontrado. Recarregue a lista.');
+                return;
+            }
+            document.getElementById('procEditId').value = p.id;
+            document.getElementById('procTitulo').value = p.titulo || '';
+            document.getElementById('procConteudo').value = p.conteudo || '';
+            document.getElementById('procCategoria').value = p.categoria || 'certidão';
+            document.getElementById('btnSalvarProc').textContent = 'Salvar alterações';
+            const btnCancel = document.getElementById('btnCancelarProc');
+            if (btnCancel) btnCancel.style.display = 'inline-block';
+            document.getElementById('formProc').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         async function carregarProcedimentos() {
             try {
                 const procs = await apiGet('procedimentos', 'order=criado_em.asc');
                 const container = document.getElementById('listaProcedimentos');
                 if (!procs || procs.length === 0) {
                     container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado.</div>';
+                    procsCache = {};
                     return;
                 }
-                const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-                const isAdmin = usuario.papel === 'super_admin';
+                procsCache = {};
+                procs.forEach(p => { if (p.id) procsCache[p.id] = p; });
+
+                const podeGerir = isGestor();
                 container.innerHTML = procs.map((p) => `
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
-                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button></div>` : ''}
+                        ${podeGerir ? `<div class="acoes">
+                            <button type="button" onclick="editarProcedimento('${p.id}')"><i class="fas fa-pen"></i> Editar</button>
+                            <button type="button" class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button>
+                        </div>` : ''}
                     </div>
                 `).join('');
             } catch (err) {
@@ -1298,11 +1347,12 @@
         }
 
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
-            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-            if (usuario.papel !== 'super_admin') {
-                alert('Apenas Super Admin pode adicionar procedimentos.');
+            if (!isGestor()) {
+                alert('Apenas Admin ou Super Admin podem gerenciar procedimentos.');
                 return;
             }
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            const editId = document.getElementById('procEditId').value.trim();
             const titulo = document.getElementById('procTitulo').value.trim();
             const conteudo = document.getElementById('procConteudo').value.trim();
             const categoria = document.getElementById('procCategoria').value;
@@ -1313,20 +1363,31 @@
             }
 
             try {
-                await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
-                document.getElementById('procTitulo').value = '';
-                document.getElementById('procConteudo').value = '';
-                await carregarProcedimentos();
-                alert('Procedimento adicionado!');
+                if (editId) {
+                    await apiPatch('procedimentos', editId, { titulo, conteudo, categoria });
+                    limparFormProc();
+                    await carregarProcedimentos();
+                    alert('Procedimento atualizado!');
+                } else {
+                    await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
+                    limparFormProc();
+                    await carregarProcedimentos();
+                    alert('Procedimento adicionado!');
+                }
             } catch (err) {
-                alert('Erro ao adicionar procedimento: ' + err.message);
+                alert('Erro ao salvar procedimento: ' + err.message);
             }
+        });
+
+        document.getElementById('btnCancelarProc').addEventListener('click', function() {
+            limparFormProc();
         });
 
         async function removerProcedimento(id) {
             if (!confirm('Remover este procedimento?')) return;
             try {
                 await apiDelete('procedimentos', id);
+                if (document.getElementById('procEditId').value === id) limparFormProc();
                 await carregarProcedimentos();
             } catch (err) {
                 alert('Erro ao remover procedimento: ' + err.message);
@@ -1785,7 +1846,6 @@ REGRAS OBRIGATÓRIAS:
 
 8. Cite o item ou a data da regra quando disponível na base.`;
 
-                // IA via Edge Function (chave DeepSeek só no Supabase, não no front)
                 const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
                     method: 'POST',
                     headers: {
@@ -1797,12 +1857,7 @@ REGRAS OBRIGATÓRIAS:
                 });
 
                 const data = await response.json();
-                if (!response.ok) {
-                    const msg = (data && (data.error?.message || data.error || data.message))
-                        ? (data.error?.message || data.error || data.message)
-                        : JSON.stringify(data);
-                    addMessage('assistant', '❌ Erro na IA (' + response.status + '): ' + msg);
-                } else if (data.choices && data.choices.length > 0) {
+                if (data.choices && data.choices.length > 0) {
                     addMessage('assistant', data.choices[0].message.content);
                 } else if (data.error) {
                     addMessage('assistant', '❌ Erro: ' + (data.error.message || data.error));
