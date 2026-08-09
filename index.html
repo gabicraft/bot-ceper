@@ -1785,26 +1785,23 @@ REGRAS OBRIGATÓRIAS:
 
 8. Cite o item ou a data da regra quando disponível na base.`;
 
-                // Chamada direta ao DeepSeek (a Edge Function estava retornando 500)
-                const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                // IA via Edge Function (chave DeepSeek só no Supabase, não no front)
+                const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer sk-79ceb1926bde460e87c47a2d55f867a6'
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'apikey': SUPABASE_ANON_KEY
                     },
-                    body: JSON.stringify({
-                        model: 'deepseek-chat',
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.3,
-                        max_tokens: 2000,
-                        stream: false
-                    })
+                    body: JSON.stringify({ prompt: prompt })
                 });
 
                 const data = await response.json();
                 if (!response.ok) {
-                    const msg = (data && data.error && data.error.message) ? data.error.message : JSON.stringify(data);
-                    addMessage('assistant', '❌ Erro da API DeepSeek (' + response.status + '): ' + msg);
+                    const msg = (data && (data.error?.message || data.error || data.message))
+                        ? (data.error?.message || data.error || data.message)
+                        : JSON.stringify(data);
+                    addMessage('assistant', '❌ Erro na IA (' + response.status + '): ' + msg);
                 } else if (data.choices && data.choices.length > 0) {
                     addMessage('assistant', data.choices[0].message.content);
                 } else if (data.error) {
