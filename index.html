@@ -500,6 +500,29 @@
             max-width: min(100%, 420px); border-radius: 8px; margin: 8px 0;
             border: 1px solid var(--border-color); display: block;
         }
+        .proc-img-thumb {
+            position: relative; display: inline-block; cursor: pointer;
+            border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.25);
+        }
+        .proc-img-thumb img {
+            display: block; max-width: 140px; max-height: 100px; object-fit: cover;
+        }
+        .proc-img-thumb .proc-img-del {
+            display: block; text-align: center; font-size: 11px; padding: 4px 6px;
+            background: rgba(180,40,40,0.85); color: #fff;
+        }
+        .proc-img-thumb:hover { outline: 2px solid var(--secondary); }
+        .chat-imgs-base {
+            display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+        }
+        .chat-imgs-base img {
+            max-width: min(100%, 320px); border-radius: 10px;
+            border: 1px solid var(--border-color); cursor: pointer;
+        }
+        .chat-imgs-base .chat-imgs-label {
+            width: 100%; font-size: 12px; color: var(--text-muted); margin-bottom: 2px;
+        }
     </style>
 </head>
 <body>
@@ -722,13 +745,14 @@
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
                             <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
-                                <i class="fas fa-image"></i> Inserir imagem
+                                <i class="fas fa-image"></i> Anexar imagem
                                 <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
                             </label>
                         </div>
                     </div>
-                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
-                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
+                    <textarea id="procConteudo" class="modal-textarea" placeholder="Escreva só o texto, ex.: veja a imagem 1 abaixo. As imagens anexadas são numeradas na ordem do upload (1ª = Imagem 1)."></textarea>
+                    <p class="text-muted" style="font-size:12px;margin:8px 0 4px;">Imagens anexadas (ordem do envio = número). Clique para remover.</p>
+                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin:0;"></p>
                     <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
                 </div>
                 <div class="modal-proc-footer">
@@ -1582,20 +1606,56 @@ VER TAMBÉM:
             textarea.setSelectionRange(pos, pos);
         }
 
+        function escaparRegex(s) {
+            return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function extrairUrlsImagens(texto) {
+            const urls = [];
+            const re = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+            let m;
+            while ((m = re.exec(String(texto || ''))) !== null) {
+                if (m[1] && urls.indexOf(m[1]) === -1) urls.push(m[1]);
+            }
+            return urls;
+        }
+
+        function removerImagemDoConteudoProc(url) {
+            const ta = document.getElementById('procConteudo');
+            if (!ta || !url) return;
+            const re = new RegExp('<img[^>]*src=["\']' + escaparRegex(url) + '["\'][^>]*>', 'gi');
+            ta.value = ta.value.replace(re, '');
+            // limpa linhas em branco triplas
+            ta.value = ta.value.replace(/\n{3,}/g, '\n\n');
+            atualizarPreviewImagensProc();
+            const st = document.getElementById('procUploadStatus');
+            if (st) st.textContent = 'Imagem removida do texto.';
+        }
+
         function atualizarPreviewImagensProc() {
             const box = document.getElementById('procPreviewImagens');
+            if (!box) return;
             const conteudo = document.getElementById('procConteudo').value || '';
-            const re = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
-            const urls = [];
-            let m;
-            while ((m = re.exec(conteudo)) !== null) urls.push(m[1]);
+            const urls = extrairUrlsImagens(conteudo);
             if (!urls.length) {
                 box.innerHTML = '';
                 return;
             }
-            box.innerHTML = urls.map(u =>
-                '<img src="' + u + '" alt="preview" style="max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border-color);object-fit:cover;" />'
-            ).join('');
+            box.innerHTML = urls.map(function(u, i) {
+                return '<div class="proc-img-thumb" data-url="' + encodeURIComponent(u) + '" title="Clique para remover a imagem">' +
+                '<div style="font-size:11px;font-weight:600;color:var(--secondary);padding:4px 6px 0;">Imagem ' + (i + 1) + '</div>' +
+                '<img src="' + u + '" alt="Imagem ' + (i + 1) + '" />' +
+                '<span class="proc-img-del">✕ remover</span>' +
+                '</div>';
+            }).join('');
+            box.querySelectorAll('.proc-img-thumb').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const url = decodeURIComponent(el.getAttribute('data-url') || '');
+                    if (url && confirm('Remover esta imagem do texto?')) {
+                        removerImagemDoConteudoProc(url);
+                    }
+                });
+            });
         }
 
         async function carregarProcedimentos() {
@@ -1662,9 +1722,12 @@ VER TAMBÉM:
                 const path = 'base/' + (usuario.id || 'anon') + '/' + Date.now() + '_' +
                     file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
                 const url = await uploadToStorage(BASE_IMG_BUCKET, path, file);
-                const tag = '\n<img src="' + url + '" alt="' + (file.name || 'imagem') + '" style="max-width:100%;border-radius:8px;margin:8px 0;" />\n';
-                inserirNoCursor(document.getElementById('procConteudo'), tag);
-                status.textContent = 'Imagem inserida no texto.';
+                const ta = document.getElementById('procConteudo');
+                // Anexa no FINAL (não no cursor): ordem de upload = Imagem 1, 2, 3...
+                const tag = '\n<img src="' + url + '" alt="imagem" style="max-width:100%;border-radius:8px;margin:8px 0;" />\n';
+                ta.value = (ta.value || '').replace(/\s+$/, '') + tag;
+                const num = extrairUrlsImagens(ta.value).length;
+                status.textContent = 'Anexada como Imagem ' + num + ' (ordem do upload).';
                 atualizarPreviewImagensProc();
             } catch (err) {
                 status.textContent = '';
@@ -2341,6 +2404,7 @@ VER TAMBÉM:
                 }
 
                 let prompt;
+                let imagensDaBase = [];
                 if (eMensagemCasual(pergunta)) {
                     prompt = `Você é o assistente da Central de Perícias (CEPER).
 O usuário enviou uma mensagem casual/curta. Responda de forma breve, cordial e profissional (2 a 4 frases).
@@ -2352,7 +2416,13 @@ ${pergunta}`;
                 } else {
                     const procs = await apiGet('procedimentos', 'order=criado_em.asc');
                     const sel = selecionarBase(procs, pergunta);
-                    console.log('[IA] modo:', sel.modo, '| itens:', sel.qtd, '| topicos:', (sel.topicos || []).join(', '));
+
+                    // Texto para a IA sem tags de imagem. Você escreve "veja a imagem 1 abaixo".
+                    // Uploads na ordem = Imagem 1, 2, 3… mostradas pelo app abaixo da resposta.
+                    imagensDaBase = extrairUrlsImagens(sel.texto || '');
+                    const baseParaIA = String(sel.texto || '').replace(/<img[^>]*>/gi, ' ');
+
+                    console.log('[IA] modo:', sel.modo, '| itens:', sel.qtd, '| topicos:', (sel.topicos || []).join(', '), '| imgs:', imagensDaBase.length);
 
                     prompt = `Você é o assistente especialista da Central de Perícias (CEPER).
 
@@ -2362,20 +2432,20 @@ Use SOMENTE este material para responder. Não omita informações relevantes qu
 TÓPICOS: ${(sel.topicos && sel.topicos.length) ? sel.topicos.join(' | ') : '(base geral)'}
 
 ===== BASE (PACOTE DO TÓPICO) =====
-${sel.texto}
+${baseParaIA}
 ===== FIM DA BASE =====
 
 PERGUNTA DO USUÁRIO:
 ${pergunta}
 
 REGRAS:
-1. Responda de forma COMPLETA com base no pacote acima (listas de pessoas, passos de rotina, exceções — o que for pertinente à pergunta).
-2. Se a pergunta for uma lista (ex.: servidores da CEPER), inclua TODOS os nomes/itens do pacote, sem cortar.
-3. Se a pergunta for uma rotina específica, foque nela; mencione cenários relacionados só se estiverem no pacote e forem úteis.
-4. NÃO invente nomes, prazos ou procedimentos que não estejam no pacote.
-5. Se o pacote não cobrir a pergunta, diga claramente e inicie com: ⚠️ Esta informação não está na base da CEPER.
-6. Tom profissional e objetivo. Modelos de certidão entre [CERTIDAO] e [/CERTIDAO].
-7. Destaque urgente com #texto#.`;
+1. Responda de forma COMPLETA com base no pacote acima.
+2. Se a base disser "veja a imagem N abaixo" (ou similar), mantenha essa frase. As imagens numeradas aparecem automaticamente abaixo para o usuário — não descreva o conteúdo visual da figura.
+3. Se a pergunta for lista de pessoas/equipe, liste TODOS os nomes do pacote.
+4. Em rotina específica, foque nela; cite cenários só se forem úteis e estiverem no pacote.
+5. NÃO invente nomes, prazos ou procedimentos que não estejam no pacote.
+6. Se o pacote não cobrir a pergunta, inicie com: ⚠️ Esta informação não está na base da CEPER.
+7. Tom profissional e objetivo. Certidões entre [CERTIDAO] e [/CERTIDAO]. Destaque urgente com #texto#.`;
                 }
 
                 const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
@@ -2395,7 +2465,7 @@ REGRAS:
                         : JSON.stringify(data);
                     addMessage('assistant', '❌ Erro na IA (' + response.status + '): ' + msg);
                 } else if (data.choices && data.choices.length > 0) {
-                    addMessage('assistant', data.choices[0].message.content);
+                    addMessage('assistant', data.choices[0].message.content, imagensDaBase);
                     // Registra consumo de tokens
                     if (data.usage) {
                         await registrarUsoTokens(usuario.id, data.usage);
@@ -2440,7 +2510,7 @@ REGRAS:
             }
         }
 
-        function addMessage(role, text) {
+        function addMessage(role, text, imagensExtra) {
             const chat = document.getElementById('chatArea');
             const div = document.createElement('div');
             div.className = 'message ' + role;
@@ -2450,7 +2520,10 @@ REGRAS:
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
 
-            let html = text;
+            const imgsNoTexto = extrairUrlsImagens(text);
+            let clean = String(text || '').replace(/<img[^>]*>/gi, '');
+
+            let html = clean;
             html = html.replace(/\[CERTIDAO\]([\s\S]+?)\[\/CERTIDAO\]/g, '<div class="certidao">$1</div>');
             html = html.replace(/#([^#\n]+)#/g, '<span class="red-text">$1</span>');
             html = html
@@ -2471,6 +2544,22 @@ REGRAS:
             html = html.replace(/<li>/g, '<ul><li>').replace(/<\/li>/g, '</li></ul>');
             html = html.replace(/<ul><ul>/g, '<ul>').replace(/<\/ul><\/ul>/g, '</ul>');
             html = html.replace(/<p><ul>/g, '<ul>').replace(/<\/ul><\/p>/g, '</ul>');
+
+            // Junta imagens do texto + as vindas do pacote da base
+            const todasImgs = [];
+            imgsNoTexto.forEach(u => { if (todasImgs.indexOf(u) === -1) todasImgs.push(u); });
+            (imagensExtra || []).forEach(u => { if (u && todasImgs.indexOf(u) === -1) todasImgs.push(u); });
+
+            if (todasImgs.length && role === 'assistant') {
+                html += '<div class="chat-imgs-base"><div class="chat-imgs-label">Imagens da base de conhecimento</div>' +
+                    todasImgs.map(function(u, i) {
+                        const num = i + 1;
+                        return '<figure style="margin:0;">' +
+                            '<div style="font-size:12px;color:var(--secondary);font-weight:600;margin-bottom:4px;">Imagem ' + num + '</div>' +
+                            '<img src="' + u + '" alt="Imagem ' + num + '" onclick="window.open(this.src,\'_blank\')" />' +
+                            '</figure>';
+                    }).join('') + '</div>';
+            }
 
             bubble.innerHTML = html;
             div.appendChild(avatar);
