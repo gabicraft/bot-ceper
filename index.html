@@ -134,6 +134,13 @@
             cursor: zoom-in;
             display: block;
             object-fit: cover;
+            transition: max-width 0.2s ease, max-height 0.2s ease;
+        }
+        .arquivo-chat img.ampliada {
+            max-width: 280px;
+            max-height: 220px;
+            object-fit: contain;
+            cursor: zoom-out;
         }
         .arquivo-chat .btn-download {
             background: rgba(255,255,255,0.1);
@@ -581,16 +588,49 @@
             if (box) box.classList.remove('open');
         }
         document.addEventListener('click', function(e) {
-            const img = e.target.closest && e.target.closest('img.avatar-img, .arquivo-chat img');
-            if (img && img.src) {
+            // Clique no botão de download NÃO deve ampliar
+            if (e.target.closest && e.target.closest('.btn-download')) return;
+
+            // Imagem do chat: amplia só um pouco (no lugar), sem nova aba
+            const chatImg = e.target.closest && e.target.closest('.arquivo-chat img');
+            if (chatImg) {
                 e.preventDefault();
                 e.stopPropagation();
-                abrirAvatarLightbox(img.src);
+                chatImg.classList.toggle('ampliada');
+                return;
+            }
+
+            // Avatar de perfil: lightbox
+            const avatarImg = e.target.closest && e.target.closest('img.avatar-img');
+            if (avatarImg && avatarImg.src) {
+                e.preventDefault();
+                e.stopPropagation();
+                abrirAvatarLightbox(avatarImg.src);
             }
         });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') fecharAvatarLightbox();
         });
+
+        // Download real (funciona com URLs do Supabase)
+        async function baixarArquivo(url, nome) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Falha ao baixar');
+                const blob = await res.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = nome || 'arquivo';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+                // fallback: abre em nova aba
+                window.open(url, '_blank');
+            }
+        }
 
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
@@ -1298,16 +1338,18 @@
                             arquivoHtml = `<div class="arquivo-chat">
                                 <div class="img-wrap">
                                     <img src="${m.arquivo_url}" alt="${nomeArq}">
-                                    <a class="btn-download" href="${m.arquivo_url}" download="${nomeArq}" title="Baixar imagem" target="_blank" rel="noopener">
+                                    <button type="button" class="btn-download" title="Baixar imagem"
+                                        onclick="event.stopPropagation(); baixarArquivo('${m.arquivo_url.replace(/'/g, "\\'")}', '${nomeArq.replace(/'/g, "\\'")}')">
                                         <i class="fas fa-download"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>`;
                         } else {
                             arquivoHtml = `<div class="arquivo-chat">
-                                <a class="arquivo-link" href="${m.arquivo_url}" target="_blank" rel="noopener" download="${nomeArq}">
+                                <button type="button" class="arquivo-link" style="background:none;border:none;cursor:pointer;padding:0;"
+                                    onclick="baixarArquivo('${m.arquivo_url.replace(/'/g, "\\'")}', '${nomeArq.replace(/'/g, "\\'")}')">
                                     📎 ${m.arquivo_nome || 'Arquivo'} <i class="fas fa-download" style="margin-left:4px;font-size:11px;"></i>
-                                </a>
+                                </button>
                             </div>`;
                         }
                     }
