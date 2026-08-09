@@ -27,7 +27,6 @@
         .header-actions .usuario-info { color: var(--text-muted); font-size: 13px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 40px; border: 1px solid var(--border-color); }
         .online-count { color: var(--text-muted); font-size: 13px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 40px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 6px; }
         .online-count .dot { display: inline-block; width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
-        /* TELA DE LOGIN SEM ONLINE */
         #telaLogin { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; }
         #telaLogin .login-box { background: rgba(255,255,255,0.05); padding: 40px 32px; border-radius: 24px; border: 1px solid var(--border-color); max-width: 420px; width: 100%; }
         #telaLogin .login-box h2 { text-align: center; color: var(--secondary); margin-bottom: 24px; }
@@ -108,13 +107,17 @@
         .chat-msg .data-msg { font-size: 11px; color: var(--text-muted); }
         .chat-msg .texto-msg { color: var(--text-light); }
         .chat-msg .privado { color: var(--danger); font-size: 12px; margin-right: 6px; }
-        .chat-input-area { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .chat-input-area { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .chat-input-area input[type="text"] { flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.04); color: var(--text-light); font-size: 14px; outline: none; min-width: 150px; }
         .chat-input-area select { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: #1e2a3a; color: #e8edf5; font-size: 14px; outline: none; min-width: 120px; cursor: pointer; }
         .chat-input-area select option { background: #1e2a3a; color: #e8edf5; }
-        .chat-input-area select option:hover { background: var(--primary-light); }
-        .chat-input-area button { background: var(--secondary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; color: #1a1a1a; cursor: pointer; }
+        .chat-input-area button { background: var(--secondary); border: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; color: #1a1a1a; cursor: pointer; }
         .chat-input-area button:hover { background: #d4a820; }
+        .btn-anexo { background: rgba(255,255,255,0.08) !important; color: var(--text-light) !important; padding: 10px 14px !important; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-anexo:hover { background: var(--primary-light) !important; }
+        #previewArquivo { margin-top: 8px; display: none; }
+        #previewArquivo .preview-item { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
+        #previewArquivo .preview-item button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
         .online-users { flex: 1; min-width: 160px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto; }
         .online-users h4 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .online-users ul { list-style: none; padding: 0; margin: 0; }
@@ -236,19 +239,33 @@
         .online-users li .busy-dot {
             margin-left: auto;
         }
+        .arquivo-chat {
+            margin-top: 6px;
+            display: inline-block;
+        }
+        .arquivo-chat img {
+            max-width: 220px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+        }
+        .arquivo-chat a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .arquivo-chat a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <!-- Lightbox para ampliar avatar -->
+    <!-- Lightbox para ampliar avatar / imagem -->
     <div id="avatarLightbox" onclick="fecharAvatarLightbox()">
         <img id="avatarLightboxImg" src="" alt="Foto ampliada" />
         <div class="lb-hint">Clique em qualquer lugar para fechar</div>
     </div>
 
-    <!-- ============================================
-    TELA DE LOGIN
-    ============================================ -->
+    <!-- TELA DE LOGIN -->
     <div id="telaLogin">
         <div class="login-box">
             <h2><i class="fas fa-lock"></i> Acesso restrito</h2>
@@ -260,9 +277,7 @@
         </div>
     </div>
 
-    <!-- ============================================
-    TELA DE TROCA DE SENHA
-    ============================================ -->
+    <!-- TELA DE TROCA DE SENHA -->
     <div id="telaTrocaSenha">
         <div class="login-box">
             <h2><i class="fas fa-key"></i> Trocar senha</h2>
@@ -274,9 +289,7 @@
         </div>
     </div>
 
-    <!-- ============================================
-    CONTEÚDO PRINCIPAL
-    ============================================ -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <div id="conteudoPrincipal" class="container" style="display:none;">
         <div class="header">
             <div class="logo">
@@ -377,10 +390,21 @@
                     <div id="chatInternoArea" class="chat-interno-area">
                         <div class="empty-state">Carregando mensagens...</div>
                     </div>
+
+                    <!-- Preview do arquivo -->
+                    <div id="previewArquivo"></div>
+
                     <div class="chat-input-area">
                         <select id="chatDestinatario">
                             <option value="todos">Todos (público)</option>
                         </select>
+
+                        <!-- Botão de anexo -->
+                        <label class="btn-anexo" title="Anexar arquivo">
+                            <i class="fas fa-paperclip"></i>
+                            <input type="file" id="chatArquivo" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none">
+                        </label>
+
                         <input type="text" id="chatInternoInput" placeholder="Digite sua mensagem..." />
                         <button id="btnEnviarChat"><i class="fas fa-paper-plane"></i> Enviar</button>
                     </div>
@@ -428,8 +452,10 @@
         const SUPABASE_STORAGE_URL = 'https://jxcioqwwxsnyhmkigvbj.supabase.co/storage/v1';
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
         const AVATAR_BUCKET = 'avatars';
+        const CHAT_BUCKET = 'chat-arquivos';
 
         let avatarMap = {};
+        let arquivoPendente = null;
 
         // ============================================
         // FUNÇÕES DE API
@@ -482,7 +508,7 @@
             if (box) box.classList.remove('open');
         }
         document.addEventListener('click', function(e) {
-            const img = e.target.closest && e.target.closest('img.avatar-img');
+            const img = e.target.closest && e.target.closest('img.avatar-img, .arquivo-chat img');
             if (img && img.src) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -532,7 +558,7 @@
         }
 
         // ============================================
-        // SOM DE NOTIFICAÇÃO (versão melhorada)
+        // SOM DE NOTIFICAÇÃO
         // ============================================
         let audioCtx = null;
 
@@ -556,23 +582,17 @@
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
-
                 gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-
                 oscillator.start(audioCtx.currentTime);
                 oscillator.stop(audioCtx.currentTime + 0.3);
             } catch (e) {
@@ -1091,7 +1111,7 @@
         }
 
         // ============================================
-        // CHAT INTERNO
+        // CHAT INTERNO + ENVIO DE ARQUIVOS
         // ============================================
         async function carregarChatInterno() {
             try {
@@ -1146,6 +1166,17 @@
                     const iconePrivado = isPrivado ? '<span class="privado"><i class="fas fa-lock"></i></span>' : '';
                     const dataFormatada = new Date(m.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
                     const avUrl = avatarMap[m.remetente] || '';
+
+                    // Exibir arquivo se existir
+                    let arquivoHtml = '';
+                    if (m.arquivo_url) {
+                        if (m.arquivo_tipo && m.arquivo_tipo.startsWith('image/')) {
+                            arquivoHtml = `<div class="arquivo-chat"><img src="${m.arquivo_url}" alt="${m.arquivo_nome || 'Imagem'}"></div>`;
+                        } else {
+                            arquivoHtml = `<div class="arquivo-chat"><a href="${m.arquivo_url}" target="_blank" rel="noopener">📎 ${m.arquivo_nome || 'Arquivo'}</a></div>`;
+                        }
+                    }
+
                     return `
                         <div class="chat-msg">
                             <div class="msg-left">
@@ -1153,7 +1184,8 @@
                                 <div class="msg-body">
                                     ${iconePrivado}
                                     <span class="remetente">${remetenteDisplay}</span>
-                                    <span class="texto-msg">${m.mensagem}</span>
+                                    <span class="texto-msg">${m.mensagem || ''}</span>
+                                    ${arquivoHtml}
                                 </div>
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
@@ -1167,10 +1199,38 @@
             }
         }
 
-        // ===== POLLING MELHORADO (som + badge) =====
+        // ===== Seleção de arquivo =====
+        document.getElementById('chatArquivo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 15 * 1024 * 1024) {
+                alert('Arquivo muito grande. Máximo 15 MB.');
+                this.value = '';
+                return;
+            }
+
+            arquivoPendente = file;
+            const preview = document.getElementById('previewArquivo');
+            preview.style.display = 'block';
+            preview.innerHTML = `
+                <div class="preview-item">
+                    📎 ${file.name} (${(file.size / 1024).toFixed(0)} KB)
+                    <button onclick="cancelarArquivo()" title="Remover">✕</button>
+                </div>
+            `;
+        });
+
+        function cancelarArquivo() {
+            arquivoPendente = null;
+            document.getElementById('chatArquivo').value = '';
+            document.getElementById('previewArquivo').style.display = 'none';
+            document.getElementById('previewArquivo').innerHTML = '';
+        }
+
+        // ===== POLLING =====
         function startChatPolling() {
             if (chatInterval) clearInterval(chatInterval);
-
             carregarChatInterno();
 
             chatInterval = setInterval(async () => {
@@ -1209,7 +1269,6 @@
                             }
                             playNotificationSound();
                         }
-
                         const maisRecente = novasMsgs[novasMsgs.length - 1];
                         ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
                     }
@@ -1217,30 +1276,58 @@
                     if (abaAtiva) {
                         await carregarChatInterno();
                     }
-
                 } catch (err) {
                     console.warn('Erro no polling do chat:', err);
                 }
             }, 4000);
         }
 
+        // ===== ENVIO DE MENSAGEM + ARQUIVO =====
         document.getElementById('btnEnviarChat').addEventListener('click', async function() {
             const input = document.getElementById('chatInternoInput');
             const mensagem = input.value.trim();
-            if (!mensagem) return;
-
+            const destinatario = document.getElementById('chatDestinatario').value;
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             const remetente = usuario.nome || 'Servidor';
-            const destinatario = document.getElementById('chatDestinatario').value;
+
+            if (!mensagem && !arquivoPendente) return;
+
+            let arquivo_url = null;
+            let arquivo_nome = null;
+            let arquivo_tipo = null;
+
+            // Upload do arquivo (se tiver)
+            if (arquivoPendente) {
+                try {
+                    const path = `${usuario.id || 'anon'}/${Date.now()}_${arquivoPendente.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                    arquivo_url = await uploadToStorage(CHAT_BUCKET, path, arquivoPendente);
+                    arquivo_nome = arquivoPendente.name;
+                    arquivo_tipo = arquivoPendente.type;
+                } catch (err) {
+                    alert('Erro ao enviar arquivo: ' + err.message);
+                    return;
+                }
+            }
+
+            const payload = {
+                remetente,
+                mensagem: mensagem || (arquivo_nome ? `📎 ${arquivo_nome}` : ''),
+                arquivo_url,
+                arquivo_nome,
+                arquivo_tipo
+            };
 
             try {
                 if (destinatario === 'todos') {
-                    await apiPost('mensagens_chat', { remetente, mensagem });
+                    await apiPost('mensagens_chat', payload);
                 } else {
-                    await apiPost('mensagens_privadas', { remetente, destinatario, mensagem });
+                    await apiPost('mensagens_privadas', { ...payload, destinatario });
                 }
+
                 input.value = '';
+                cancelarArquivo();
                 await carregarChatInterno();
+
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                 if (badge) badge.style.display = 'none';
             } catch (err) {
@@ -1255,7 +1342,7 @@
         });
 
         // ============================================
-        // CHAT IA (Edge Function segura)
+        // CHAT IA (Edge Function)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1518,7 +1605,7 @@ REGRAS OBRIGATÓRIAS:
         }
 
         // ============================================
-        // NAVEGAÇÃO POR ABAS (com limpeza do badge)
+        // NAVEGAÇÃO POR ABAS
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.tabs button').forEach(btn => {
@@ -1532,7 +1619,6 @@ REGRAS OBRIGATÓRIAS:
                         target.classList.add('active');
                     }
 
-                    // Quando clicar no Chat da Equipe → limpa o badge e atualiza
                     if (this.dataset.tab === 'tabChatInterno') {
                         const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                         if (badge) badge.style.display = 'none';
