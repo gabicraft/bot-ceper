@@ -103,9 +103,6 @@
         .chat-interno-area { flex: 2; min-width: 300px; background: rgba(0,0,0,0.2); border-radius: 16px; padding: 16px; max-height: 400px; overflow-y: auto; margin-bottom: 12px; border: 1px solid var(--border-color); }
         .chat-interno-area::-webkit-scrollbar { width: 5px; }
         .chat-interno-area::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
-        .chat-msg { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
-        .chat-msg .remetente { font-weight: 600; color: var(--secondary); }
-        .chat-msg .data-msg { font-size: 11px; color: var(--text-muted); }
         .chat-msg .texto-msg { color: var(--text-light); }
         .chat-msg .privado { color: var(--danger); font-size: 12px; margin-right: 6px; }
         .chat-input-area { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -213,20 +210,6 @@
             color: rgba(255,255,255,0.55);
             font-size: 13px;
         }
-        .chat-msg {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .chat-msg .msg-left {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            min-width: 0;
-            flex: 1;
-        }
-        .chat-msg .msg-body { min-width: 0; }
         .online-users li {
             display: flex;
             align-items: center;
@@ -256,29 +239,37 @@
             border-radius: 20px;
             margin-left: 4px;
         }
-        .chat-msg.privada-minha .msg-body {
-            text-align: right;
+        /* Mensagens em lista limpa (sem balões) */
+        .chat-msg {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
         }
-        .chat-msg .msg-bubble {
-            display: inline-block;
-            background: rgba(255,255,255,0.06);
-            padding: 8px 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            max-width: 90%;
+        .chat-msg .msg-body {
+            flex: 1;
+            min-width: 0;
         }
-        .chat-msg.minha-msg {
-            flex-direction: row-reverse;
+        .chat-msg .remetente {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-right: 6px;
         }
-        .chat-msg.minha-msg .msg-left {
-            flex-direction: row-reverse;
+        .chat-msg.minha-msg .remetente {
+            color: #7eb8ff;
         }
-        .chat-msg.minha-msg .msg-bubble {
-            background: var(--primary-light);
-            border-color: var(--primary-light);
+        .chat-msg .texto-msg {
+            color: var(--text-light);
+            word-wrap: break-word;
         }
-        .chat-msg.minha-msg .data-msg {
-            text-align: left;
+        .chat-msg .data-msg {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-left: 8px;
+            flex-shrink: 0;
         }
         #chatTituloAtual {
             margin: 0;
@@ -651,6 +642,26 @@
         // Conversas estilo WhatsApp
         let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
         let unreadPrivados = {};  // { "Nome": quantidade }
+
+        // Formata data/hora de forma confiável (Brasil)
+        function formatarDataHora(valor) {
+            if (!valor) return '';
+            let s = String(valor).trim();
+            // Se vier sem timezone (ex: "2026-08-09 01:46:42"), trata como UTC
+            if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+                s = s.replace(' ', 'T') + 'Z';
+            }
+            const d = new Date(s);
+            if (isNaN(d.getTime())) return String(valor);
+            return d.toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
         // ============================================
         // ONLINE USERS + AVATARES
@@ -1221,21 +1232,17 @@
                 if (badge) badge.style.display = 'none';
 
                 container.innerHTML = mensagens.map(m => {
-                    const isMinha = m.remetente === nome;
-                    const dataFormatada = new Date(m.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+                    const isMinha = (m.remetente || '').trim() === (nome || '').trim();
                     const avUrl = avatarMap[m.remetente] || '';
                     const classeExtra = isMinha ? 'minha-msg' : '';
+                    const dataFormatada = formatarDataHora(m.data_hora);
 
                     return `
                         <div class="chat-msg ${classeExtra}">
-                            <div class="msg-left">
-                                ${avatarHtml(avUrl, m.remetente, 30)}
-                                <div class="msg-body">
-                                    <div class="msg-bubble">
-                                        ${!isMinha ? `<span class="remetente">${m.remetente}</span><br>` : ''}
-                                        <span class="texto-msg">${m.mensagem}</span>
-                                    </div>
-                                </div>
+                            ${avatarHtml(avUrl, m.remetente, 28)}
+                            <div class="msg-body">
+                                <span class="remetente">${m.remetente}</span>
+                                <span class="texto-msg">${m.mensagem}</span>
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
                         </div>
