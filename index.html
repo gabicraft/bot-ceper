@@ -27,6 +27,7 @@
         .header-actions .usuario-info { color: var(--text-muted); font-size: 13px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 40px; border: 1px solid var(--border-color); }
         .online-count { color: var(--text-muted); font-size: 13px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 40px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 6px; }
         .online-count .dot { display: inline-block; width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+        /* TELA DE LOGIN SEM ONLINE */
         #telaLogin { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; }
         #telaLogin .login-box { background: rgba(255,255,255,0.05); padding: 40px 32px; border-radius: 24px; border: 1px solid var(--border-color); max-width: 420px; width: 100%; }
         #telaLogin .login-box h2 { text-align: center; color: var(--secondary); margin-bottom: 24px; }
@@ -107,17 +108,13 @@
         .chat-msg .data-msg { font-size: 11px; color: var(--text-muted); }
         .chat-msg .texto-msg { color: var(--text-light); }
         .chat-msg .privado { color: var(--danger); font-size: 12px; margin-right: 6px; }
-        .chat-input-area { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .chat-input-area { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .chat-input-area input[type="text"] { flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.04); color: var(--text-light); font-size: 14px; outline: none; min-width: 150px; }
         .chat-input-area select { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: #1e2a3a; color: #e8edf5; font-size: 14px; outline: none; min-width: 120px; cursor: pointer; }
         .chat-input-area select option { background: #1e2a3a; color: #e8edf5; }
-        .chat-input-area button { background: var(--secondary); border: none; padding: 10px 18px; border-radius: 12px; font-weight: 600; color: #1a1a1a; cursor: pointer; }
+        .chat-input-area select option:hover { background: var(--primary-light); }
+        .chat-input-area button { background: var(--secondary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; color: #1a1a1a; cursor: pointer; }
         .chat-input-area button:hover { background: #d4a820; }
-        .btn-anexo { background: rgba(255,255,255,0.08) !important; color: var(--text-light) !important; padding: 10px 14px !important; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-anexo:hover { background: var(--primary-light) !important; }
-        #previewArquivo { margin-top: 8px; display: none; }
-        #previewArquivo .preview-item { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
-        #previewArquivo .preview-item button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
         .online-users { flex: 1; min-width: 160px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto; }
         .online-users h4 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .online-users ul { list-style: none; padding: 0; margin: 0; }
@@ -234,38 +231,75 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 10px;
+            transition: background 0.2s ease;
+        }
+        .online-users li:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        .online-users li.active-chat {
+            background: rgba(42,90,140,0.35);
+            border: 1px solid rgba(42,90,140,0.5);
         }
         .online-users li .online-dot,
         .online-users li .busy-dot {
             margin-left: auto;
         }
-        .arquivo-chat {
-            margin-top: 6px;
+        .online-users li .unread-badge {
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 20px;
+            margin-left: 4px;
+        }
+        .chat-msg.privada-minha .msg-body {
+            text-align: right;
+        }
+        .chat-msg .msg-bubble {
             display: inline-block;
+            background: rgba(255,255,255,0.06);
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            max-width: 90%;
         }
-        .arquivo-chat img {
-            max-width: 220px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: block;
+        .chat-msg.minha-msg {
+            flex-direction: row-reverse;
         }
-        .arquivo-chat a {
-            color: var(--secondary);
-            text-decoration: none;
-            font-size: 13px;
+        .chat-msg.minha-msg .msg-left {
+            flex-direction: row-reverse;
         }
-        .arquivo-chat a:hover { text-decoration: underline; }
+        .chat-msg.minha-msg .msg-bubble {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+        .chat-msg.minha-msg .data-msg {
+            text-align: left;
+        }
+        #chatTituloAtual {
+            margin: 0;
+            font-size: 18px;
+        }
+        #btnVoltarGeral:hover {
+            background: var(--primary-light) !important;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Lightbox para ampliar avatar / imagem -->
+    <!-- Lightbox para ampliar avatar -->
     <div id="avatarLightbox" onclick="fecharAvatarLightbox()">
         <img id="avatarLightboxImg" src="" alt="Foto ampliada" />
         <div class="lb-hint">Clique em qualquer lugar para fechar</div>
     </div>
 
-    <!-- TELA DE LOGIN -->
+    <!-- ============================================
+    TELA DE LOGIN
+    ============================================ -->
     <div id="telaLogin">
         <div class="login-box">
             <h2><i class="fas fa-lock"></i> Acesso restrito</h2>
@@ -277,7 +311,9 @@
         </div>
     </div>
 
-    <!-- TELA DE TROCA DE SENHA -->
+    <!-- ============================================
+    TELA DE TROCA DE SENHA
+    ============================================ -->
     <div id="telaTrocaSenha">
         <div class="login-box">
             <h2><i class="fas fa-key"></i> Trocar senha</h2>
@@ -289,7 +325,9 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+    <!-- ============================================
+    CONTEÚDO PRINCIPAL
+    ============================================ -->
     <div id="conteudoPrincipal" class="container" style="display:none;">
         <div class="header">
             <div class="logo">
@@ -382,7 +420,12 @@
         <!-- TAB CHAT INTERNO -->
         <div id="tabChatInterno" class="tab-content">
             <div class="chat-header">
-                <h3><i class="fas fa-users"></i> Chat da Equipe</h3>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <button id="btnVoltarGeral" onclick="abrirConversaGeral()" style="display:none; background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-light); padding:6px 14px; border-radius:20px; font-size:13px; cursor:pointer;">
+                        <i class="fas fa-arrow-left"></i> Chat Geral
+                    </button>
+                    <h3 id="chatTituloAtual"><i class="fas fa-users"></i> Chat Geral</h3>
+                </div>
                 <span class="usuario-logado"><i class="fas fa-user-circle"></i> Logado como: <strong id="chatUsuarioNome">carregando...</strong></span>
             </div>
             <div class="chat-interno-wrapper">
@@ -390,27 +433,16 @@
                     <div id="chatInternoArea" class="chat-interno-area">
                         <div class="empty-state">Carregando mensagens...</div>
                     </div>
-
-                    <!-- Preview do arquivo -->
-                    <div id="previewArquivo"></div>
-
                     <div class="chat-input-area">
-                        <select id="chatDestinatario">
+                        <select id="chatDestinatario" style="display:none;">
                             <option value="todos">Todos (público)</option>
                         </select>
-
-                        <!-- Botão de anexo -->
-                        <label class="btn-anexo" title="Anexar arquivo">
-                            <i class="fas fa-paperclip"></i>
-                            <input type="file" id="chatArquivo" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none">
-                        </label>
-
-                        <input type="text" id="chatInternoInput" placeholder="Digite sua mensagem..." />
+                        <input type="text" id="chatInternoInput" placeholder="Digite sua mensagem no Chat Geral..." />
                         <button id="btnEnviarChat"><i class="fas fa-paper-plane"></i> Enviar</button>
                     </div>
                 </div>
                 <div class="online-users" id="onlineUsersContainer">
-                    <h4><i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i> Online agora</h4>
+                    <h4><i class="fas fa-circle" style="color:var(--success);font-size:10px;"></i> Online agora <small style="font-weight:400;color:var(--text-muted);">(clique para conversar)</small></h4>
                     <ul id="onlineUsersList">
                         <li class="empty-online">Carregando...</li>
                     </ul>
@@ -452,10 +484,8 @@
         const SUPABASE_STORAGE_URL = 'https://jxcioqwwxsnyhmkigvbj.supabase.co/storage/v1';
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
         const AVATAR_BUCKET = 'avatars';
-        const CHAT_BUCKET = 'chat-arquivos';
 
         let avatarMap = {};
-        let arquivoPendente = null;
 
         // ============================================
         // FUNÇÕES DE API
@@ -508,7 +538,7 @@
             if (box) box.classList.remove('open');
         }
         document.addEventListener('click', function(e) {
-            const img = e.target.closest && e.target.closest('img.avatar-img, .arquivo-chat img');
+            const img = e.target.closest && e.target.closest('img.avatar-img');
             if (img && img.src) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -558,7 +588,7 @@
         }
 
         // ============================================
-        // SOM DE NOTIFICAÇÃO
+        // SOM DE NOTIFICAÇÃO (versão melhorada)
         // ============================================
         let audioCtx = null;
 
@@ -582,17 +612,23 @@
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
+                
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
+
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
+
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
+
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
+
                 gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
                 oscillator.start(audioCtx.currentTime);
                 oscillator.stop(audioCtx.currentTime + 0.3);
             } catch (e) {
@@ -611,6 +647,10 @@
         let logoutTimer = null;
         let heartbeatInterval = null;
         const LOGOUT_TIMEOUT = 30 * 60 * 1000;
+
+        // Conversas estilo WhatsApp
+        let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
+        let unreadPrivados = {};  // { "Nome": quantidade }
 
         // ============================================
         // ONLINE USERS + AVATARES
@@ -669,35 +709,20 @@
                         chatList.innerHTML = '<li class="empty-online">Ninguém online no momento.</li>';
                     } else {
                         let html = '';
-                        online.forEach(u => {
-                            html += '<li>' + avatarHtml(u.avatar_url, u.nome, 26) +
-                                '<span>' + u.nome + '</span><span class="online-dot"></span></li>';
-                        });
-                        recentes.forEach(u => {
-                            html += '<li>' + avatarHtml(u.avatar_url, u.nome, 26) +
-                                '<span>' + u.nome + ' (ausente)</span><span class="online-dot busy-dot"></span></li>';
-                        });
-                        chatList.innerHTML = html;
-                    }
-                }
-
-                if (selectDest) {
-                    const currentVal = selectDest.value;
-                    selectDest.innerHTML = '<option value="todos">Todos (público)</option>';
-                    const visto = new Set();
-                    const add = (nome, label) => {
-                        if (!nome || nome === usuarioLogado.nome || visto.has(nome)) return;
-                        visto.add(nome);
-                        const opt = document.createElement('option');
-                        opt.value = nome;
-                        opt.textContent = label || nome;
-                        selectDest.appendChild(opt);
-                    };
-                    online.forEach(u => add(u.nome, u.nome + ' (online)'));
-                    recentes.forEach(u => add(u.nome, u.nome + ' (ausente)'));
-                    ativos.forEach(u => add(u.nome, u.nome));
-                    if ([...selectDest.options].some(o => o.value === currentVal)) {
-                        selectDest.value = currentVal;
+                        const renderUser = (u, statusClass, statusLabel) => {
+                            if (u.nome === usuarioLogado.nome) return '';
+                            const isActive = conversaAtual === u.nome ? ' active-chat' : '';
+                            const unread = unreadPrivados[u.nome] || 0;
+                            const badge = unread > 0 ? `<span class="unread-badge">${unread}</span>` : '';
+                            return `<li class="user-online-item${isActive}" data-nome="${u.nome}" onclick="abrirConversaPrivada('${u.nome.replace(/'/g, "\\'")}')">
+                                ${avatarHtml(u.avatar_url, u.nome, 26)}
+                                <span>${u.nome}${statusLabel ? ' ' + statusLabel : ''}${badge}</span>
+                                <span class="online-dot ${statusClass}"></span>
+                            </li>`;
+                        };
+                        online.forEach(u => { html += renderUser(u, '', ''); });
+                        recentes.forEach(u => { html += renderUser(u, 'busy-dot', '(ausente)'); });
+                        chatList.innerHTML = html || '<li class="empty-online">Ninguém online no momento.</li>';
                     }
                 }
             } catch (err) {
@@ -1111,8 +1136,37 @@
         }
 
         // ============================================
-        // CHAT INTERNO + ENVIO DE ARQUIVOS
+        // CHAT INTERNO (estilo WhatsApp)
         // ============================================
+
+        function abrirConversaGeral() {
+            conversaAtual = null;
+            document.getElementById('btnVoltarGeral').style.display = 'none';
+            document.getElementById('chatTituloAtual').innerHTML = '<i class="fas fa-users"></i> Chat Geral';
+            document.getElementById('chatInternoInput').placeholder = 'Digite sua mensagem no Chat Geral...';
+            // Remove destaque da lista
+            document.querySelectorAll('.user-online-item').forEach(el => el.classList.remove('active-chat'));
+            carregarChatInterno();
+        }
+
+        function abrirConversaPrivada(nomeUsuario) {
+            if (!nomeUsuario) return;
+            conversaAtual = nomeUsuario;
+            // Zera não-lidas dessa conversa
+            unreadPrivados[nomeUsuario] = 0;
+
+            document.getElementById('btnVoltarGeral').style.display = 'inline-flex';
+            document.getElementById('chatTituloAtual').innerHTML = '<i class="fas fa-lock"></i> Conversa com <span style="color:var(--secondary)">' + nomeUsuario + '</span>';
+            document.getElementById('chatInternoInput').placeholder = 'Mensagem privada para ' + nomeUsuario + '...';
+
+            // Destaca o usuário na lista
+            document.querySelectorAll('.user-online-item').forEach(el => {
+                el.classList.toggle('active-chat', el.dataset.nome === nomeUsuario);
+            });
+
+            carregarChatInterno();
+        }
+
         async function carregarChatInterno() {
             try {
                 const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
@@ -1130,62 +1184,57 @@
                     } catch (_) { /* ignore */ }
                 }
 
-                const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
-                const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
-
-                let todas = [];
-                if (msgsPublicas) {
-                    todas = todas.concat(msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
-                }
-                if (msgsPrivadas) {
-                    const privadasFiltradas = msgsPrivadas.filter(m =>
-                        m.remetente === nome || m.destinatario === nome
-                    );
-                    todas = todas.concat(privadasFiltradas.map(m => ({ ...m, tipo: 'privado' })));
-                }
-                todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
-
                 const container = document.getElementById('chatInternoArea');
-                if (!todas || todas.length === 0) {
-                    container.innerHTML = '<div class="empty-state">Nenhuma mensagem ainda. Seja o primeiro a escrever!</div>';
+                let mensagens = [];
+
+                if (conversaAtual === null) {
+                    // ===== CHAT GERAL (só mensagens públicas) =====
+                    const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
+                    mensagens = (msgsPublicas || []).map(m => ({ ...m, tipo: 'publico' }));
+                } else {
+                    // ===== CONVERSA PRIVADA com conversaAtual =====
+                    const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
+                    mensagens = (msgsPrivadas || [])
+                        .filter(m =>
+                            (m.remetente === nome && m.destinatario === conversaAtual) ||
+                            (m.remetente === conversaAtual && m.destinatario === nome)
+                        )
+                        .map(m => ({ ...m, tipo: 'privado' }));
+                }
+
+                if (!mensagens || mensagens.length === 0) {
+                    const emptyMsg = conversaAtual
+                        ? `Nenhuma mensagem ainda com <strong>${conversaAtual}</strong>.<br>Envie a primeira mensagem!`
+                        : 'Nenhuma mensagem no Chat Geral ainda. Seja o primeiro a escrever!';
+                    container.innerHTML = '<div class="empty-state">' + emptyMsg + '</div>';
                     lastMessageCount = 0;
                     return;
                 }
 
-                if (todas.length > 0) {
-                    const ultima = todas[todas.length - 1];
+                // Atualiza última mensagem lida
+                if (mensagens.length > 0) {
+                    const ultima = mensagens[mensagens.length - 1];
                     ultimaMensagemLida = new Date(ultima.data_hora).getTime();
                 }
 
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                 if (badge) badge.style.display = 'none';
 
-                container.innerHTML = todas.map(m => {
-                    const isPrivado = m.tipo === 'privado';
-                    const remetenteDisplay = isPrivado ? `${m.remetente} (privado)` : m.remetente;
-                    const iconePrivado = isPrivado ? '<span class="privado"><i class="fas fa-lock"></i></span>' : '';
+                container.innerHTML = mensagens.map(m => {
+                    const isMinha = m.remetente === nome;
                     const dataFormatada = new Date(m.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
                     const avUrl = avatarMap[m.remetente] || '';
-
-                    // Exibir arquivo se existir
-                    let arquivoHtml = '';
-                    if (m.arquivo_url) {
-                        if (m.arquivo_tipo && m.arquivo_tipo.startsWith('image/')) {
-                            arquivoHtml = `<div class="arquivo-chat"><img src="${m.arquivo_url}" alt="${m.arquivo_nome || 'Imagem'}"></div>`;
-                        } else {
-                            arquivoHtml = `<div class="arquivo-chat"><a href="${m.arquivo_url}" target="_blank" rel="noopener">📎 ${m.arquivo_nome || 'Arquivo'}</a></div>`;
-                        }
-                    }
+                    const classeExtra = isMinha ? 'minha-msg' : '';
 
                     return `
-                        <div class="chat-msg">
+                        <div class="chat-msg ${classeExtra}">
                             <div class="msg-left">
                                 ${avatarHtml(avUrl, m.remetente, 30)}
                                 <div class="msg-body">
-                                    ${iconePrivado}
-                                    <span class="remetente">${remetenteDisplay}</span>
-                                    <span class="texto-msg">${m.mensagem || ''}</span>
-                                    ${arquivoHtml}
+                                    <div class="msg-bubble">
+                                        ${!isMinha ? `<span class="remetente">${m.remetente}</span><br>` : ''}
+                                        <span class="texto-msg">${m.mensagem}</span>
+                                    </div>
                                 </div>
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
@@ -1193,44 +1242,16 @@
                     `;
                 }).join('');
                 container.scrollTop = container.scrollHeight;
-                lastMessageCount = todas.length;
+                lastMessageCount = mensagens.length;
             } catch (err) {
                 console.error('Erro ao carregar chat:', err);
             }
         }
 
-        // ===== Seleção de arquivo =====
-        document.getElementById('chatArquivo').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            if (file.size > 15 * 1024 * 1024) {
-                alert('Arquivo muito grande. Máximo 15 MB.');
-                this.value = '';
-                return;
-            }
-
-            arquivoPendente = file;
-            const preview = document.getElementById('previewArquivo');
-            preview.style.display = 'block';
-            preview.innerHTML = `
-                <div class="preview-item">
-                    📎 ${file.name} (${(file.size / 1024).toFixed(0)} KB)
-                    <button onclick="cancelarArquivo()" title="Remover">✕</button>
-                </div>
-            `;
-        });
-
-        function cancelarArquivo() {
-            arquivoPendente = null;
-            document.getElementById('chatArquivo').value = '';
-            document.getElementById('previewArquivo').style.display = 'none';
-            document.getElementById('previewArquivo').innerHTML = '';
-        }
-
-        // ===== POLLING =====
+        // ===== POLLING MELHORADO (som + badge + não-lidas privadas) =====
         function startChatPolling() {
             if (chatInterval) clearInterval(chatInterval);
+
             carregarChatInterno();
 
             chatInterval = setInterval(async () => {
@@ -1241,93 +1262,84 @@
                     const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
                     const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
 
-                    let todas = [];
-                    if (msgsPublicas) todas.push(...msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
+                    let todasRelevantes = [];
+                    if (msgsPublicas) todasRelevantes.push(...msgsPublicas.map(m => ({ ...m, tipo: 'publico' })));
                     if (msgsPrivadas) {
                         const filtradas = msgsPrivadas.filter(m =>
                             m.remetente === nome || m.destinatario === nome
                         );
-                        todas.push(...filtradas.map(m => ({ ...m, tipo: 'privado' })));
+                        todasRelevantes.push(...filtradas.map(m => ({ ...m, tipo: 'privado' })));
                     }
-
-                    todas.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+                    todasRelevantes.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
 
                     const chatTab = document.getElementById('tabChatInterno');
                     const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
 
-                    const novasMsgs = todas.filter(m => {
+                    const novasMsgs = todasRelevantes.filter(m => {
                         const t = new Date(m.data_hora).getTime();
                         return t > ultimaMensagemLida;
                     });
 
                     if (novasMsgs.length > 0) {
+                        // Atualiza contadores de não-lidas privadas
+                        novasMsgs.forEach(m => {
+                            if (m.tipo === 'privado' && m.remetente !== nome) {
+                                // Só conta se não estiver com a conversa aberta
+                                if (conversaAtual !== m.remetente) {
+                                    unreadPrivados[m.remetente] = (unreadPrivados[m.remetente] || 0) + 1;
+                                }
+                            }
+                        });
+
                         if (!abaAtiva) {
                             if (badge) {
                                 badge.style.display = 'inline-block';
                                 badge.textContent = novasMsgs.length;
                             }
                             playNotificationSound();
+                        } else {
+                            // Se a aba estiver aberta, atualiza a conversa atual
+                            await carregarChatInterno();
+                            // Atualiza a lista de online (para mostrar badges de não-lidas)
+                            carregarOnlineUsers();
                         }
+
                         const maisRecente = novasMsgs[novasMsgs.length - 1];
                         ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
-                    }
-
-                    if (abaAtiva) {
+                    } else if (abaAtiva) {
+                        // Mesmo sem novas, atualiza se estiver na aba (para manter sincronizado)
                         await carregarChatInterno();
                     }
+
                 } catch (err) {
                     console.warn('Erro no polling do chat:', err);
                 }
             }, 4000);
         }
 
-        // ===== ENVIO DE MENSAGEM + ARQUIVO =====
         document.getElementById('btnEnviarChat').addEventListener('click', async function() {
             const input = document.getElementById('chatInternoInput');
             const mensagem = input.value.trim();
-            const destinatario = document.getElementById('chatDestinatario').value;
+            if (!mensagem) return;
+
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             const remetente = usuario.nome || 'Servidor';
 
-            if (!mensagem && !arquivoPendente) return;
-
-            let arquivo_url = null;
-            let arquivo_nome = null;
-            let arquivo_tipo = null;
-
-            // Upload do arquivo (se tiver)
-            if (arquivoPendente) {
-                try {
-                    const path = `${usuario.id || 'anon'}/${Date.now()}_${arquivoPendente.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-                    arquivo_url = await uploadToStorage(CHAT_BUCKET, path, arquivoPendente);
-                    arquivo_nome = arquivoPendente.name;
-                    arquivo_tipo = arquivoPendente.type;
-                } catch (err) {
-                    alert('Erro ao enviar arquivo: ' + err.message);
-                    return;
-                }
-            }
-
-            const payload = {
-                remetente,
-                mensagem: mensagem || (arquivo_nome ? `📎 ${arquivo_nome}` : ''),
-                arquivo_url,
-                arquivo_nome,
-                arquivo_tipo
-            };
-
             try {
-                if (destinatario === 'todos') {
-                    await apiPost('mensagens_chat', payload);
+                if (conversaAtual === null) {
+                    // Chat Geral → mensagem pública
+                    await apiPost('mensagens_chat', { remetente, mensagem });
                 } else {
-                    await apiPost('mensagens_privadas', { ...payload, destinatario });
+                    // Conversa privada
+                    await apiPost('mensagens_privadas', {
+                        remetente,
+                        destinatario: conversaAtual,
+                        mensagem
+                    });
                 }
-
                 input.value = '';
-                cancelarArquivo();
                 await carregarChatInterno();
-
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                 if (badge) badge.style.display = 'none';
             } catch (err) {
@@ -1342,7 +1354,7 @@
         });
 
         // ============================================
-        // CHAT IA (Edge Function)
+        // CHAT IA (Edge Function segura)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1605,7 +1617,7 @@ REGRAS OBRIGATÓRIAS:
         }
 
         // ============================================
-        // NAVEGAÇÃO POR ABAS
+        // NAVEGAÇÃO POR ABAS (com limpeza do badge)
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.tabs button').forEach(btn => {
@@ -1619,6 +1631,7 @@ REGRAS OBRIGATÓRIAS:
                         target.classList.add('active');
                     }
 
+                    // Quando clicar no Chat da Equipe → limpa o badge e atualiza
                     if (this.dataset.tab === 'tabChatInterno') {
                         const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                         if (badge) badge.style.display = 'none';
