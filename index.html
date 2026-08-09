@@ -1993,54 +1993,136 @@ VER TAMBÉM:
                     return false;
                 }
 
+                // ----- Busca por TÓPICO: identifica o contexto e manda o pacote inteiro -----
+                function extrairTopico(proc) {
+                    const c = String(proc.conteudo || '');
+                    const m = c.match(/T[ÓO]PICO\s*:\s*([^\n\r]+)/i);
+                    if (m && m[1]) return normalizarTexto(m[1]);
+                    // fallback: categoria + primeira parte do título
+                    const tit = normalizarTexto(proc.titulo || '');
+                    const cat = normalizarTexto(proc.categoria || '');
+                    if (cat === 'equipe') return 'equipe';
+                    if (cat === 'localizador') return 'localizadores';
+                    if (cat === 'sistema') return 'sistemas';
+                    // usa as 2-4 primeiras palavras significativas do título
+                    const toks = tokensUteis(tit).slice(0, 3);
+                    return toks.join(' ') || cat || 'geral';
+                }
+
+                function expandirTermos(termos) {
+                    const mapa = {
+                        servidor: ['equipe', 'pessoas', 'servidores'],
+                        servidores: ['equipe', 'pessoas', 'servidor'],
+                        pessoas: ['equipe', 'servidores'],
+                        equipe: ['servidores', 'pessoas'],
+                        funcionario: ['equipe', 'servidor'],
+                        funcionarios: ['equipe', 'servidores'],
+                        cancelar: ['cancelamento', 'nomeacao', 'nomear'],
+                        cancelamento: ['cancelar', 'nomeacao'],
+                        nomeacao: ['cancelar', 'cancelamento', 'perito', 'nomear'],
+                        nomear: ['nomeacao', 'perito'],
+                        falta: ['faltas', 'justificativa', 'comparecer'],
+                        faltas: ['falta', 'justificativa'],
+                        especialidade: ['perito', 'localidade', 'redistribuir'],
+                        perito: ['especialidade', 'nomeacao', 'agenda'],
+                        localizador: ['localizadores', 'juliana', 'prazo'],
+                        localizadores: ['localizador'],
+                        certidao: ['certidoes', 'modelo'],
+                        tutela: ['recurso', 'cancelar'],
+                        recurso: ['tutela', 'embargos', 'agravo'],
+                        loas: ['bpc', 'ta'],
+                        bpc: ['loas'],
+                        eproc: ['sistema', 'ajg'],
+                        ajg: ['sistema', 'eproc'],
+                        whatsapp: ['equipe', 'grupo', 'hazel'],
+                        debora: ['equipe'],
+                        sergio: ['equipe'],
+                        luiz: ['equipe'],
+                        rosana: ['equipe', 'rosanetes']
+                    };
+                    const out = new Set(termos);
+                    termos.forEach(t => { (mapa[t] || []).forEach(x => out.add(x)); });
+                    return Array.from(out);
+                }
+
                 function pontuarProcedimento(proc, termos) {
                     const titulo = normalizarTexto(proc.titulo || '');
                     const conteudo = normalizarTexto(proc.conteudo || '');
                     const cat = normalizarTexto(proc.categoria || '');
+                    const topico = extrairTopico(proc);
                     const tituloToks = tokensUteis(titulo);
-                    const corpoToks = tokensUteis(conteudo);
                     let score = 0;
                     termos.forEach(t => {
-                        if (tituloToks.some(x => termosParecidos(x, t))) score += 6;
-                        else if (titulo.includes(t)) score += 4;
-                        if (corpoToks.some(x => termosParecidos(x, t))) score += 2;
-                        else if (conteudo.includes(t)) score += 1;
-                        if (cat && termosParecidos(cat, t)) score += 2;
+                        if (tituloToks.some(x => termosParecidos(x, t))) score += 8;
+                        else if (titulo.includes(t)) score += 5;
+                        if (topico && (topico.includes(t) || termosParecidos(topico, t))) score += 6;
+                        if (conteudo.includes(t)) score += 2;
+                        if (cat && (cat === t || cat.includes(t))) score += 3;
                     });
                     return score;
                 }
 
                 function selecionarBase(procs, pergunta) {
                     if (!procs || !procs.length) {
-                        return { texto: 'BASE DE CONHECIMENTO VAZIA.', modo: 'vazia', qtd: 0 };
+                        return { texto: 'BASE DE CONHECIMENTO VAZIA.', modo: 'vazia', qtd: 0, topicos: [] };
                     }
-                    const termos = tokensUteis(pergunta);
+
+                    const termos = expandirTermos(tokensUteis(pergunta));
                     if (!termos.length) {
                         return {
-                            texto: procs.map(p => (p.titulo || '') + '\n' + (p.conteudo || '')).join('\n\n'),
+                            texto: procs.map(p => (p.titulo || '') + '\n' + (p.conteudo || '')).join('\n\n---\n\n'),
                             modo: 'completa',
-                            qtd: procs.length
+                            qtd: procs.length,
+                            topicos: []
                         };
                     }
+
+                    // 1) Pontua cada item
                     const ranqueados = procs
-                        .map(p => ({ p, score: pontuarProcedimento(p, termos) }))
+                        .map(p => ({ p, score: pontuarProcedimento(p, termos), topico: extrairTopico(p) }))
                         .filter(x => x.score > 0)
                         .sort((a, b) => b.score - a.score);
 
                     if (!ranqueados.length) {
                         return {
-                            texto: procs.map(p => (p.titulo || '') + '\n' + (p.conteudo || '')).join('\n\n'),
+                            texto: procs.map(p => (p.titulo || '') + '\n' + (p.conteudo || '')).join('\n\n---\n\n'),
                             modo: 'completa-fallback',
-                            qtd: procs.length
+                            qtd: procs.length,
+                            topicos: []
                         };
                     }
 
-                    // top resultados (até 5, ou todos com score alto)
-                    const escolhidos = ranqueados.slice(0, 5).map(x => x.p);
+                    // 2) Descobre o(s) tópico(s) vencedor(es) a partir dos melhores matches
+                    const topHits = ranqueados.slice(0, 5);
+                    const scorePorTopico = {};
+                    topHits.forEach(x => {
+                        const t = x.topico || 'geral';
+                        scorePorTopico[t] = (scorePorTopico[t] || 0) + x.score;
+                    });
+                    const topicosOrdenados = Object.keys(scorePorTopico)
+                        .sort((a, b) => scorePorTopico[b] - scorePorTopico[a]);
+                    // pega o principal e, se o 2º estiver perto, inclui também
+                    const topicosEscolhidos = [topicosOrdenados[0]];
+                    if (topicosOrdenados[1] && scorePorTopico[topicosOrdenados[1]] >= scorePorTopico[topicosOrdenados[0]] * 0.6) {
+                        topicosEscolhidos.push(topicosOrdenados[1]);
+                    }
+
+                    // 3) Manda TODOS os itens desses tópicos (pacote completo do contexto)
+                    const escolhidos = procs.filter(p => {
+                        const t = extrairTopico(p);
+                        return topicosEscolhidos.some(te => t === te || t.includes(te) || te.includes(t));
+                    });
+
+                    // segurança: se o filtro de tópico ficou vazio, usa os hits ranqueados
+                    const finais = escolhidos.length ? escolhidos : topHits.map(x => x.p);
+
                     return {
-                        texto: escolhidos.map(p => (p.titulo || '') + '\n' + (p.conteudo || '')).join('\n\n'),
-                        modo: 'filtrada',
-                        qtd: escolhidos.length
+                        texto: finais.map(p =>
+                            '### ' + (p.titulo || 'Sem título') + '\n' + (p.conteudo || '')
+                        ).join('\n\n---\n\n'),
+                        modo: 'topico-completo',
+                        qtd: finais.length,
+                        topicos: topicosEscolhidos
                     };
                 }
 
@@ -2056,26 +2138,30 @@ ${pergunta}`;
                 } else {
                     const procs = await apiGet('procedimentos', 'order=criado_em.asc');
                     const sel = selecionarBase(procs, pergunta);
-                    console.log('[IA] modo base:', sel.modo, '| itens:', sel.qtd);
+                    console.log('[IA] modo:', sel.modo, '| itens:', sel.qtd, '| topicos:', (sel.topicos || []).join(', '));
 
-                    prompt = `Você é um assistente especialista da Central de Perícias (CEPER).
+                    prompt = `Você é o assistente especialista da Central de Perícias (CEPER).
 
-BASE DE CONHECIMENTO (trechos selecionados ou base completa se não houve match):
+Abaixo está o PACOTE COMPLETO do(s) tópico(s) identificado(s) na base de conhecimento.
+Use SOMENTE este material para responder. Não omita informações relevantes que estejam no pacote.
+
+TÓPICOS: ${(sel.topicos && sel.topicos.length) ? sel.topicos.join(' | ') : '(base geral)'}
+
+===== BASE (PACOTE DO TÓPICO) =====
 ${sel.texto}
+===== FIM DA BASE =====
 
 PERGUNTA DO USUÁRIO:
 ${pergunta}
 
-REGRAS OBRIGATÓRIAS:
-
-1. Se a pergunta for sobre PROCEDIMENTOS, CERTIDÕES, PRAZOS, LOCALIZADORES ou rotinas da CEPER → use a base acima como fonte primária.
-2. Se a informação NÃO estiver na base → você pode usar conhecimento geral, mas OBRIGATORIAMENTE inicie com: ⚠️ Esta informação não está na base da CEPER. Com base no meu conhecimento geral, sugiro:
-3. Assuntos gerais (história, cultura, etc.) → responda normalmente, sem aviso.
-4. NUNCA invente números de processo, prazos específicos ou dados concretos que não estejam na base.
-5. Tom profissional, prático e objetivo.
-6. Modelos de certidão entre [CERTIDAO] e [/CERTIDAO].
-7. Destaque urgente com #texto# (fica vermelho).
-8. Cite o item da base quando possível.`;
+REGRAS:
+1. Responda de forma COMPLETA com base no pacote acima (listas de pessoas, passos de rotina, exceções — o que for pertinente à pergunta).
+2. Se a pergunta for uma lista (ex.: servidores da CEPER), inclua TODOS os nomes/itens do pacote, sem cortar.
+3. Se a pergunta for uma rotina específica, foque nela; mencione cenários relacionados só se estiverem no pacote e forem úteis.
+4. NÃO invente nomes, prazos ou procedimentos que não estejam no pacote.
+5. Se o pacote não cobrir a pergunta, diga claramente e inicie com: ⚠️ Esta informação não está na base da CEPER.
+6. Tom profissional e objetivo. Modelos de certidão entre [CERTIDAO] e [/CERTIDAO].
+7. Destaque urgente com #texto#.`;
                 }
 
                 const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
