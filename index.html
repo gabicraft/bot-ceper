@@ -548,11 +548,6 @@
             }
         }
 
-        // Reforça o "desbloqueio" do áudio em QUALQUER interação do usuário
-        // (não apenas um único clique). Isso é necessário porque navegadores
-        // como Safari/iOS podem suspender automaticamente o AudioContext depois
-        // de um tempo, e um AudioContext suspenso não pode ser retomado de
-        // dentro de um setInterval (não conta como "gesto do usuário").
         ['click', 'touchstart', 'keydown'].forEach(evt => {
             document.addEventListener(evt, initAudio);
         });
@@ -619,12 +614,10 @@
                 try {
                     usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade,ativo,avatar_url&order=nome.asc');
                 } catch (e1) {
-                    // Coluna avatar_url ainda não existe
                     usuarios = await apiGet('usuarios', 'select=nome,ultima_atividade,ativo&order=nome.asc');
                 }
                 if (!Array.isArray(usuarios)) throw new Error('Resposta inválida');
 
-                // Atualiza mapa de avatares para o chat
                 avatarMap = {};
                 usuarios.forEach(u => {
                     if (u.nome) avatarMap[u.nome] = u.avatar_url || '';
@@ -725,7 +718,6 @@
 
             try {
                 const url = await uploadToStorage(AVATAR_BUCKET, path, file);
-                // cache-bust na URL
                 const urlFinal = url + '?t=' + Date.now();
                 await apiPatch('usuarios', usuario.id, { avatar_url: urlFinal });
                 usuario.avatar_url = urlFinal;
@@ -899,7 +891,7 @@
             startOnlinePolling();
 
             if (heartbeatInterval) clearInterval(heartbeatInterval);
-            heartbeatInterval = setInterval(heartbeat, 15000); // a cada 15s
+            heartbeatInterval = setInterval(heartbeat, 15000);
 
             logoutTimer = setInterval(verificarInatividade, 30000);
         }
@@ -958,7 +950,7 @@
         }
 
         // ============================================
-        // AVISOS (com data corrigida)
+        // AVISOS
         // ============================================
         async function carregarAvisos() {
             try {
@@ -1097,14 +1089,13 @@
         }
 
         // ============================================
-        // CHAT INTERNO (com data corrigida)
+        // CHAT INTERNO
         // ============================================
         async function carregarChatInterno() {
             try {
                 const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
                 const nome = usuario.nome || '';
 
-                // Garante avatares carregados para mostrar ao lado dos nomes
                 if (Object.keys(avatarMap).length === 0) {
                     try {
                         let us;
@@ -1203,13 +1194,9 @@
                     const abaAtiva = chatTab && chatTab.classList.contains('active');
                     const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
 
-                    // Mensagens que chegaram depois da última já contabilizada
                     const novasMsgs = todas.filter(m => new Date(m.data_hora).getTime() > ultimaMensagemLida);
 
                     if (novasMsgs.length > 0 && !abaAtiva) {
-                        // Só alerta quando o usuário NÃO está com a aba de chat aberta.
-                        // Avança o marcador imediatamente para não tocar o som de novo
-                        // a cada polling (a cada 5s) para a mesma mensagem.
                         if (badge) {
                             badge.style.display = 'inline-block';
                             badge.textContent = novasMsgs.length;
@@ -1259,7 +1246,7 @@
         });
 
         // ============================================
-        // CHAT IA (DeepSeek)
+        // CHAT IA (agora usando Edge Function segura)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1315,24 +1302,22 @@ REGRAS OBRIGATÓRIAS:
 
 8. Cite o item ou a data da regra quando disponível na base.`;
 
-                const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                // ===== AQUI ESTÁ A MUDANÇA IMPORTANTE =====
+                const response = await fetch('https://jxcioqwwxsnyhmkigvbj.supabase.co/functions/v1/deepseek-chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer sk-79ceb1926bde460e87c47a2d55f867a6'
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'apikey': SUPABASE_ANON_KEY
                     },
-                    body: JSON.stringify({
-                        model: 'deepseek-chat',
-                        messages: [{ role: 'user', content: prompt }],
-                        temperature: 0.3,
-                        max_tokens: 2000,
-                        stream: false
-                    })
+                    body: JSON.stringify({ prompt: prompt })
                 });
 
                 const data = await response.json();
                 if (data.choices && data.choices.length > 0) {
                     addMessage('assistant', data.choices[0].message.content);
+                } else if (data.error) {
+                    addMessage('assistant', '❌ Erro: ' + (data.error.message || data.error));
                 } else {
                     addMessage('assistant', '❌ Não foi possível obter uma resposta da IA.');
                 }
