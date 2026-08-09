@@ -118,9 +118,45 @@
         #previewArquivo .preview-item { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
         #previewArquivo .preview-item button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 0 4px; }
         .arquivo-chat { margin-top: 6px; }
-        .arquivo-chat img { max-width: 220px; border-radius: 10px; cursor: pointer; display: block; }
-        .arquivo-chat a { color: var(--secondary); text-decoration: none; font-size: 13px; }
-        .arquivo-chat a:hover { text-decoration: underline; }
+        .arquivo-chat .img-wrap {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 8px;
+            background: rgba(255,255,255,0.04);
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .arquivo-chat img {
+            max-width: 120px;
+            max-height: 90px;
+            border-radius: 8px;
+            cursor: zoom-in;
+            display: block;
+            object-fit: cover;
+        }
+        .arquivo-chat .btn-download {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-light);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: 0.2s;
+        }
+        .arquivo-chat .btn-download:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+        .arquivo-chat a.arquivo-link { color: var(--secondary); text-decoration: none; font-size: 13px; }
+        .arquivo-chat a.arquivo-link:hover { text-decoration: underline; }
         .online-users { flex: 1; min-width: 160px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto; }
         .online-users h4 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .online-users ul { list-style: none; padding: 0; margin: 0; }
@@ -1255,12 +1291,24 @@
 
                     let arquivoHtml = '';
                     if (m.arquivo_url) {
+                        const nomeArq = (m.arquivo_nome || 'arquivo').replace(/"/g, '&quot;');
                         const isImg = (m.arquivo_tipo || '').startsWith('image/') ||
-                            /\.(jpe?g|png|gif|webp|bmp)$/i.test(m.arquivo_url);
+                            /\.(jpe?g|png|gif|webp|bmp)(\?|$)/i.test(m.arquivo_url);
                         if (isImg) {
-                            arquivoHtml = `<div class="arquivo-chat"><img src="${m.arquivo_url}" alt="${m.arquivo_nome || 'Imagem'}"></div>`;
+                            arquivoHtml = `<div class="arquivo-chat">
+                                <div class="img-wrap">
+                                    <img src="${m.arquivo_url}" alt="${nomeArq}">
+                                    <a class="btn-download" href="${m.arquivo_url}" download="${nomeArq}" title="Baixar imagem" target="_blank" rel="noopener">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            </div>`;
                         } else {
-                            arquivoHtml = `<div class="arquivo-chat"><a href="${m.arquivo_url}" target="_blank" rel="noopener">📎 ${m.arquivo_nome || 'Arquivo'}</a></div>`;
+                            arquivoHtml = `<div class="arquivo-chat">
+                                <a class="arquivo-link" href="${m.arquivo_url}" target="_blank" rel="noopener" download="${nomeArq}">
+                                    📎 ${m.arquivo_nome || 'Arquivo'} <i class="fas fa-download" style="margin-left:4px;font-size:11px;"></i>
+                                </a>
+                            </div>`;
                         }
                     }
 
