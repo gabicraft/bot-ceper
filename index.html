@@ -191,6 +191,72 @@
             font-size: 16px;
             flex-shrink: 0;
         }
+        /* Reações */
+        .msg-reacoes {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .reacao-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+        .reacao-pill:hover { background: rgba(255,255,255,0.14); }
+        .reacao-pill.minha {
+            background: rgba(42,90,140,0.35);
+            border-color: rgba(42,90,140,0.7);
+        }
+        .reacao-pill .reacao-count { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .reacao-pill.minha .reacao-count { color: #b0d4ff; }
+        .btn-add-reacao {
+            background: transparent;
+            border: 1px dashed rgba(255,255,255,0.15);
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-add-reacao:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: rgba(232,185,49,0.08);
+        }
+        .reacao-picker {
+            display: none;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: #1a2838;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 6px;
+            margin-top: 4px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .reacao-picker.open { display: inline-flex; }
+        .reacao-picker button {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+            line-height: 1;
+        }
+        .reacao-picker button:hover { background: rgba(255,255,255,0.1); transform: scale(1.15); }
         .online-users { flex: 1; min-width: 160px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto; }
         .online-users h4 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .online-users ul { list-style: none; padding: 0; margin: 0; }
@@ -761,6 +827,8 @@
         // Conversas estilo WhatsApp
         let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
         let unreadPrivados = {};  // { "Nome": quantidade }
+        let reacoesCache = [];    // reações carregadas
+        const EMOJIS_REACAO = ['❤️', '👍', '😂', '😮', '😢', '🙏', '🔥', '👏'];
 
         // Formata data/hora de forma confiável (Brasil)
         function formatarDataHora(valor) {
@@ -1269,6 +1337,98 @@
         // CHAT INTERNO (estilo WhatsApp)
         // ============================================
 
+        async function carregarReacoes() {
+            try {
+                reacoesCache = await apiGet('reacoes', 'order=criado_em.asc') || [];
+            } catch (e) {
+                reacoesCache = [];
+            }
+        }
+
+        function reacoesDaMensagem(mensagemId, tipoMsg) {
+            return (reacoesCache || []).filter(r =>
+                String(r.mensagem_id) === String(mensagemId) && r.tipo_mensagem === tipoMsg
+            );
+        }
+
+        function htmlReacoes(mensagemId, tipoMsg, meuNome) {
+            if (!mensagemId) return '';
+            const lista = reacoesDaMensagem(mensagemId, tipoMsg);
+            const contagem = {};
+            const quem = {};
+            lista.forEach(r => {
+                contagem[r.emoji] = (contagem[r.emoji] || 0) + 1;
+                if (!quem[r.emoji]) quem[r.emoji] = [];
+                quem[r.emoji].push(r.usuario);
+            });
+
+            let pills = '';
+            Object.keys(contagem).forEach(emoji => {
+                const minha = (quem[emoji] || []).includes(meuNome);
+                const titulo = (quem[emoji] || []).join(', ');
+                pills += `<button type="button" class="reacao-pill${minha ? ' minha' : ''}" title="${titulo}"
+                    onclick="alternarReacao('${mensagemId}', '${tipoMsg}', '${emoji}')">
+                    ${emoji}<span class="reacao-count">${contagem[emoji]}</span>
+                </button>`;
+            });
+
+            const pickerId = 'picker-' + mensagemId;
+            const emojisBtns = EMOJIS_REACAO.map(e =>
+                `<button type="button" onclick="alternarReacao('${mensagemId}', '${tipoMsg}', '${e}'); fecharPickers()">${e}</button>`
+            ).join('');
+
+            return `<div class="msg-reacoes">
+                ${pills}
+                <button type="button" class="btn-add-reacao" title="Reagir" onclick="togglePicker('${pickerId}', event)">+</button>
+                <div class="reacao-picker" id="${pickerId}">${emojisBtns}</div>
+            </div>`;
+        }
+
+        function togglePicker(id, ev) {
+            if (ev) ev.stopPropagation();
+            document.querySelectorAll('.reacao-picker').forEach(p => {
+                if (p.id !== id) p.classList.remove('open');
+            });
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('open');
+        }
+
+        function fecharPickers() {
+            document.querySelectorAll('.reacao-picker').forEach(p => p.classList.remove('open'));
+        }
+
+        document.addEventListener('click', function() { fecharPickers(); });
+
+        async function alternarReacao(mensagemId, tipoMsg, emoji) {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            const nome = usuario.nome || '';
+            if (!nome || !mensagemId) return;
+
+            const existente = (reacoesCache || []).find(r =>
+                String(r.mensagem_id) === String(mensagemId) &&
+                r.tipo_mensagem === tipoMsg &&
+                r.usuario === nome &&
+                r.emoji === emoji
+            );
+
+            try {
+                if (existente && existente.id) {
+                    await apiDelete('reacoes', existente.id);
+                } else {
+                    await apiPost('reacoes', {
+                        mensagem_id: mensagemId,
+                        tipo_mensagem: tipoMsg,
+                        usuario: nome,
+                        emoji: emoji
+                    });
+                }
+                await carregarReacoes();
+                await carregarChatInterno();
+            } catch (err) {
+                alert('Erro ao reagir. Verifique se a tabela "reacoes" existe no Supabase.\n\n' + (err.message || err));
+            }
+        }
+
         function abrirConversaGeral() {
             conversaAtual = null;
             document.getElementById('btnVoltarGeral').style.display = 'none';
@@ -1313,6 +1473,8 @@
                         (us || []).forEach(u => { if (u.nome) avatarMap[u.nome] = u.avatar_url || ''; });
                     } catch (_) { /* ignore */ }
                 }
+
+                await carregarReacoes();
 
                 const container = document.getElementById('chatInternoArea');
                 let mensagens = [];
@@ -1384,6 +1546,9 @@
                         }
                     }
 
+                    const tipoMsg = m.tipo === 'privado' ? 'privado' : 'publico';
+                    const reacoesHtml = htmlReacoes(m.id, tipoMsg, nome);
+
                     return `
                         <div class="chat-msg ${classeExtra}">
                             ${avatarHtml(avUrl, m.remetente, 28)}
@@ -1391,6 +1556,7 @@
                                 <span class="remetente">${m.remetente}</span>
                                 <span class="texto-msg">${m.mensagem || ''}</span>
                                 ${arquivoHtml}
+                                ${reacoesHtml}
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
                         </div>
