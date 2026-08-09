@@ -112,6 +112,15 @@
         .chat-input-area select option:hover { background: var(--primary-light); }
         .chat-input-area button { background: var(--secondary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; color: #1a1a1a; cursor: pointer; }
         .chat-input-area button:hover { background: #d4a820; }
+        .btn-anexo { background: rgba(255,255,255,0.08) !important; color: var(--text-light) !important; padding: 10px 14px !important; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border: none; }
+        .btn-anexo:hover { background: var(--primary-light) !important; }
+        #previewArquivo { margin-top: 8px; display: none; }
+        #previewArquivo .preview-item { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; font-size: 13px; }
+        #previewArquivo .preview-item button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; padding: 0 4px; }
+        .arquivo-chat { margin-top: 6px; }
+        .arquivo-chat img { max-width: 220px; border-radius: 10px; cursor: pointer; display: block; }
+        .arquivo-chat a { color: var(--secondary); text-decoration: none; font-size: 13px; }
+        .arquivo-chat a:hover { text-decoration: underline; }
         .online-users { flex: 1; min-width: 160px; background: rgba(0,0,0,0.15); border-radius: 16px; padding: 16px; border: 1px solid var(--border-color); max-height: 400px; overflow-y: auto; }
         .online-users h4 { color: var(--secondary); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .online-users ul { list-style: none; padding: 0; margin: 0; }
@@ -424,10 +433,15 @@
                     <div id="chatInternoArea" class="chat-interno-area">
                         <div class="empty-state">Carregando mensagens...</div>
                     </div>
+                    <div id="previewArquivo"></div>
                     <div class="chat-input-area">
                         <select id="chatDestinatario" style="display:none;">
                             <option value="todos">Todos (público)</option>
                         </select>
+                        <label class="btn-anexo" title="Anexar arquivo">
+                            <i class="fas fa-paperclip"></i>
+                            <input type="file" id="chatArquivo" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none">
+                        </label>
                         <input type="text" id="chatInternoInput" placeholder="Digite sua mensagem no Chat Geral..." />
                         <button id="btnEnviarChat"><i class="fas fa-paper-plane"></i> Enviar</button>
                     </div>
@@ -475,8 +489,10 @@
         const SUPABASE_STORAGE_URL = 'https://jxcioqwwxsnyhmkigvbj.supabase.co/storage/v1';
         const SUPABASE_ANON_KEY = 'sb_publishable_ezQwOFDaLoXUlhDjwvLMWw_9xsxEc8U';
         const AVATAR_BUCKET = 'avatars';
+        const CHAT_BUCKET = 'chat-arquivos';
 
         let avatarMap = {};
+        let arquivoPendente = null;
 
         // ============================================
         // FUNÇÕES DE API
@@ -529,7 +545,7 @@
             if (box) box.classList.remove('open');
         }
         document.addEventListener('click', function(e) {
-            const img = e.target.closest && e.target.closest('img.avatar-img');
+            const img = e.target.closest && e.target.closest('img.avatar-img, .arquivo-chat img');
             if (img && img.src) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1237,12 +1253,24 @@
                     const classeExtra = isMinha ? 'minha-msg' : '';
                     const dataFormatada = formatarDataHora(m.data_hora);
 
+                    let arquivoHtml = '';
+                    if (m.arquivo_url) {
+                        const isImg = (m.arquivo_tipo || '').startsWith('image/') ||
+                            /\.(jpe?g|png|gif|webp|bmp)$/i.test(m.arquivo_url);
+                        if (isImg) {
+                            arquivoHtml = `<div class="arquivo-chat"><img src="${m.arquivo_url}" alt="${m.arquivo_nome || 'Imagem'}"></div>`;
+                        } else {
+                            arquivoHtml = `<div class="arquivo-chat"><a href="${m.arquivo_url}" target="_blank" rel="noopener">📎 ${m.arquivo_nome || 'Arquivo'}</a></div>`;
+                        }
+                    }
+
                     return `
                         <div class="chat-msg ${classeExtra}">
                             ${avatarHtml(avUrl, m.remetente, 28)}
                             <div class="msg-body">
                                 <span class="remetente">${m.remetente}</span>
-                                <span class="texto-msg">${m.mensagem}</span>
+                                <span class="texto-msg">${m.mensagem || ''}</span>
+                                ${arquivoHtml}
                             </div>
                             <span class="data-msg">${dataFormatada}</span>
                         </div>
@@ -1325,27 +1353,81 @@
             }, 4000);
         }
 
+        // ===== Seleção de arquivo =====
+        document.getElementById('chatArquivo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 15 * 1024 * 1024) {
+                alert('Arquivo muito grande. Máximo 15 MB.');
+                this.value = '';
+                return;
+            }
+
+            arquivoPendente = file;
+            const preview = document.getElementById('previewArquivo');
+            preview.style.display = 'block';
+            preview.innerHTML = `
+                <div class="preview-item">
+                    📎 ${file.name} (${(file.size / 1024).toFixed(0)} KB)
+                    <button onclick="cancelarArquivo()" title="Remover">✕</button>
+                </div>
+            `;
+        });
+
+        function cancelarArquivo() {
+            arquivoPendente = null;
+            document.getElementById('chatArquivo').value = '';
+            document.getElementById('previewArquivo').style.display = 'none';
+            document.getElementById('previewArquivo').innerHTML = '';
+        }
+
+        // ===== ENVIO DE MENSAGEM + ARQUIVO =====
         document.getElementById('btnEnviarChat').addEventListener('click', async function() {
             const input = document.getElementById('chatInternoInput');
             const mensagem = input.value.trim();
-            if (!mensagem) return;
+            if (!mensagem && !arquivoPendente) return;
 
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             const remetente = usuario.nome || 'Servidor';
 
+            let arquivo_url = null;
+            let arquivo_nome = null;
+            let arquivo_tipo = null;
+
+            if (arquivoPendente) {
+                try {
+                    const path = (usuario.id || 'anon') + '/' + Date.now() + '_' +
+                        arquivoPendente.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                    arquivo_url = await uploadToStorage(CHAT_BUCKET, path, arquivoPendente);
+                    arquivo_nome = arquivoPendente.name;
+                    arquivo_tipo = arquivoPendente.type;
+                } catch (err) {
+                    alert('Erro ao enviar arquivo: ' + err.message +
+                        '\n\nVerifique se o bucket "chat-arquivos" existe e está público no Supabase.');
+                    return;
+                }
+            }
+
+            const payload = {
+                remetente,
+                mensagem: mensagem || (arquivo_nome ? '📎 ' + arquivo_nome : ''),
+                arquivo_url,
+                arquivo_nome,
+                arquivo_tipo
+            };
+
             try {
                 if (conversaAtual === null) {
-                    // Chat Geral → mensagem pública
-                    await apiPost('mensagens_chat', { remetente, mensagem });
+                    await apiPost('mensagens_chat', payload);
                 } else {
-                    // Conversa privada
                     await apiPost('mensagens_privadas', {
-                        remetente,
-                        destinatario: conversaAtual,
-                        mensagem
+                        ...payload,
+                        destinatario: conversaAtual
                     });
                 }
                 input.value = '';
+                cancelarArquivo();
                 await carregarChatInterno();
                 const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                 if (badge) badge.style.display = 'none';
