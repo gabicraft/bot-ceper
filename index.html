@@ -423,6 +423,73 @@
         #btnVoltarGeral:hover {
             background: var(--primary-light) !important;
         }
+        /* Modal Base de Conhecimento */
+        .modal-proc-overlay {
+            position: fixed; inset: 0; z-index: 10050;
+            background: rgba(0,0,0,0.72);
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        .modal-proc-box {
+            background: #152233;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: min(920px, 100%);
+            max-height: 92vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+        .modal-proc-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+        }
+        .modal-proc-header h3 { margin: 0; font-size: 18px; color: var(--secondary); }
+        .modal-proc-close {
+            background: transparent; border: none; color: var(--text-muted);
+            font-size: 20px; cursor: pointer; padding: 4px 8px;
+        }
+        .modal-proc-close:hover { color: #fff; }
+        .modal-proc-body {
+            padding: 16px 20px; overflow-y: auto; flex: 1;
+        }
+        .modal-label {
+            display: block; font-size: 12px; color: var(--text-muted);
+            margin: 10px 0 6px; font-weight: 600;
+        }
+        .modal-input {
+            width: 100%; padding: 12px 14px; border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.04); color: var(--text-light);
+            font-size: 14px; outline: none;
+        }
+        .modal-input:focus { border-color: var(--primary-light); }
+        .modal-textarea {
+            width: 100%; min-height: 320px; padding: 14px;
+            border-radius: 12px; border: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.25); color: var(--text-light);
+            font-size: 14px; line-height: 1.55; outline: none; resize: vertical;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .modal-textarea:focus { border-color: var(--primary-light); }
+        .modal-proc-footer {
+            display: flex; justify-content: flex-end; gap: 10px;
+            padding: 14px 20px; border-top: 1px solid var(--border-color);
+        }
+        .modal-btn-primary {
+            background: var(--secondary); border: none; color: #1a1a1a;
+            padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer;
+        }
+        .modal-btn-primary:hover { background: #d4a820; }
+        .modal-btn-sec {
+            background: rgba(255,255,255,0.08); border: 1px solid var(--border-color);
+            color: var(--text-light); padding: 8px 14px; border-radius: 10px;
+            font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .modal-btn-sec:hover { background: var(--primary-light); }
+        .proc-conteudo img {
+            max-width: min(100%, 420px); border-radius: 8px; margin: 8px 0;
+            border: 1px solid var(--border-color); display: block;
+        }
     </style>
 </head>
 <body>
@@ -539,40 +606,61 @@
 
         <!-- TAB BASE -->
         <div id="tabBase" class="tab-content">
-            <h3 style="margin-bottom:12px;"><i class="fas fa-book"></i> Editar Base de Conhecimento</h3>
-            <p class="text-muted" style="font-size:13px;margin-bottom:16px;">
-                Cadastre <strong>fatias</strong> por tópico: uma rotina objetiva, e cenários/exceções em itens separados.
-                Use títulos claros (ex.: <em>Cancelar nomeação – rotina no eproc/AJG</em>).
-            </p>
-            <div class="form-proc" id="formProc">
-                <input type="hidden" id="procEditId" value="" />
-                <input type="text" id="procTitulo" placeholder="Título (ex: Cancelar nomeação – rotina no eproc/AJG)" />
-                <select id="procCategoria">
-                    <option value="rotina">Rotina (passo a passo)</option>
-                    <option value="cenario">Cenário / variável</option>
-                    <option value="fluxo">Fluxo completo</option>
-                    <option value="certidao">Certidão / modelo</option>
-                    <option value="localizador">Localizador</option>
-                    <option value="equipe">Equipe / cultura</option>
-                    <option value="sistema">Sistema (e-Proc / AJG)</option>
-                    <option value="orientacao">Orientação geral</option>
-                </select>
-                <textarea id="procConteudo" placeholder="Modelo sugerido:
-
-TÓPICO: Nome do assunto
-TIPO: rotina | cenário | modelo
-
-(texto objetivo)
-
-VER TAMBÉM:
-- Título de item relacionado
-- Outro item relacionado"></textarea>
-                <div style="grid-column: span 2; display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="btn-submit" id="btnSalvarProc" style="flex:1; grid-column:auto;">Adicionar procedimento</button>
-                    <button type="button" id="btnCancelarProc" style="display:none; flex:0 0 auto; background:rgba(255,255,255,0.08); border:1px solid var(--border-color); color:var(--text-light); padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer;">Cancelar edição</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <div>
+                    <h3 style="margin-bottom:6px;"><i class="fas fa-book"></i> Base de Conhecimento</h3>
+                    <p class="text-muted" style="font-size:13px;margin:0;">
+                        Fatias por tópico (rotina, cenário, equipe…). Edição em janela ampla, com imagens.
+                    </p>
                 </div>
+                <button type="button" id="btnNovoProc" class="btn-submit" style="width:auto; padding:10px 18px; border:none; border-radius:12px; background:var(--secondary); color:#1a1a1a; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-plus"></i> Novo item
+                </button>
             </div>
             <div id="listaProcedimentos"></div>
+        </div>
+
+        <!-- Modal edição Base de Conhecimento -->
+        <div id="modalProc" class="modal-proc-overlay" style="display:none;" onclick="if(event.target===this)fecharModalProc()">
+            <div class="modal-proc-box" onclick="event.stopPropagation()">
+                <div class="modal-proc-header">
+                    <h3 id="modalProcTitulo">Novo item da base</h3>
+                    <button type="button" class="modal-proc-close" onclick="fecharModalProc()" title="Fechar">✕</button>
+                </div>
+                <div class="modal-proc-body">
+                    <input type="hidden" id="procEditId" value="" />
+                    <label class="modal-label">Título</label>
+                    <input type="text" id="procTitulo" class="modal-input" placeholder="Ex: Cancelar nomeação – rotina no eproc/AJG" />
+                    <label class="modal-label">Categoria</label>
+                    <select id="procCategoria" class="modal-input">
+                        <option value="rotina">Rotina (passo a passo)</option>
+                        <option value="cenario">Cenário / variável</option>
+                        <option value="fluxo">Fluxo completo</option>
+                        <option value="certidao">Certidão / modelo</option>
+                        <option value="localizador">Localizador</option>
+                        <option value="equipe">Equipe / cultura</option>
+                        <option value="sistema">Sistema (e-Proc / AJG)</option>
+                        <option value="orientacao">Orientação geral</option>
+                    </select>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:12px;">
+                        <label class="modal-label" style="margin:0;">Conteúdo</label>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button type="button" id="btnInserirModeloProc" class="modal-btn-sec">Inserir modelo de texto</button>
+                            <label class="modal-btn-sec" style="cursor:pointer; margin:0;">
+                                <i class="fas fa-image"></i> Inserir imagem
+                                <input type="file" id="procImagemInput" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="procConteudo" class="modal-textarea" placeholder="Texto do procedimento. Use o botão Inserir imagem para colocar prints no ponto do cursor."></textarea>
+                    <p id="procUploadStatus" style="font-size:12px; color:var(--text-muted); min-height:18px; margin-top:6px;"></p>
+                    <div id="procPreviewImagens" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+                </div>
+                <div class="modal-proc-footer">
+                    <button type="button" id="btnCancelarProc" class="modal-btn-sec" onclick="fecharModalProc()">Cancelar</button>
+                    <button type="button" id="btnSalvarProc" class="modal-btn-primary">Salvar</button>
+                </div>
+            </div>
         </div>
 
         <!-- TAB CHAT INTERNO -->
@@ -1410,18 +1498,44 @@ VER TAMBÉM:
         }
 
         // ============================================
-        // PROCEDIMENTOS (adicionar / editar / remover)
+        // PROCEDIMENTOS – modal amplo + imagens
         // ============================================
         let procsCache = {};
+        const BASE_IMG_BUCKET = CHAT_BUCKET; // usa o mesmo bucket público do chat (pasta base/)
+        const MODELO_TEXTO_PROC = `TÓPICO: Nome do assunto
+TIPO: rotina | cenário | modelo
+
+1. Passo um
+2. Passo dois
+
+VER TAMBÉM:
+- Título de item relacionado
+`;
 
         function limparFormProc() {
             document.getElementById('procEditId').value = '';
             document.getElementById('procTitulo').value = '';
             document.getElementById('procConteudo').value = '';
             document.getElementById('procCategoria').value = 'rotina';
-            document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
-            const btnCancel = document.getElementById('btnCancelarProc');
-            if (btnCancel) btnCancel.style.display = 'none';
+            document.getElementById('procUploadStatus').textContent = '';
+            document.getElementById('procPreviewImagens').innerHTML = '';
+            document.getElementById('modalProcTitulo').textContent = 'Novo item da base';
+            document.getElementById('btnSalvarProc').textContent = 'Salvar';
+        }
+
+        function abrirModalProc(novo) {
+            if (!isGestor()) {
+                alert('Apenas Admin ou Super Admin podem gerenciar a base.');
+                return;
+            }
+            if (novo) limparFormProc();
+            document.getElementById('modalProc').style.display = 'flex';
+            setTimeout(() => document.getElementById('procTitulo').focus(), 50);
+        }
+
+        function fecharModalProc() {
+            document.getElementById('modalProc').style.display = 'none';
+            limparFormProc();
         }
 
         function editarProcedimento(id) {
@@ -1434,15 +1548,42 @@ VER TAMBÉM:
             document.getElementById('procTitulo').value = p.titulo || '';
             document.getElementById('procConteudo').value = p.conteudo || '';
             document.getElementById('procCategoria').value = p.categoria || 'rotina';
+            document.getElementById('modalProcTitulo').textContent = 'Editar item da base';
             document.getElementById('btnSalvarProc').textContent = 'Salvar alterações';
-            const btnCancel = document.getElementById('btnCancelarProc');
-            if (btnCancel) btnCancel.style.display = 'inline-block';
-            document.getElementById('formProc').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('procUploadStatus').textContent = '';
+            atualizarPreviewImagensProc();
+            document.getElementById('modalProc').style.display = 'flex';
+        }
+
+        function inserirNoCursor(textarea, texto) {
+            const start = textarea.selectionStart || 0;
+            const end = textarea.selectionEnd || 0;
+            const val = textarea.value;
+            textarea.value = val.slice(0, start) + texto + val.slice(end);
+            const pos = start + texto.length;
+            textarea.focus();
+            textarea.setSelectionRange(pos, pos);
+        }
+
+        function atualizarPreviewImagensProc() {
+            const box = document.getElementById('procPreviewImagens');
+            const conteudo = document.getElementById('procConteudo').value || '';
+            const re = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+            const urls = [];
+            let m;
+            while ((m = re.exec(conteudo)) !== null) urls.push(m[1]);
+            if (!urls.length) {
+                box.innerHTML = '';
+                return;
+            }
+            box.innerHTML = urls.map(u =>
+                '<img src="' + u + '" alt="preview" style="max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border-color);object-fit:cover;" />'
+            ).join('');
         }
 
         async function carregarProcedimentos() {
             try {
-                const procs = await apiGet('procedimentos', 'order=criado_em.asc');
+                const procs = await apiGet('procedimentos', 'order=titulo.asc');
                 const container = document.getElementById('listaProcedimentos');
                 if (!procs || procs.length === 0) {
                     container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado.</div>';
@@ -1453,20 +1594,66 @@ VER TAMBÉM:
                 procs.forEach(p => { if (p.id) procsCache[p.id] = p; });
 
                 const podeGerir = isGestor();
-                container.innerHTML = procs.map((p) => `
+                const btnNovo = document.getElementById('btnNovoProc');
+                if (btnNovo) btnNovo.style.display = podeGerir ? 'inline-flex' : 'none';
+                container.innerHTML = procs.map((p) => {
+                    const trecho = (p.conteudo || '').replace(/<img[^>]*>/gi, ' 🖼️ ').slice(0, 280);
+                    return `
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
-                        <div class="proc-conteudo">${p.conteudo || ''}</div>
+                        <div class="proc-conteudo">${trecho}${(p.conteudo || '').length > 280 ? '…' : ''}</div>
                         ${podeGerir ? `<div class="acoes">
                             <button type="button" onclick="editarProcedimento('${p.id}')"><i class="fas fa-pen"></i> Editar</button>
                             <button type="button" class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button>
                         </div>` : ''}
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
             } catch (err) {
                 console.error('Erro ao carregar procedimentos:', err);
             }
         }
+
+        document.getElementById('btnNovoProc').addEventListener('click', function() {
+            abrirModalProc(true);
+        });
+
+        document.getElementById('btnInserirModeloProc').addEventListener('click', function() {
+            const ta = document.getElementById('procConteudo');
+            if (!ta.value.trim()) ta.value = MODELO_TEXTO_PROC;
+            else inserirNoCursor(ta, '\n' + MODELO_TEXTO_PROC);
+        });
+
+        document.getElementById('procImagemInput').addEventListener('change', async function(e) {
+            const file = e.target.files && e.target.files[0];
+            e.target.value = '';
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('Selecione um arquivo de imagem.');
+                return;
+            }
+            if (file.size > 8 * 1024 * 1024) {
+                alert('Imagem muito grande (máx. 8 MB).');
+                return;
+            }
+            const status = document.getElementById('procUploadStatus');
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            status.textContent = 'Enviando imagem…';
+            try {
+                const path = 'base/' + (usuario.id || 'anon') + '/' + Date.now() + '_' +
+                    file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const url = await uploadToStorage(BASE_IMG_BUCKET, path, file);
+                const tag = '\n<img src="' + url + '" alt="' + (file.name || 'imagem') + '" style="max-width:100%;border-radius:8px;margin:8px 0;" />\n';
+                inserirNoCursor(document.getElementById('procConteudo'), tag);
+                status.textContent = 'Imagem inserida no texto.';
+                atualizarPreviewImagensProc();
+            } catch (err) {
+                status.textContent = '';
+                alert('Erro ao enviar imagem: ' + err.message +
+                    '\n\nConfira se o bucket "chat-arquivos" está público (ou crie a pasta base/ nele).');
+            }
+        });
+
+        document.getElementById('procConteudo').addEventListener('input', atualizarPreviewImagensProc);
 
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
             if (!isGestor()) {
@@ -1487,12 +1674,12 @@ VER TAMBÉM:
             try {
                 if (editId) {
                     await apiPatch('procedimentos', editId, { titulo, conteudo, categoria });
-                    limparFormProc();
+                    fecharModalProc();
                     await carregarProcedimentos();
                     alert('Procedimento atualizado!');
                 } else {
                     await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
-                    limparFormProc();
+                    fecharModalProc();
                     await carregarProcedimentos();
                     alert('Procedimento adicionado!');
                 }
@@ -1501,20 +1688,23 @@ VER TAMBÉM:
             }
         });
 
-        document.getElementById('btnCancelarProc').addEventListener('click', function() {
-            limparFormProc();
-        });
-
         async function removerProcedimento(id) {
             if (!confirm('Remover este procedimento?')) return;
             try {
                 await apiDelete('procedimentos', id);
-                if (document.getElementById('procEditId').value === id) limparFormProc();
+                if (document.getElementById('procEditId').value === id) fecharModalProc();
                 await carregarProcedimentos();
             } catch (err) {
                 alert('Erro ao remover procedimento: ' + err.message);
             }
         }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modalProc');
+                if (modal && modal.style.display === 'flex') fecharModalProc();
+            }
+        });
 
         // ============================================
         // CHAT INTERNO (estilo WhatsApp)
