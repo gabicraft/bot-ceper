@@ -1275,9 +1275,13 @@
         // ============================================
         // PROCEDIMENTOS
         // ============================================
+        let procedimentosCache = [];
+        let editingProcId = null;
+
         async function carregarProcedimentos() {
             try {
                 const procs = await apiGet('procedimentos', 'order=criado_em.asc');
+                procedimentosCache = procs || [];
                 const container = document.getElementById('listaProcedimentos');
                 if (!procs || procs.length === 0) {
                     container.innerHTML = '<div class="empty-state">Nenhum procedimento cadastrado.</div>';
@@ -1289,7 +1293,10 @@
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
-                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button></div>` : ''}
+                        ${isAdmin ? `<div class="acoes">
+                            <button class="btn-edit" onclick="editarProcedimento('${p.id}')">✏️ Editar</button>
+                            <button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button>
+                        </div>` : ''}
                     </div>
                 `).join('');
             } catch (err) {
@@ -1297,10 +1304,48 @@
             }
         }
 
+        function editarProcedimento(id) {
+            const proc = procedimentosCache.find(p => String(p.id) === String(id));
+            if (!proc) {
+                alert('Procedimento não encontrado. Tente recarregar a página.');
+                return;
+            }
+            editingProcId = proc.id;
+            document.getElementById('procTitulo').value = proc.titulo || '';
+            document.getElementById('procCategoria').value = proc.categoria || 'certidão';
+            document.getElementById('procConteudo').value = proc.conteudo || '';
+
+            const btn = document.getElementById('btnSalvarProc');
+            btn.textContent = 'Salvar alterações';
+
+            let btnCancelar = document.getElementById('btnCancelarEdicaoProc');
+            if (!btnCancelar) {
+                btnCancelar = document.createElement('button');
+                btnCancelar.id = 'btnCancelarEdicaoProc';
+                btnCancelar.type = 'button';
+                btnCancelar.textContent = 'Cancelar edição';
+                btnCancelar.style.cssText = 'grid-column: span 2; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); color: var(--text-light); padding: 10px; border-radius: 10px; cursor: pointer;';
+                btnCancelar.onclick = cancelarEdicaoProc;
+                btn.insertAdjacentElement('afterend', btnCancelar);
+            }
+
+            document.getElementById('formProc').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelarEdicaoProc() {
+            editingProcId = null;
+            document.getElementById('procTitulo').value = '';
+            document.getElementById('procConteudo').value = '';
+            document.getElementById('procCategoria').value = 'certidão';
+            document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
+            const btnCancelar = document.getElementById('btnCancelarEdicaoProc');
+            if (btnCancelar) btnCancelar.remove();
+        }
+
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.papel !== 'super_admin') {
-                alert('Apenas Super Admin pode adicionar procedimentos.');
+                alert('Apenas Super Admin pode adicionar ou editar procedimentos.');
                 return;
             }
             const titulo = document.getElementById('procTitulo').value.trim();
@@ -1313,13 +1358,20 @@
             }
 
             try {
-                await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
-                document.getElementById('procTitulo').value = '';
-                document.getElementById('procConteudo').value = '';
-                await carregarProcedimentos();
-                alert('Procedimento adicionado!');
+                if (editingProcId) {
+                    await apiPatch('procedimentos', editingProcId, { titulo, conteudo, categoria });
+                    cancelarEdicaoProc();
+                    await carregarProcedimentos();
+                    alert('Procedimento atualizado!');
+                } else {
+                    await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
+                    document.getElementById('procTitulo').value = '';
+                    document.getElementById('procConteudo').value = '';
+                    await carregarProcedimentos();
+                    alert('Procedimento adicionado!');
+                }
             } catch (err) {
-                alert('Erro ao adicionar procedimento: ' + err.message);
+                alert('Erro ao salvar procedimento: ' + err.message);
             }
         });
 
@@ -1327,6 +1379,9 @@
             if (!confirm('Remover este procedimento?')) return;
             try {
                 await apiDelete('procedimentos', id);
+                if (editingProcId && String(editingProcId) === String(id)) {
+                    cancelarEdicaoProc();
+                }
                 await carregarProcedimentos();
             } catch (err) {
                 alert('Erro ao remover procedimento: ' + err.message);
