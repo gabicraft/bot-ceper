@@ -631,7 +631,7 @@
         let arquivoPendente = null;
 
         // ============================================
-        // FUNÇÕES DE API
+        // FUNÇÕES DE API (corrigidas para resposta vazia)
         // ============================================
         const headers = {
             'Content-Type': 'application/json',
@@ -681,10 +681,7 @@
             if (box) box.classList.remove('open');
         }
         document.addEventListener('click', function(e) {
-            // Clique no botão de download NÃO deve ampliar
             if (e.target.closest && e.target.closest('.btn-download')) return;
-
-            // Imagem do chat: amplia só um pouco (no lugar), sem nova aba
             const chatImg = e.target.closest && e.target.closest('.arquivo-chat img');
             if (chatImg) {
                 e.preventDefault();
@@ -692,8 +689,6 @@
                 chatImg.classList.toggle('ampliada');
                 return;
             }
-
-            // Avatar de perfil: lightbox
             const avatarImg = e.target.closest && e.target.closest('img.avatar-img');
             if (avatarImg && avatarImg.src) {
                 e.preventDefault();
@@ -705,7 +700,6 @@
             if (e.key === 'Escape') fecharAvatarLightbox();
         });
 
-        // Download real (funciona com URLs do Supabase)
         async function baixarArquivo(url, nome) {
             try {
                 const res = await fetch(url);
@@ -720,15 +714,18 @@
                 a.remove();
                 URL.revokeObjectURL(blobUrl);
             } catch (err) {
-                // fallback: abre em nova aba
                 window.open(url, '_blank');
             }
         }
 
+        // --- API corrigidas ---
         async function apiGet(table, filters) {
             const url = SUPABASE_URL + table + (filters ? '?' + filters : '');
             const res = await fetch(url, { headers });
-            if (!res.ok) throw new Error(await res.text());
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Erro HTTP ' + res.status);
+            }
             return res.json();
         }
 
@@ -738,7 +735,10 @@
                 headers: headers,
                 body: JSON.stringify(data)
             });
-            if (!res.ok) throw new Error(await res.text());
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Erro HTTP ' + res.status);
+            }
             const text = await res.text();
             return text ? JSON.parse(text) : {};
         }
@@ -749,7 +749,10 @@
                 headers: headers,
                 body: JSON.stringify(data)
             });
-            if (!res.ok) throw new Error(await res.text());
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Erro HTTP ' + res.status);
+            }
             const text = await res.text();
             return text ? JSON.parse(text) : {};
         }
@@ -759,12 +762,16 @@
                 method: 'DELETE',
                 headers: headers
             });
-            if (!res.ok) throw new Error(await res.text());
-            return res.json();
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Erro HTTP ' + res.status);
+            }
+            const text = await res.text();
+            return text ? JSON.parse(text) : {};
         }
 
         // ============================================
-        // SOM DE NOTIFICAÇÃO (versão melhorada)
+        // SOM DE NOTIFICAÇÃO (versão robusta)
         // ============================================
         let audioCtx = null;
 
@@ -788,23 +795,17 @@
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-
                 oscillator.frequency.value = 880;
                 oscillator.type = 'sine';
-
                 gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-
                 oscillator.start(audioCtx.currentTime);
                 oscillator.stop(audioCtx.currentTime + 0.3);
             } catch (e) {
@@ -824,17 +825,14 @@
         let heartbeatInterval = null;
         const LOGOUT_TIMEOUT = 30 * 60 * 1000;
 
-        // Conversas estilo WhatsApp
-        let conversaAtual = null; // null = Chat Geral | string = nome do usuário na conversa privada
-        let unreadPrivados = {};  // { "Nome": quantidade }
-        let reacoesCache = [];    // reações carregadas
+        let conversaAtual = null;
+        let unreadPrivados = {};
+        let reacoesCache = [];
         const EMOJIS_REACAO = ['❤️', '👍', '😂', '😮', '😢', '🙏', '🔥', '👏'];
 
-        // Formata data/hora de forma confiável (Brasil)
         function formatarDataHora(valor) {
             if (!valor) return '';
             let s = String(valor).trim();
-            // Se vier sem timezone (ex: "2026-08-09 01:46:42"), trata como UTC
             if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(s) && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
                 s = s.replace(' ', 'T') + 'Z';
             }
@@ -1273,8 +1271,10 @@
         }
 
         // ============================================
-        // PROCEDIMENTOS
+        // PROCEDIMENTOS (com Edição)
         // ============================================
+        let procedimentoEditando = null;
+
         async function carregarProcedimentos() {
             try {
                 const procs = await apiGet('procedimentos', 'order=criado_em.asc');
@@ -1289,7 +1289,16 @@
                     <div class="proc-item">
                         <div class="proc-titulo">${p.titulo || 'Sem título'} <span class="badge">${p.categoria || 'geral'}</span></div>
                         <div class="proc-conteudo">${p.conteudo || ''}</div>
-                        ${isAdmin ? `<div class="acoes"><button class="btn-del" onclick="removerProcedimento('${p.id}')">🗑️ Remover</button></div>` : ''}
+                        ${isAdmin ? `
+                            <div class="acoes">
+                                <button onclick="editarProcedimento('${p.id}', '${p.titulo.replace(/'/g, "\\'")}', '${p.categoria}', '${p.conteudo.replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn-del" onclick="removerProcedimento('${p.id}')">
+                                    <i class="fas fa-trash"></i> Remover
+                                </button>
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('');
             } catch (err) {
@@ -1297,10 +1306,26 @@
             }
         }
 
+        function editarProcedimento(id, titulo, categoria, conteudo) {
+            const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+            if (usuario.papel !== 'super_admin') {
+                alert('Apenas Super Admin pode editar.');
+                return;
+            }
+            procedimentoEditando = id;
+            document.getElementById('procTitulo').value = titulo;
+            document.getElementById('procCategoria').value = categoria;
+            document.getElementById('procConteudo').value = conteudo;
+            const btn = document.getElementById('btnSalvarProc');
+            btn.textContent = 'Atualizar procedimento';
+            btn.style.background = '#f39c12';
+            document.getElementById('formProc').scrollIntoView({ behavior: 'smooth' });
+        }
+
         document.getElementById('btnSalvarProc').addEventListener('click', async function() {
             const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
             if (usuario.papel !== 'super_admin') {
-                alert('Apenas Super Admin pode adicionar procedimentos.');
+                alert('Apenas Super Admin pode modificar procedimentos.');
                 return;
             }
             const titulo = document.getElementById('procTitulo').value.trim();
@@ -1313,13 +1338,25 @@
             }
 
             try {
-                await apiPost('procedimentos', { titulo, conteudo, categoria, criado_por: usuario.id });
+                if (procedimentoEditando) {
+                    await apiPatch('procedimentos', procedimentoEditando, {
+                        titulo, conteudo, categoria
+                    });
+                    alert('Procedimento atualizado!');
+                } else {
+                    await apiPost('procedimentos', {
+                        titulo, conteudo, categoria, criado_por: usuario.id
+                    });
+                    alert('Procedimento adicionado!');
+                }
                 document.getElementById('procTitulo').value = '';
                 document.getElementById('procConteudo').value = '';
+                document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
+                document.getElementById('btnSalvarProc').style.background = '';
+                procedimentoEditando = null;
                 await carregarProcedimentos();
-                alert('Procedimento adicionado!');
             } catch (err) {
-                alert('Erro ao adicionar procedimento: ' + err.message);
+                alert('Erro: ' + err.message);
             }
         });
 
@@ -1434,7 +1471,6 @@
             document.getElementById('btnVoltarGeral').style.display = 'none';
             document.getElementById('chatTituloAtual').innerHTML = '<i class="fas fa-users"></i> Chat Geral';
             document.getElementById('chatInternoInput').placeholder = 'Digite sua mensagem no Chat Geral...';
-            // Remove destaque da lista
             document.querySelectorAll('.user-online-item').forEach(el => el.classList.remove('active-chat'));
             carregarChatInterno();
         }
@@ -1442,14 +1478,12 @@
         function abrirConversaPrivada(nomeUsuario) {
             if (!nomeUsuario) return;
             conversaAtual = nomeUsuario;
-            // Zera não-lidas dessa conversa
             unreadPrivados[nomeUsuario] = 0;
 
             document.getElementById('btnVoltarGeral').style.display = 'inline-flex';
             document.getElementById('chatTituloAtual').innerHTML = '<i class="fas fa-lock"></i> Conversa com <span style="color:var(--secondary)">' + nomeUsuario + '</span>';
             document.getElementById('chatInternoInput').placeholder = 'Mensagem privada para ' + nomeUsuario + '...';
 
-            // Destaca o usuário na lista
             document.querySelectorAll('.user-online-item').forEach(el => {
                 el.classList.toggle('active-chat', el.dataset.nome === nomeUsuario);
             });
@@ -1480,11 +1514,9 @@
                 let mensagens = [];
 
                 if (conversaAtual === null) {
-                    // ===== CHAT GERAL (só mensagens públicas) =====
                     const msgsPublicas = await apiGet('mensagens_chat', 'order=data_hora.asc');
                     mensagens = (msgsPublicas || []).map(m => ({ ...m, tipo: 'publico' }));
                 } else {
-                    // ===== CONVERSA PRIVADA com conversaAtual =====
                     const msgsPrivadas = await apiGet('mensagens_privadas', 'order=data_hora.asc');
                     mensagens = (msgsPrivadas || [])
                         .filter(m =>
@@ -1503,7 +1535,6 @@
                     return;
                 }
 
-                // Atualiza última mensagem lida
                 if (mensagens.length > 0) {
                     const ultima = mensagens[mensagens.length - 1];
                     ultimaMensagemLida = new Date(ultima.data_hora).getTime();
@@ -1569,7 +1600,6 @@
             }
         }
 
-        // ===== POLLING MELHORADO (som + badge + não-lidas privadas) =====
         function startChatPolling() {
             if (chatInterval) clearInterval(chatInterval);
 
@@ -1603,10 +1633,8 @@
                     });
 
                     if (novasMsgs.length > 0) {
-                        // Atualiza contadores de não-lidas privadas
                         novasMsgs.forEach(m => {
                             if (m.tipo === 'privado' && m.remetente !== nome) {
-                                // Só conta se não estiver com a conversa aberta
                                 if (conversaAtual !== m.remetente) {
                                     unreadPrivados[m.remetente] = (unreadPrivados[m.remetente] || 0) + 1;
                                 }
@@ -1620,16 +1648,13 @@
                             }
                             playNotificationSound();
                         } else {
-                            // Se a aba estiver aberta, atualiza a conversa atual
                             await carregarChatInterno();
-                            // Atualiza a lista de online (para mostrar badges de não-lidas)
                             carregarOnlineUsers();
                         }
 
                         const maisRecente = novasMsgs[novasMsgs.length - 1];
                         ultimaMensagemLida = new Date(maisRecente.data_hora).getTime();
                     } else if (abaAtiva) {
-                        // Mesmo sem novas, atualiza se estiver na aba (para manter sincronizado)
                         await carregarChatInterno();
                     }
 
@@ -1639,7 +1664,6 @@
             }, 4000);
         }
 
-        // ===== Seleção de arquivo =====
         document.getElementById('chatArquivo').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1668,7 +1692,6 @@
             document.getElementById('previewArquivo').innerHTML = '';
         }
 
-        // ===== ENVIO DE MENSAGEM + ARQUIVO =====
         document.getElementById('btnEnviarChat').addEventListener('click', async function() {
             const input = document.getElementById('chatInternoInput');
             const mensagem = input.value.trim();
@@ -1729,7 +1752,7 @@
         });
 
         // ============================================
-        // CHAT IA (Edge Function segura)
+        // CHAT IA (Edge Function)
         // ============================================
         document.getElementById('enviarBtn').addEventListener('click', enviarPergunta);
         document.getElementById('perguntaInput').addEventListener('keydown', function(e) {
@@ -1992,7 +2015,7 @@ REGRAS OBRIGATÓRIAS:
         }
 
         // ============================================
-        // NAVEGAÇÃO POR ABAS (com limpeza do badge)
+        // NAVEGAÇÃO POR ABAS (com limpeza de edição)
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.tabs button').forEach(btn => {
@@ -2006,11 +2029,19 @@ REGRAS OBRIGATÓRIAS:
                         target.classList.add('active');
                     }
 
-                    // Quando clicar no Chat da Equipe → limpa o badge e atualiza
                     if (this.dataset.tab === 'tabChatInterno') {
                         const badge = document.querySelector('.tabs button[data-tab="tabChatInterno"] .badge-msg');
                         if (badge) badge.style.display = 'none';
                         carregarChatInterno();
+                    }
+
+                    // Se não for a aba Base, limpa edição de procedimentos
+                    if (this.dataset.tab !== 'tabBase') {
+                        document.getElementById('procTitulo').value = '';
+                        document.getElementById('procConteudo').value = '';
+                        document.getElementById('btnSalvarProc').textContent = 'Adicionar procedimento';
+                        document.getElementById('btnSalvarProc').style.background = '';
+                        procedimentoEditando = null;
                     }
                 });
             });
